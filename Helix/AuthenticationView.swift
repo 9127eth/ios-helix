@@ -7,6 +7,7 @@
 
 import SwiftUI
 import Firebase
+import FirebaseAuth
 
 struct AuthenticationView: View {
     @StateObject private var authManager = AuthenticationManager()
@@ -20,56 +21,59 @@ struct AuthenticationView: View {
             TextField("Email", text: $email)
                 .textFieldStyle(RoundedBorderTextFieldStyle())
                 .autocapitalization(.none)
+                .foregroundColor(AppColors.bodyPrimaryText)
             
             SecureField("Password", text: $password)
                 .textFieldStyle(RoundedBorderTextFieldStyle())
+                .foregroundColor(AppColors.bodyPrimaryText)
             
             Button("Sign In") {
                 authManager.signInWithEmail(email: email, password: password) { result in
-                    switch result {
-                    case .success:
-                        print("Signed in successfully")
-                    case .failure(let error):
-                        alertMessage = error.localizedDescription
-                        showingAlert = true
-                    }
+                    handleAuthResult(result)
                 }
             }
+            .foregroundColor(AppColors.primaryText)
+            .background(AppColors.primary)
             
             Button("Sign Up") {
                 authManager.signUpWithEmail(email: email, password: password) { result in
-                    switch result {
-                    case .success:
-                        print("Signed up successfully")
-                    case .failure(let error):
-                        alertMessage = error.localizedDescription
-                        showingAlert = true
-                    }
+                    handleAuthResult(result)
                 }
             }
+            .foregroundColor(AppColors.primaryText)
+            .background(AppColors.primary)
             
             Button("Sign In with Google") {
                 signInWithGoogle()
             }
+            .foregroundColor(AppColors.primaryText)
+            .background(AppColors.primary)
             
             Button("Sign In with Apple") {
                 authManager.signInWithApple { result in
-                    switch result {
-                    case .success:
-                        print("Signed in with Apple successfully")
-                    case .failure(let error):
-                        alertMessage = error.localizedDescription
-                        showingAlert = true
-                    }
+                    handleAuthResult(result)
                 }
             }
+            .foregroundColor(AppColors.primaryText)
+            .background(AppColors.primary)
         }
         .padding()
+        .background(AppColors.background)
         .alert(isPresented: $showingAlert) {
             Alert(title: Text("Error"), message: Text(alertMessage), dismissButton: .default(Text("OK")))
         }
     }
-
+    
+    private func handleAuthResult(_ result: Result<FirebaseAuth.User, Error>) {
+        switch result {
+        case .success(let user):
+            print("Authentication successful for user: \(user.uid)")
+        case .failure(let error):
+            alertMessage = error.localizedDescription
+            showingAlert = true
+        }
+    }
+    
     private func signInWithGoogle() {
         guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
               let window = windowScene.windows.first,
@@ -79,13 +83,7 @@ struct AuthenticationView: View {
         }
 
         authManager.signInWithGoogle(presenting: rootViewController) { result in
-            switch result {
-            case .success(let user):
-                print("Signed in successfully: \(user.uid)")
-            case .failure(let error):
-                alertMessage = error.localizedDescription
-                showingAlert = true
-            }
+            handleAuthResult(result)
         }
     }
 }
