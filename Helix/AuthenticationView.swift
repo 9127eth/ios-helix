@@ -22,18 +22,21 @@ struct AuthenticationView: View {
     @State private var agreeToTerms = false
     
     var body: some View {
-        VStack(spacing: 20) {
-            headerView
-            
-            authButtonsView
-            
-            if showEmailAuth {
-                emailAuthView
+        ZStack {
+            Color(AppColors.background)
+                .edgesIgnoringSafeArea(.all)
+
+            VStack(spacing: 20) {
+                headerView
+                
+                authButtonsView
+                
+                if showEmailAuth {
+                    emailAuthView
+                }
             }
+            .padding()
         }
-        .padding()
-        .background(AppColors.background)
-        .edgesIgnoringSafeArea(.all)
         .alert(isPresented: $showingAlert) {
             Alert(title: Text("Error"), message: Text(alertMessage), dismissButton: .default(Text("OK")))
         }
@@ -90,7 +93,7 @@ struct AuthenticationView: View {
     
     private var emailAuthView: some View {
         VStack(spacing: 15) {
-            Text(isLogin ? "Log In" : "Create an Account")
+            Text(isLogin ? "Welcome back!" : "Create an Account")
                 .font(.headline)
                 .foregroundColor(AppColors.bodyPrimaryText)
                 .padding(.bottom, 10)
