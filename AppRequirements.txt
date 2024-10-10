@@ -1,0 +1,361 @@
+You are an expert in Swift, firebase, and iOS development.
+---
+
+### **Code Style and Structure**
+
+- **Write Clean, Concise Swift Code**:
+  - Strive for clarity and simplicity in your code.
+  - Use Swift's powerful language features effectively.
+  
+- **Follow Functional and Declarative Programming Patterns**:
+  - **Prefer Value Types**: Use structs and enums over classes when possible.
+  - **Immutability**: Favor `let` over `var` to define constants.
+  - **Higher-Order Functions**: Use `map`, `filter`, `reduce`, and `compactMap` for collection transformations.
+
+- **Avoid Imperative Code When Possible**:
+  - Minimize the use of mutable state and side effects.
+  - Use Swift's optional chaining and guard statements to handle optional values safely.
+
+- **Modularization and Code Reuse**:
+  - Break down your code into reusable components and extensions.
+  - Utilize protocols and protocol extensions to define shared interfaces.
+
+- **Descriptive Variable and Function Names**:
+  - Use clear, descriptive names that convey purpose.
+  - Include context in variable names (e.g., `isLoading`, `hasError`, `shouldFetchData`).
+
+- **File Organization**:
+  - **Structure Files Intuitively**:
+    - **Models**: Data structures and entities.
+    - **Views**: UI components (SwiftUI views or UIKit views).
+    - **ViewModels / Controllers**: Business logic and state management.
+    - **Helpers / Utilities**: Extensions, utility functions, and common code.
+    - **Resources**: Assets like images and localized strings.
+    - **Protocols and Type Definitions**: Protocols, enums, and typealiases.
+
+- **Project Structure**:
+  - Group related files using folders and groups in Xcode.
+  - Keep the project hierarchy clean to enhance navigability.
+
+---
+
+### **Naming Conventions**
+
+- **Camel Case for Variables and Functions**:
+  - Start with a lowercase letter, e.g., `isUserLoggedIn`, `fetchData()`.
+
+- **Pascal Case for Types and Protocols**:
+  - Start with an uppercase letter, e.g., `UserProfile`, `NetworkManager`, `Authenticatable`.
+
+- **Use Descriptive Names**:
+  - Avoid abbreviations unless they are well-known (e.g., `URL`, `ID`).
+  - Function names should be clear about their purpose and side effects.
+
+- **Enum Cases and Static Constants**:
+  - Use lowerCamelCase for enum cases, e.g., `case success`, `case failure`.
+  - Use upperCamelCase for static constants when part of a type.
+
+- **File Naming**:
+  - Match the file name with the type or extension it contains, e.g., `UserProfile.swift` contains the `UserProfile` struct.
+
+- **Avoid Prefixes**:
+  - Do not use prefixes like `NS` or `UI`; Swift's module system makes them unnecessary.
+
+---
+
+### **Swift Usage**
+
+- **Embrace Swift's Type Safety**:
+  - Utilize strong typing to catch errors at compile time.
+  - Use optionals (`?` and `!`) judiciously to handle the presence or absence of values.
+
+- **Prefer Structs and Enums over Classes**:
+  - Use structs for modeling data.
+  - Use enums for grouping related values and handling state.
+
+- **Protocol-Oriented Programming**:
+  - Define protocols to specify interfaces and use protocol extensions to provide default implementations.
+
+- **Avoid Using `Any` and `AnyObject`**:
+  - Be as specific as possible with types.
+
+- **Use Extensions for Code Organization**:
+  - Extend types to add functionality, keeping related code grouped together.
+
+- **Avoid Overusing Singletons**:
+  - Use dependency injection where possible to make code more testable.
+
+---
+
+### **Syntax and Formatting**
+
+- **Consistent Indentation and Spacing**:
+  - Use 4 spaces for indentation.
+  - Maintain consistent spacing around operators and after commas.
+
+- **Function and Closure Syntax**:
+  - Use trailing closure syntax when the last parameter is a closure.
+  - Specify parameter and return types explicitly.
+
+- **Simplify Conditionals and Control Flow**:
+  - Use `guard` statements for early exits and to reduce nested code.
+  - Use `if let` or `guard let` for optional unwrapping.
+
+- **Keep Methods Short and Focused**:
+  - Each function or method should perform a single task.
+  - Break down complex functions into smaller, reusable ones.
+
+- **Comments and Documentation**:
+  - Use `///` for documentation comments to generate documentation.
+  - Comment on why something is done if it's not immediately clear.
+
+- **Avoid Force Unwrapping and Force Casting**:
+  - Use safe unwrapping techniques to prevent runtime crashes.
+
+---
+
+### **Performance Optimization**
+
+- **Efficient Data Handling**:
+  - Use lazy properties for expensive initializations that may not be needed immediately.
+  - Use background threads for non-UI work to keep the UI responsive.
+
+- **Optimize Image Loading**:
+  - Use appropriate image formats like PNG or JPEG.
+  - Leverage caching mechanisms to avoid redundant network calls.
+
+- **Memory Management**:
+  - Be mindful of reference cycles; use `[weak self]` or `[unowned self]` in closures where appropriate.
+  - Use value types (structs) to reduce memory overhead.
+
+- **Leverage SwiftUI and Combine (if applicable)**:
+  - Use SwiftUI's `@State`, `@Binding`, and `@ObservedObject` for efficient state management.
+  - Use Combine's publishers and subscribers for reactive programming.
+
+- **Asynchronous Programming**:
+  - Utilize async/await patterns where available for cleaner asynchronous code.
+  - Avoid blocking the main thread.
+
+- **Networking**:
+  - Use efficient networking libraries like `URLSession` or third-party libraries like `Alamofire`.
+  - Implement proper error handling and retries for network requests.
+
+---
+
+### **Logging Rules**
+
+- **Purposeful Logging**:
+  - Log only what is necessary to debug issues.
+  - Avoid cluttering the console with excessive logs.
+
+- **Use Appropriate Log Levels**:
+  - **Debug**: Detailed information, typically of interest only when diagnosing problems.
+  - **Info**: Confirmation that things are working as expected.
+  - **Warning**: An indication that something unexpected happened, but the application is still functioning.
+  - **Error**: Serious issues that have caused operations to fail.
+
+- **Include Contextual Information**:
+  - Provide relevant details that can help identify the issue (e.g., function names, variable values).
+
+- **Avoid Logging Sensitive Information**:
+  - Do not log personal data, passwords, or any sensitive information.
+
+- **Logging Frameworks**:
+  - Consider using logging frameworks like `os.log` for advanced logging features and better performance.
+
+- **Review and Refine Logs**:
+  - Periodically audit your logs to ensure they provide value.
+  - Remove or adjust logs that are no longer helpful.
+
+---
+
+### **Exception and Error Handling**
+
+- **Use Swift's Error Handling Mechanisms**:
+  - Implement `do-catch` blocks for throwing functions.
+  - Define custom error types conforming to the `Error` protocol.
+
+- **Fail Gracefully**:
+  - Provide meaningful feedback to the user when errors occur.
+  - Avoid crashes by handling unexpected states.
+
+- **Validation**:
+  - Validate inputs and states before performing operations.
+  - Use assertions (`assert`, `precondition`) during development to catch issues early.
+
+---
+
+### **Code Documentation**
+
+- **Use Markup for Documentation Comments**:
+  - Write clear and concise documentation using Swift's markup syntax.
+  - Document public APIs and complex code logic.
+
+- **Keep Documentation Up to Date**:
+  - Update comments when code changes.
+  - Remove outdated comments to prevent confusion.
+
+---
+
+### **Accessibility and Internationalization**
+
+- **Accessibility**:
+  - Use accessibility labels and hints for UI elements.
+  - Ensure your app is usable with VoiceOver and other assistive technologies.
+
+- **Internationalization (i18n) and Localization (l10n)**:
+  - Use `NSLocalizedString` for user-facing text.
+  - Support right-to-left languages if applicable.
+
+---
+
+### **Security Best Practices**
+
+- **Secure Data Storage**:
+  - Store sensitive data in the Keychain.
+  - Avoid storing sensitive information in plain text.
+
+- **Network Security**:
+  - Use HTTPS for all network requests.
+  - Validate SSL certificates and implement certificate pinning if necessary.
+
+- **Input Validation**:
+  - Sanitize user input to prevent injection attacks.
+
+---
+
+### **Dependency Management**
+
+- **Use Swift Package Manager (SPM)**:
+  - Prefer SPM for adding third-party libraries.
+  - Keep dependencies up to date and minimal.
+
+- **Avoid Over-Reliance on External Libraries**:
+  - Use built-in frameworks when possible.
+  - Evaluate the necessity and security of each dependency.
+
+---
+
+### **Project Configuration**
+
+- **Use Configurations and Schemes**:
+  - Separate build configurations for Debug and Release.
+  - Use different schemes for testing, staging, and production if needed.
+
+- **Environment Variables and Secrets**:
+  - Do not hardcode API keys or secrets.
+  - Use configuration files or environment variables securely.
+
+---
+
+### **General Best Practices**
+
+- **Stay Updated with Swift Evolution**:
+  - Keep up with the latest Swift language features and best practices.
+
+- **Consistent Coding Style**:
+  - Use tools like SwiftLint to enforce coding standards.
+
+- **Performance Profiling**:
+  - Use Xcode Instruments to profile and optimize your app.
+
+- **User Experience**:
+  - Follow Apple's Human Interface Guidelines for UI/UX design.
+
+UI
+Overview of the Business Card Grid UI
+The business card grid is a responsive collection of user-created business cards displayed on the dashboard. It adapts to different screen sizes:
+Mobile Devices: Single-column layout.
+Tablets and Desktops: Two-column layout.
+Each business card is presented as a card with key details and interactive elements, allowing users to manage their cards efficiently.
+---
+
+
+Components of Each Business Card Item
+1. Card Container
+Layout:
+A rectangular card view with a fixed height (e.g., 180 points).
+Full width of the container with padding to prevent content from touching the edges.
+Styling:
+Background color: A theme-defined color (bg-card-grid-background).
+Border: Rounded corners for a modern look.
+Shadow: Subtle shadow to elevate the card from the background.
+Hover Effects: Increases shadow intensity on hover or selection.
+2. Top-Right Dropdown Menu
+Purpose: Provides quick access to actions related to the business card.
+Trigger Icon:
+An icon (e.g., three vertical dots) positioned at the top-right corner.
+
+Menu Options:
+Preview:
+Icon: Eye symbol.
+Action: Opens a preview of the business card.
+Share:
+Icon: Share symbol.
+Action: Opens a modal to share the card via QR code or link.
+Disabled if the card is inactive, with reduced opacity.
+Edit:
+Icon: Pencil symbol.
+Action: Navigates to the edit screen for the card.
+Delete:
+Icon: Trash bin.
+Action: Deletes the card after user confirmation.
+Highlighted in red or with a warning indicator.
+
+3. Main Content Area
+Title (Card Description):
+Large font size, bold weight.
+Displays the card's description or a user-defined title.
+Truncated with an ellipsis if it exceeds one line.
+Subtitles:
+Job Title:
+Smaller font size, muted color.
+Truncated if too long.
+Company:
+Similar styling to the job title.
+Positioned below the job title.
+Interaction:
+The entire content area (excluding the dropdown menu) is clickable if the card is active.
+Clicking opens the share modal or preview, depending on the desired functionality.
+4. Bottom Section
+Divided into two parts:
+Left Side (Status Indicators):
+Main Card Indicator:
+Displayed if card.isPrimary is true.
+Small label or badge reading "Main".
+Tooltip on hover (or info button) explaining "This is your main card".
+Inactive Status:
+Displayed if the card is inactive (card.isActive === false).
+Label or badge reading "Inactive", styled differently (e.g., gray background).
+Tooltip indicating "Get Pro to re-activate".
+Right Side (Action Buttons):
+Three circular icon buttons aligned horizontally:
+Edit Button:
+Icon: Pencil.
+Action: Navigates to the edit screen.
+Tooltip: "Edit".
+Preview Button:
+Icon: Eye.
+Action: Opens a preview modal.
+Tooltip: "Preview".
+Share Button:
+Icon: Share symbol.
+Action: Opens the share modal.
+Disabled if the card is inactive.
+Tooltip: "Share this card".
+Styling of Action Buttons:
+Circular shape with consistent sizing.
+Background color matching the theme.
+Icon color contrasts with the background.
+Hover effect changes background color and scales the button slightly.
+
+
+Grid Layout Details
+One column, cards stack vertically.
+Tablets and Desktops (Medium to Large Screens): Two columns, cards displayed side by side.
+Spacing:
+Uniform gap between cards (e.g., 16 points).
+Margins around the grid to prevent content from touching screen edges.
+A create card button is the same size as a card in the grid.
+
+When a user tried to preview a card, we should show their actual web page as the preview. 

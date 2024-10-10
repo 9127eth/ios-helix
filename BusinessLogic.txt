@@ -1,0 +1,283 @@
+Digital Business Card App - Swift Version Development Guide
+Introduction
+This document provides an overview of the business logic, card parameters, and essential details to help you develop the Swift version of our digital business card app. The app enables users to create, customize, share, and manage digital business cards using NFC technology on iOS devices.
+App Overview
+Purpose: Allow users to create personalized digital business cards and share them contactlessly using NFC or via QR codes and links.
+Platform: iOS App developed using Swift, leveraging iOS's NFC capabilities.
+Backend: Firebase services for authentication, database, storage, and analytics.
+
+Key Features and Functionality
+1. User Registration & Authentication
+Registration Methods:
+Email/Password
+Google Sign-In
+Apple Sign-In
+Authentication Flow:
+Secure authentication using Firebase Authentication.
+Profile updates sync across platforms.
+Password reset functionality via email.
+
+Profile Management (Business Card Creation)
+Profile Fields
+Basic Information:
+First Name
+Middle Name (optional)
+Last Name (optional)
+Prefix (e.g., Dr., Mr., Ms.)
+Credentials (e.g., Ph.D., MD)
+Pronouns (e.g., he/him, she/her)
+About Me (brief bio or introduction)
+Specialty
+Contact Information:
+Phone Number
+Email Address
+Professional Details:
+Job Title
+Company
+Social Media Links:
+LinkedIn
+Twitter
+Facebook
+Instagram
+TikTok
+YouTube
+Discord
+Twitch
+Snapchat
+Telegram
+WhatsApp
+Threads
+Custom Links:
+Allow users to add custom web links with display text.
+Additional Features:
+Custom Message and Header
+Upload CV/Resume (for premium users)
+Profile Picture or Business Logo
+
+Business Logic
+Validation:
+Validate all input fields (e.g., proper email and phone number formats).
+Real-Time Preview:
+Provide a live preview of the business card during editing.
+Multiple Business Cards:
+Free Users: Can create one business card.
+Premium Users: Can create multiple business cards.
+
+Business Card Sharing
+A. NFC Sharing
+Functionality:
+Users can share their business card via QR Code, or native ios sharing. 
+Technical Implementation:
+Business Logic:
+Upon interaction, the recipient receives a link to the sender’s digital business card.
+B. QR Code Sharing
+Functionality:
+Generate QR codes that link to the user's digital business card.
+Business Logic:
+QR codes should be easily accessible within the app.
+Ensure high-resolution and scannable QR codes.
+Include options to download QR codes in various formats (PNG, JPEG, SVG).
+C. URL Sharing
+URL Structure:
+
+All users will have a randomly assigned username upon account creation that is mapped to their user id.
+This username will be mapped to their primary card slug. so the url to their primary card will be 
+https://www.helixcard.app/c/{username}. When a user creates their first card, it automatically becomes their primary card, accessible at:
+https://www.helixcard.app/c/{username}
+
+Usernames should be 6 characters.
+
+When a user adds an additional card, the url for that card will be 
+https://www.helixcard.app/c/{username}/{cardSlug} where the additional slug is a randomly generated and only 3 characters long. 
+
+Firebase Database Structure
+1. **Users Collection (`/users/{userId}`):**
+   - **Add/Update Fields:**
+     - `username` (string): Must be unique.
+     - `isPro` (boolean): Set to `true` when user upgrades.
+     - isActive (boolean)
+     - `primaryCardId` (string): Update to `{username}` upon upgrade.
+
+2. **BusinessCards Sub-Collection (`/users/{userId}/businessCards/{cardId}`):**
+   - **Maintain Fields:**
+     - `cardSlug` (string): must be unique to user
+     - `isPrimary` (boolean): Reflects primary status.
+
+4. The Business Card Experience
+Design:
+Visually appealing and responsive design.
+Support for dark mode.
+Primary Image:
+Users can upload a picture, which appears as a circular image aligned to the right of the business card header.
+5. Data Syncing
+Functionality:
+Sync profile data across all platforms using Firebase Firestore.
+
+Business Logic:
+Implement refresh mechanisms to update data on mobile devices.
+Ensure users remain signed in across multiple devices unless they choose to log out.
+6. Analytics
+7. Notifications
+Implement:
+Notifications for events like business card views, interactions, subscription renewals, and security alerts.
+Customization:
+Allow users to customize notification preferences.
+8. Account Management
+Account Deletion:
+Provide a way for users to delete their accounts.
+Subscription Management:
+Implement features for upgrading, renewing, or canceling subscriptions.
+Password Recovery:
+Implement a "Forgot Password" functionality.
+
+Handling Upgrades from Free to Pro**
+**Update User Document:**
+   - **Set `isPro` to `true`.**
+
+   Free Users can create one card. When they upgrade, they can create additional cards, but no more than 10.
+
+   Here are the Card parameters, ? are optional.
+   struct BusinessCard {
+    var id: String
+    var isPrimary: Bool
+    var cardSlug: String
+    var username: String // For premium users
+    var firstName: String
+    var middleName: String?
+    var lastName: String?
+    var prefix: String?
+    var credentials: String?
+    var pronouns: String?
+    var description: String // Brief bio or tagline
+    var jobTitle: String?
+    var company: String?
+    var phoneNumber: String?
+    var email: String?
+    var aboutMe: String?
+    var customMessage: String?
+    var customMessageHeader: String?
+    var linkedIn: String?
+    var twitter: String?
+    var facebookUrl: String?
+    var instagramUrl: String?
+    var tiktokUrl: String?
+    var youtubeUrl: String?
+    var discordUrl: String?
+    var twitchUrl: String?
+    var snapchatUrl: String?
+    var telegramUrl: String?
+    var whatsappUrl: String?
+    var threadsUrl: String?
+    var webLinks: [(url: String, displayText: String)]?
+    var cvUrl: String?
+    var cvHeader: String?
+    var cvDescription: String?
+    var cvDisplayText: String?
+    var imageUrl: String? // Profile picture URL
+    var isActive: Bool
+    var isPro: Bool
+}
+
+isActive indicates if the card is active (important when handling inactive cards for non-premium users).
+isPro indicates if the user is a premium subscriber.
+
+Handling Inactive Cards
+When a User's Subscription Expires:
+Set isPro to false in the user's data.
+Non-primary cards (isPrimary == false) become inactive (isActive = false).
+In the App:
+Display inactive cards differently in the dashboard.
+Inform users that inactive cards require a subscription to reactivate.
+Users can still edit and save inactive cards.
+Disable the share button for inactive cards.
+
+Handling Business Card Deletions
+Primary Card Deletion:
+If a user deletes their primary card:
+Reserve the primary URL but display a placeholder message.
+Set primaryCardId to nil and primaryCardPlaceholder to true.
+Creating a New Primary Card:
+When creating a new card, if primaryCardPlaceholder is true, set the new card as the primary card.
+
+
+User Interface and User Experience
+Form Layout for creating a new card and editing an existing card.
+Sections:
+Basic Information: Name, Credentials, Pronouns, About Me.
+Contact Information: Phone Number, Email.
+Social Links: Input fields for various social media URLs.
+Custom Message and CV Upload: Fields for custom messages and uploading resumes (premium feature).
+For each of these, the user can add a header, and a display text. 
+These sections should be collapsible and expandable. 
+
+Share Modal
+Features:
+Accessible via a Share button on each card.
+Contents:
+QR code linking to the card URL.
+Title "First and Last Name" above the QR code.
+Option to copy the card URL.
+Download button for the QR code in PNG, JPEG, SVG formats.
+Option for transparent background in downloads.
+"Preview in Browser" button.
+
+Design:
+Modal should be mobile-friendly.
+
+Background content is grayed out when the modal is open.
+Close button at the top right.
+
+Business Card Display
+Profile Picture:
+Displayed as a circular image aligned to the right of the business card header.
+
+Dark Mode Support:
+Implement a dark mode option for the app.
+
+Frontend
+iOS App: Developed using Swift and SwiftUI (recommended for modern and reactive UI).
+Backend
+Firebase Services:
+Authentication: For user login and registration.
+Firestore Database: To store user and business card data.
+Storage: For storing uploaded images, CVs, and other assets.
+Analytics: To track user interactions and app usage.
+
+Important Components and Modules
+Data Models
+User Data:
+Stores user information like uid, username, isPro, and subscription status.
+Business Card Data:
+Contains all fields related to business cards as specified in the BusinessCard struct.
+Networking
+Firebase Integration:
+Use FirebaseAuth for authentication.
+Use Firestore for database operations.
+Use FirebaseStorage for file uploads (images, CVs).
+UI Components
+Forms:
+Use SwiftUI forms for input.
+Implement validation and real-time feedback.
+Modals and Alerts:
+For the share modal and notifications.
+Ensure modals are adaptive and support different screen sizes.
+Utilities
+Slug Generation:
+Generate random slugs for URLs
+Image Upload and Handling:
+Functions to upload images to Firebase Storage.
+Handling image retrieval and caching.
+
+Here is how we handle pro users that unsubscribe.
+
+We make non primary cards inactive if the user firestore "isPro" status is false.
+All of this logic should only be tied to the firebase "isPro" status. We should not add any new fields (other than "isActive") or anything like that if not absolutely necessary.
+When a user cancels and the firestore changes to isPro=false I want a few things to happen, but I want this to be tied to the firebase changed isPro to false. 
+The dashboard should show non primary cards as inactive. 
+Provide messaging to inform the user that these cards are inactive and require a subscription to reactivate.
+Users will be able to edit and save cards as normal. 
+Also, we can disable the share button  on the grid and give to pro message.
+The URL for an inactive card should still be accessible but, it should have a pop up message saying "This card is no longer active." This pop up should have a button to create a new free card.
+Implement this in a straightforward way that only changes the necessary code to implement the functionality. Nothing else. this is my first time coding.
+
+When a user goes from pro to free, we need to handle the business card url to not show the document after their subsctiption ends. Because the action we will take is after the sub has ended, we can is ispro as false to determine this.
