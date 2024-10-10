@@ -16,6 +16,10 @@ struct AuthenticationView: View {
     @State private var showingAlert = false
     @State private var alertMessage = ""
     @State private var isSignUp = true
+    @State private var showEmailAuth = false
+    @State private var isLogin = false
+    @State private var username = ""
+    @State private var agreeToTerms = false
     
     var body: some View {
         VStack(spacing: 20) {
@@ -23,12 +27,13 @@ struct AuthenticationView: View {
             
             authButtonsView
             
-            orSeparator
-            
-            emailAuthView
+            if showEmailAuth {
+                emailAuthView
+            }
         }
         .padding()
         .background(AppColors.background)
+        .edgesIgnoringSafeArea(.all)
         .alert(isPresented: $showingAlert) {
             Alert(title: Text("Error"), message: Text(alertMessage), dismissButton: .default(Text("OK")))
         }
@@ -59,43 +64,16 @@ struct AuthenticationView: View {
     private var authButtonsView: some View {
         VStack(spacing: 15) {
             Button(action: signInWithGoogle) {
-                HStack {
-                    Image(systemName: "g.circle.fill") // Using SF Symbol as a fallback
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
-                        .frame(width: 24, height: 24)
-                        .foregroundColor(Color(red: 0.22, green: 0.46, blue: 0.90)) // Google Blue
-                    Text("Continue with Google")
-                        .fontWeight(.medium)
-                }
-                .frame(width: 280, height: 50)
-                .background(Color.white)
-                .foregroundColor(.black)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 25)
-                        .stroke(Color.gray.opacity(0.5), lineWidth: 1)
-                )
+                AuthButtonView(image: "google_logo", text: "Continue with Google")
             }
-            .cornerRadius(25)
             
             Button(action: signInWithApple) {
-                HStack {
-                    Image(systemName: "apple.logo")
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
-                        .frame(width: 24, height: 24)
-                    Text("Continue with Apple")
-                        .fontWeight(.medium)
-                }
-                .frame(width: 280, height: 50)
-                .background(Color.white)
-                .foregroundColor(.black)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 25)
-                        .stroke(Color.gray.opacity(0.5), lineWidth: 1)
-                )
+                AuthButtonView(image: "apple.logo", text: "Continue with Apple", isSystemImage: true)
             }
-            .cornerRadius(25)
+            
+            Button(action: { showEmailAuth = true }) {
+                AuthButtonView(image: "envelope", text: "Continue with Email", isSystemImage: true)
+            }
         }
     }
     
@@ -112,47 +90,71 @@ struct AuthenticationView: View {
     
     private var emailAuthView: some View {
         VStack(spacing: 15) {
-            Text("Continue with email")
+            Text(isLogin ? "Log In" : "Create an Account")
                 .font(.headline)
                 .foregroundColor(AppColors.bodyPrimaryText)
+                .padding(.bottom, 10)
             
-            Picker("", selection: $isSignUp) {
-                Text("Sign Up").tag(true)
-                Text("Log In").tag(false)
-            }
-            .pickerStyle(SegmentedPickerStyle())
-            .frame(width: 200)
+            TextField("Email", text: $email)
+                .textFieldStyle(RoundedBorderTextFieldStyle())
+                .autocapitalization(.none)
+                .keyboardType(.emailAddress)
             
-            VStack(spacing: 10) {
-                TextField("Email", text: $email)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                    .autocapitalization(.none)
-                    .keyboardType(.emailAddress)
-                    .frame(width: 280)
-                
-                SecureField("Password", text: $password)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                    .frame(width: 280)
+            SecureField("Password", text: $password)
+                .textFieldStyle(RoundedBorderTextFieldStyle())
+            
+            if !isLogin {
+                Toggle(isOn: $agreeToTerms) {
+                    Text("I agree to the Terms of Service and Privacy Policy")
+                        .font(.caption)
+                        .foregroundColor(AppColors.bodyPrimaryText)
+                }
             }
             
             Button(action: handleEmailAuth) {
-                Text(isSignUp ? "Sign Up" : "Log In")
-                    .frame(width: 200, height: 50)
-                    .background(AppColors.primary)
-                    .foregroundColor(AppColors.primaryText)
-                    .cornerRadius(25)
+                Text(isLogin ? "Log In" : "Sign Up")
+                    .frame(width: 160, height: 40)
+                    .background(isLogin || agreeToTerms ? AppColors.primary : Color.gray.opacity(0.3))
+                    .foregroundColor(isLogin || agreeToTerms ? AppColors.primaryText : Color.gray)
+                    .cornerRadius(20)
+                    .font(.system(size: 16, weight: .medium))
             }
-            .padding(.top)
+            .disabled(!isLogin && !agreeToTerms)
+            .padding(.top, 10)
+            
+            if isLogin {
+                Button(action: { isLogin = false }) {
+                    Text("Don't have an account? Sign up")
+                        .font(.footnote)
+                        .foregroundColor(AppColors.bodyPrimaryText)
+                }
+                .padding(.top, 5)
+                
+                Button(action: handleForgotPassword) {
+                    Text("Forgot password?")
+                        .font(.footnote)
+                        .foregroundColor(AppColors.bodyPrimaryText)
+                }
+                .padding(.top, 5)
+            } else {
+                Button(action: { isLogin = true }) {
+                    Text("Already have an account? Log in")
+                        .font(.footnote)
+                        .foregroundColor(AppColors.bodyPrimaryText)
+                }
+                .padding(.top, 5)
+            }
         }
+        .padding()
     }
     
     private func handleEmailAuth() {
-        if isSignUp {
-            authManager.signUpWithEmail(email: email, password: password) { result in
+        if isLogin {
+            authManager.signInWithEmail(email: email, password: password) { result in
                 handleAuthResult(result)
             }
         } else {
-            authManager.signInWithEmail(email: email, password: password) { result in
+            authManager.signUpWithEmail(email: email, password: password) { result in
                 handleAuthResult(result)
             }
         }
@@ -185,5 +187,11 @@ struct AuthenticationView: View {
             alertMessage = error.localizedDescription
             showingAlert = true
         }
+    }
+    
+    private func handleForgotPassword() {
+        // Implement forgot password logic here
+        print("Forgot password tapped")
+        // You can show an alert or navigate to a forgot password view
     }
 }
