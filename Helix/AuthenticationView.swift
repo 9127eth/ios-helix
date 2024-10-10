@@ -23,9 +23,7 @@ struct AuthenticationView: View {
             
             authButtonsView
             
-            Divider()
-                .background(AppColors.bodyPrimaryText)
-                .padding(.vertical)
+            orSeparator
             
             emailAuthView
         }
@@ -62,51 +60,84 @@ struct AuthenticationView: View {
         VStack(spacing: 15) {
             Button(action: signInWithGoogle) {
                 HStack {
-                    Image(systemName: "g.circle.fill")
+                    Image(systemName: "g.circle.fill") // Using SF Symbol as a fallback
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: 24, height: 24)
+                        .foregroundColor(Color(red: 0.22, green: 0.46, blue: 0.90)) // Google Blue
                     Text("Continue with Google")
+                        .fontWeight(.medium)
                 }
-                .frame(maxWidth: .infinity)
-                .padding()
-                .background(AppColors.primary)
-                .foregroundColor(AppColors.primaryText)
-                .cornerRadius(25)
+                .frame(width: 280, height: 50)
+                .background(Color.white)
+                .foregroundColor(.black)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 25)
+                        .stroke(Color.gray.opacity(0.5), lineWidth: 1)
+                )
             }
+            .cornerRadius(25)
             
             Button(action: signInWithApple) {
                 HStack {
                     Image(systemName: "apple.logo")
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: 24, height: 24)
                     Text("Continue with Apple")
+                        .fontWeight(.medium)
                 }
-                .frame(maxWidth: .infinity)
-                .padding()
-                .background(AppColors.primary)
-                .foregroundColor(AppColors.primaryText)
-                .cornerRadius(25)
+                .frame(width: 280, height: 50)
+                .background(Color.white)
+                .foregroundColor(.black)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 25)
+                        .stroke(Color.gray.opacity(0.5), lineWidth: 1)
+                )
             }
+            .cornerRadius(25)
         }
     }
     
+    private var orSeparator: some View {
+        HStack {
+            VStack { Divider().background(AppColors.bodyPrimaryText) }
+            Text("or")
+                .foregroundColor(AppColors.bodyPrimaryText)
+                .font(.footnote)
+            VStack { Divider().background(AppColors.bodyPrimaryText) }
+        }
+        .padding(.vertical)
+    }
+    
     private var emailAuthView: some View {
-        VStack {
+        VStack(spacing: 15) {
+            Text("Continue with email")
+                .font(.headline)
+                .foregroundColor(AppColors.bodyPrimaryText)
+            
             Picker("", selection: $isSignUp) {
                 Text("Sign Up").tag(true)
                 Text("Log In").tag(false)
             }
             .pickerStyle(SegmentedPickerStyle())
-            .padding(.bottom)
+            .frame(width: 200)
             
-            TextField("Email", text: $email)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-                .autocapitalization(.none)
-                .keyboardType(.emailAddress)
-            
-            SecureField("Password", text: $password)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
+            VStack(spacing: 10) {
+                TextField("Email", text: $email)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .autocapitalization(.none)
+                    .keyboardType(.emailAddress)
+                    .frame(width: 280)
+                
+                SecureField("Password", text: $password)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .frame(width: 280)
+            }
             
             Button(action: handleEmailAuth) {
                 Text(isSignUp ? "Sign Up" : "Log In")
-                    .frame(maxWidth: .infinity)
-                    .padding()
+                    .frame(width: 200, height: 50)
                     .background(AppColors.primary)
                     .foregroundColor(AppColors.primaryText)
                     .cornerRadius(25)
