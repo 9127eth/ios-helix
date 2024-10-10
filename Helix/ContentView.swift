@@ -15,13 +15,17 @@ struct ContentView: View {
         Group {
             if authManager.isAuthenticated {
                 Text("Welcome, \(authManager.user?.email ?? "User")!")
+                    .foregroundColor(AppColors.bodyPrimaryText)
                 Button("Sign Out") {
                     authManager.signOut()
                 }
+                .foregroundColor(AppColors.primaryText)
+                .background(AppColors.primary)
             } else {
                 AuthenticationView()
             }
         }
+        .background(AppColors.background)
     }
 }
 
