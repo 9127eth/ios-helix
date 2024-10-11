@@ -193,8 +193,20 @@ struct AuthenticationView: View {
     }
     
     private func handleForgotPassword() {
-        // Implement forgot password logic here
-        print("Forgot password tapped")
-        // You can show an alert or navigate to a forgot password view
+        if email.isEmpty {
+            alertMessage = "Please enter your email address."
+            showingAlert = true
+        } else {
+            authManager.resetPassword(email: email) { result in
+                switch result {
+                case .success:
+                    alertMessage = "Password reset email sent. Please check your inbox."
+                    showingAlert = true
+                case .failure(let error):
+                    alertMessage = "Failed to send password reset email: \(error.localizedDescription)"
+                    showingAlert = true
+                }
+            }
+        }
     }
 }
