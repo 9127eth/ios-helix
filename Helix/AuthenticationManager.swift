@@ -153,13 +153,13 @@ class AuthenticationManager: NSObject, ObservableObject {
     }
     
     private func getGoogleClientID() -> String? {
-        do {
-            let googleClientID: String = try Configuration.value(for: ConfigurationKey.googleClientID)
-            return googleClientID
-        } catch {
-            print("Configuration error: \(error)")
+        guard let filePath = Bundle.main.path(forResource: "GoogleService-Info", ofType: "plist"),
+              let plist = NSDictionary(contentsOfFile: filePath),
+              let clientID = plist["CLIENT_ID"] as? String else {
+            print("Failed to retrieve Google Client ID from GoogleService-Info.plist")
             return nil
         }
+        return clientID
     }
 }
 
