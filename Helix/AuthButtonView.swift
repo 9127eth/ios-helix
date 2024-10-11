@@ -17,7 +17,7 @@ struct AuthButtonView: View {
                 Image(systemName: image)
                     .resizable()
                     .aspectRatio(contentMode: .fit)
-                    .frame(width: 24, height: 24)
+                    .frame(width: 20, height: 20)  // Changed from 24x24 to 20x20
             } else {
                 Image(image)
                     .resizable()

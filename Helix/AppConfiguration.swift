@@ -11,30 +11,16 @@ import Firebase
 
 struct AppConfiguration {
     static func setupGoogleSignIn() {
-        do {
-            let googleClientID: String = try Configuration.value(for: ConfigurationKey.googleClientID)
-            GIDSignIn.sharedInstance.configuration = GIDConfiguration(clientID: googleClientID)
-        } catch {
-            print("Configuration error: \(error)")
+        guard let filePath = Bundle.main.path(forResource: "GoogleService-Info", ofType: "plist"),
+              let plist = NSDictionary(contentsOfFile: filePath),
+              let clientID = plist["CLIENT_ID"] as? String else {
+            print("Error: Failed to get Google Client ID from GoogleService-Info.plist")
+            return
         }
-    }
-    
-    static func setupFirebase() {
-        do {
-            let apiKey: String = try Configuration.value(for: ConfigurationKey.googleAPIKey)
-            print("Debug: Firebase API Key - \(apiKey)")
-            if apiKey.count != 39 || !apiKey.hasPrefix("A") {
-                print("Invalid API Key format. Please check your configuration.")
-                return
-            }
-            FirebaseApp.configure()
-        } catch {
-            print("Configuration error: \(error)")
-        }
+        GIDSignIn.sharedInstance.configuration = GIDConfiguration(clientID: clientID)
     }
     
     static func setupAll() {
-        setupFirebase()
         setupGoogleSignIn()
     }
 }
