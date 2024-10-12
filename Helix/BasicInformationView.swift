@@ -10,13 +10,12 @@ struct BasicInformationView: View {
     @Binding var businessCard: BusinessCard
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 20) {
+        VStack(alignment: .leading, spacing: 16) {
             Text("Basic Information")
                 .font(.headline)
-                .padding(.bottom, 10)
+                .padding(.bottom, 4)
             
             CustomTextField(title: "First Name*", text: $businessCard.firstName)
-         
             
             CustomTextField(title: "Middle Name", text: Binding(
                 get: { businessCard.middleName ?? "" },
@@ -28,15 +27,17 @@ struct BasicInformationView: View {
                 set: { businessCard.lastName = $0.isEmpty ? nil : $0 }
             ))
             
-            CustomTextField(title: "Prefix", text: Binding(
-                get: { businessCard.prefix ?? "" },
-                set: { businessCard.prefix = $0.isEmpty ? nil : $0 }
-            ))
-            
-            CustomTextField(title: "Pronouns", text: Binding(
-                get: { businessCard.pronouns ?? "" },
-                set: { businessCard.pronouns = $0.isEmpty ? nil : $0 }
-            ))
+            HStack(spacing: 16) {
+                CustomTextField(title: "Prefix", text: Binding(
+                    get: { businessCard.prefix ?? "" },
+                    set: { businessCard.prefix = $0.isEmpty ? nil : $0 }
+                ))
+                
+                CustomTextField(title: "Pronouns", text: Binding(
+                    get: { businessCard.pronouns ?? "" },
+                    set: { businessCard.pronouns = $0.isEmpty ? nil : $0 }
+                ))
+            }
         }
         .padding()
     }
