@@ -20,22 +20,26 @@ struct ContentView: View {
     var body: some View {
         Group {
             if authManager.isAuthenticated {
-                TabView(selection: $selectedTab) {
-                    BusinessCardGridView(businessCards: businessCards)
-                        .tabItem {
-                            Image(systemName: "rectangle.on.rectangle")
-                            Text("Cards")
-                        }
-                        .tag(0)
-                    
-                    SettingsView()
-                        .tabItem {
-                            Image(systemName: "gear")
-                            Text("Settings")
-                        }
-                        .tag(1)
+                if businessCards.isEmpty {
+                    CreateBusinessCardView()
+                } else {
+                    TabView(selection: $selectedTab) {
+                        BusinessCardGridView(businessCards: businessCards)
+                            .tabItem {
+                                Image(systemName: "rectangle.on.rectangle")
+                                Text("Cards")
+                            }
+                            .tag(0)
+                        
+                        SettingsView()
+                            .tabItem {
+                                Image(systemName: "gear")
+                                Text("Settings")
+                            }
+                            .tag(1)
+                    }
+                    .onAppear(perform: fetchBusinessCards)
                 }
-                .onAppear(perform: fetchBusinessCards)
             } else {
                 AuthenticationView()
             }
