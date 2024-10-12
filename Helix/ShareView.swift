@@ -77,7 +77,7 @@ struct ShareView: View {
                             }) {
                                 HStack {
                                     Image(systemName: showCopiedCheckmark ? "checkmark" : "doc.on.doc")
-                                    Text(showCopiedCheckmark ? "Copied!" : "Copy URL")
+                                    Text(showCopiedCheckmark ? "Copied!" : "Copy Link")
                                 }
                                 .frame(maxWidth: .infinity)
                                 .frame(height: 44)
@@ -88,13 +88,19 @@ struct ShareView: View {
                             .frame(width: 320)
                             
                             Button(action: {
-                                if let url = URL(string: card.getCardURL()) {
-                                    UIApplication.shared.open(url)
+                                let url = card.getCardURL()
+                                let activityViewController = UIActivityViewController(activityItems: [url], applicationActivities: nil)
+                                
+                                if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+                                   let window = windowScene.windows.first,
+                                   let rootViewController = window.rootViewController {
+                                    // Present the activity view controller directly
+                                    rootViewController.presentedViewController?.present(activityViewController, animated: true, completion: nil)
                                 }
                             }) {
                                 HStack {
-                                    Image(systemName: "safari")
-                                    Text("View in Browser")
+                                    Image(systemName: "square.and.arrow.up")
+                                    Text("Share Link")
                                 }
                                 .frame(maxWidth: .infinity)
                                 .frame(height: 44)
@@ -211,7 +217,8 @@ struct ShareView: View {
         if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
            let window = windowScene.windows.first,
            let rootViewController = window.rootViewController {
-            rootViewController.present(activityViewController, animated: true, completion: nil)
+            // Present the activity view controller over the current sheet
+            rootViewController.presentedViewController?.present(activityViewController, animated: true, completion: nil)
         }
     }
 }
