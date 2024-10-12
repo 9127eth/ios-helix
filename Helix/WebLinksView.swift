@@ -13,26 +13,42 @@ struct WebLinksView: View {
     @State private var newLinkDisplayText = ""
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
+        VStack(spacing: 20) {
             ForEach(businessCard.webLinks ?? [], id: \.url) { link in
                 HStack {
                     Text(link.displayText)
+                        .font(.system(size: 16, weight: .medium))
                     Spacer()
                     Text(link.url)
+                        .font(.system(size: 14))
+                        .foregroundColor(.gray)
                 }
+                .padding()
+                .background(Color.white)
+                .cornerRadius(10)
+                .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
             }
             
-            TextField("URL", text: $newLinkUrl)
-            TextField("Display Text", text: $newLinkDisplayText)
+            CustomTextField(title: "URL", text: $newLinkUrl)
+            CustomTextField(title: "Display Text", text: $newLinkDisplayText)
             
-            Button("Add Link") {
-                if !newLinkUrl.isEmpty && !newLinkDisplayText.isEmpty {
-                    let newLink = WebLink(url: newLinkUrl, displayText: newLinkDisplayText)
-                    businessCard.webLinks = (businessCard.webLinks ?? []) + [newLink]
-                    newLinkUrl = ""
-                    newLinkDisplayText = ""
-                }
+            Button(action: addNewLink) {
+                Text("Add Link")
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 10)
+                    .background(AppColors.primary)
+                    .cornerRadius(20)
             }
+        }
+    }
+    
+    private func addNewLink() {
+        if !newLinkUrl.isEmpty && !newLinkDisplayText.isEmpty {
+            let newLink = WebLink(url: newLinkUrl, displayText: newLinkDisplayText)
+            businessCard.webLinks = (businessCard.webLinks ?? []) + [newLink]
+            newLinkUrl = ""
+            newLinkDisplayText = ""
         }
     }
 }

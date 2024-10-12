@@ -54,30 +54,59 @@ struct CreateBusinessCardView: View {
         customSlug: "",
         isPro: false
     )
+    @Environment(\.presentationMode) var presentationMode
     
-    let steps = ["Basic Information", "Contact Information", "Social Links", "Web Links", "Profile Image"]
+    let steps = ["Basic Information", "Professional Information", "Description", "Contact Information", "Social Links", "Web Links", "Profile Image"]
     
     var body: some View {
-        VStack {
-            ProgressView(value: Double(currentStep), total: Double(steps.count))
-                .padding()
+        VStack(spacing: 0) {
+            // Header
+            HStack {
+                Button(action: { presentationMode.wrappedValue.dismiss() }) {
+                    Image(systemName: "xmark")
+                        .foregroundColor(.gray)
+                        .font(.system(size: 20, weight: .medium))
+                }
+                Spacer()
+                Text("Create Card")
+                    .font(.system(size: 18, weight: .semibold))
+                Spacer()
+                Button(action: { saveBusinessCard() }) {
+                    Text("Save")
+                        .foregroundColor(AppColors.primary)
+                        .font(.system(size: 16, weight: .medium))
+                }
+            }
+            .padding()
+            .background(Color.white)
+            .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 5)
             
-            Text("Step \(currentStep + 1) of \(steps.count): \(steps[currentStep])")
-                .font(.headline)
-                .padding()
+            // Progress bar
+            ProgressView(value: Double(currentStep), total: Double(steps.count - 1))
+                .accentColor(AppColors.primary)
+                .padding(.horizontal)
             
+            // Content
             ScrollView {
-                VStack {
+                VStack(spacing: 20) {
+                    Text(steps[currentStep])
+                        .font(.system(size: 24, weight: .bold))
+                        .padding(.top, 20)
+                    
                     switch currentStep {
                     case 0:
                         BasicInformationView(businessCard: $businessCard)
                     case 1:
-                        ContactInformationView(businessCard: $businessCard)
+                        ProfessionalInformationView(businessCard: $businessCard)
                     case 2:
-                        SocialLinksView(businessCard: $businessCard)
+                        DescriptionView(businessCard: $businessCard)
                     case 3:
-                        WebLinksView(businessCard: $businessCard)
+                        ContactInformationView(businessCard: $businessCard)
                     case 4:
+                        SocialLinksView(businessCard: $businessCard)
+                    case 5:
+                        WebLinksView(businessCard: $businessCard)
+                    case 6:
                         ProfileImageView(businessCard: $businessCard)
                     default:
                         EmptyView()
@@ -86,26 +115,37 @@ struct CreateBusinessCardView: View {
                 .padding()
             }
             
+            // Navigation buttons
             HStack {
                 if currentStep > 0 {
-                    Button("Previous") {
-                        currentStep -= 1
+                    Button(action: { currentStep -= 1 }) {
+                        HStack {
+                            Image(systemName: "chevron.left")
+                            Text("Previous")
+                        }
+                        .foregroundColor(AppColors.primary)
                     }
                 }
-                
                 Spacer()
-                
-                Button(currentStep == steps.count - 1 ? "Finish" : "Next") {
-                    if currentStep < steps.count - 1 {
-                        currentStep += 1
-                    } else {
-                        saveBusinessCard()
+                if currentStep < steps.count - 1 {
+                    Button(action: { currentStep += 1 }) {
+                        HStack {
+                            Text("Next")
+                            Image(systemName: "chevron.right")
+                        }
+                        .foregroundColor(.white)
                     }
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 10)
+                    .background(currentStep == 0 && businessCard.firstName.isEmpty ? Color.gray : AppColors.primary)
+                    .cornerRadius(20)
+                    .disabled(currentStep == 0 && businessCard.firstName.isEmpty)
                 }
             }
             .padding()
         }
-        .navigationTitle("Create Your Business Card")
+        .background(AppColors.background)
+        .edgesIgnoringSafeArea(.bottom)
     }
     
     private func saveBusinessCard() {
