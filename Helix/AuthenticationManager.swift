@@ -16,6 +16,10 @@ class AuthenticationManager: NSObject, ObservableObject {
     @Published var user: User?
     @Published var isAuthenticated = false
     
+    var currentUser: User? {
+        return Auth.auth().currentUser
+    }
+    
     private var appleSignInCompletion: ((Result<User, Error>) -> Void)?
     private var currentNonce: String?
 
@@ -26,16 +30,22 @@ class AuthenticationManager: NSObject, ObservableObject {
     
     private func setupFirebaseAuthStateListener() {
         Auth.auth().addStateDidChangeListener { [weak self] _, user in
-            self?.user = user
-            self?.isAuthenticated = user != nil
+            DispatchQueue.main.async {
+                self?.user = user
+                self?.isAuthenticated = user != nil
+                print("Authentication state changed. isAuthenticated: \(self?.isAuthenticated ?? false)")
+            }
         }
     }
     
     func signInWithEmail(email: String, password: String, completion: @escaping (Result<User, Error>) -> Void) {
+        print("Attempting to sign in with email: \(email)")
         Auth.auth().signIn(withEmail: email, password: password) { authResult, error in
             if let user = authResult?.user {
+                print("Sign in successful for user: \(user.uid)")
                 completion(.success(user))
             } else if let error = error {
+                print("Sign in failed: \(error.localizedDescription)")
                 completion(.failure(error))
             }
         }
@@ -168,6 +178,28 @@ class AuthenticationManager: NSObject, ObservableObject {
                 completion(.failure(error))
             } else {
                 completion(.success(()))
+            }
+        }
+    }
+    
+    func createUserDocument(for user: User, username: String) {
+        let db = Firestore.firestore()
+        let userRef = db.collection("users").document(user.uid)
+        
+        let userData: [String: Any] = [
+            "username": username,
+            "isPro": false,
+            "primaryCardId": username,  // Updated to use username as primaryCardId
+            "primaryCardPlaceholder": false,
+            "createdAt": FieldValue.serverTimestamp(),
+            "updatedAt": FieldValue.serverTimestamp()
+        ]
+        
+        userRef.setData(userData) { error in
+            if let error = error {
+                print("Error creating user document: \(error)")
+            } else {
+                print("User document created successfully")
             }
         }
     }

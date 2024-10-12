@@ -134,6 +134,7 @@
 				02F464512CB4E6130034711F /* Helix */,
 				02F464642CB4E6150034711F /* HelixTests */,
 				02F4646E2CB4E6150034711F /* HelixUITests */,
+				02F465062CB8F7C20034711F /* Frameworks */,
 				02F464502CB4E6130034711F /* Products */,
 			);
 			sourceTree = "<group>";
@@ -146,6 +147,13 @@
 				02F4646B2CB4E6150034711F /* HelixUITests.xctest */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		02F465062CB8F7C20034711F /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
