@@ -9,22 +9,23 @@ import SwiftUI
 struct BusinessCardItemView: View {
     var card: BusinessCard
     @State private var showPreview = false
+    @State private var showShare = false
     
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack(alignment: .top) {
                 Text(card.description)
-                    .font(.system(size: 38)) // Increased font size
+                    .font(.system(size: 38))
                     .fontWeight(.bold)
-                    .lineLimit(2) // Allow up to 2 lines
-                    .minimumScaleFactor(0.5) // Scale down if needed
+                    .lineLimit(2)
+                    .minimumScaleFactor(0.5)
                     .foregroundColor(AppColors.bodyPrimaryText)
                 
                 Spacer()
                 
                 Menu {
                     Button("Preview") { showPreview = true }
-                    Button("Share") { /* TODO: Implement share action */ }
+                    Button("Share") { showShare = true }
                     Button("Edit") { /* TODO: Implement edit action */ }
                     Button("Delete", role: .destructive) { /* TODO: Implement delete action */ }
                 } label: {
@@ -74,23 +75,23 @@ struct BusinessCardItemView: View {
                 
                 Spacer()
                 
-                HStack(spacing: 16) { // Increased spacing between buttons
+                HStack(spacing: 16) {
                     Button(action: { /* TODO: Implement edit action */ }) {
                         Image(systemName: "square.and.pencil")
-                            .frame(width: 30, height: 30) // Increased button size
+                            .frame(width: 30, height: 30)
                     }
                     Button(action: { showPreview = true }) {
                         Image(systemName: "magnifyingglass")
                             .frame(width: 30, height: 30)
                     }
-                    Button(action: { /* TODO: Implement share action */ }) {
+                    Button(action: { showShare = true }) {
                         Image(systemName: "square.and.arrow.up")
-                            .frame(width: 30, height: 30) // Increased button size
+                            .frame(width: 30, height: 30)
                     }
                     .disabled(!card.isActive)
                 }
-                .foregroundColor(.black) // Changed to black
-                .font(.system(size: 18)) // Increased icon size
+                .foregroundColor(.black)
+                .font(.system(size: 18))
             }
         }
         .padding()
@@ -100,6 +101,9 @@ struct BusinessCardItemView: View {
         .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
         .sheet(isPresented: $showPreview) {
             PreviewView(card: card, isPresented: $showPreview)
+        }
+        .sheet(isPresented: $showShare) {
+            ShareView(card: card, isPresented: $showShare)
         }
     }
 }
