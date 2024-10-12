@@ -12,6 +12,7 @@ struct ShareView: View {
     @State private var qrCode: UIImage?
     @State private var selectedFormat: String = "PNG"
     @State private var noBackground: Bool = false
+    @State private var showCopiedCheckmark = false
     
     var body: some View {
         NavigationView {
@@ -60,10 +61,18 @@ struct ShareView: View {
                         VStack(spacing: 15) {
                             Button(action: {
                                 UIPasteboard.general.string = card.getCardURL()
+                                withAnimation {
+                                    showCopiedCheckmark = true
+                                }
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+                                    withAnimation {
+                                        showCopiedCheckmark = false
+                                    }
+                                }
                             }) {
                                 HStack {
-                                    Image(systemName: "doc.on.doc")
-                                    Text("Copy URL")
+                                    Image(systemName: showCopiedCheckmark ? "checkmark" : "doc.on.doc")
+                                    Text(showCopiedCheckmark ? "Copied!" : "Copy URL")
                                 }
                                 .frame(maxWidth: .infinity)
                                 .frame(height: 44)
