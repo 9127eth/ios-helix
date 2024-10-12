@@ -79,7 +79,7 @@ struct BusinessCardItemView: View {
                         Image(systemName: "square.and.pencil")
                             .frame(width: 30, height: 30) // Increased button size
                     }
-                    Button(action: { /* TODO: Implement preview action */ }) {
+                    Button(action: { showPreview = true }) {
                         Image(systemName: "magnifyingglass")
                             .frame(width: 30, height: 30)
                     }
