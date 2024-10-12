@@ -5,6 +5,7 @@
 //  Created by Richard Waithe on 10/11/24.
 //
 import SwiftUI
+import Photos
 
 struct ShareView: View {
     let card: BusinessCard
@@ -212,6 +213,20 @@ struct ShareView: View {
             }
         }
         
+        // Check photo library permission
+        PHPhotoLibrary.requestAuthorization { status in
+            DispatchQueue.main.async {
+                if status == .authorized {
+                    UIImageWriteToSavedPhotosAlbum(imageToShare, nil, nil, nil)
+                    // Show a success message
+                    self.showAlert(title: "Success", message: "QR Code saved to your photo library.")
+                } else {
+                    // Show an error message
+                    self.showAlert(title: "Error", message: "Unable to save QR Code. Please allow access to your photo library in Settings.")
+                }
+            }
+        }
+        
         let activityViewController = UIActivityViewController(activityItems: [imageToShare], applicationActivities: nil)
         
         if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
@@ -219,6 +234,17 @@ struct ShareView: View {
            let rootViewController = window.rootViewController {
             // Present the activity view controller over the current sheet
             rootViewController.presentedViewController?.present(activityViewController, animated: true, completion: nil)
+        }
+    }
+    
+    func showAlert(title: String, message: String) {
+        let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+        
+        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+           let window = windowScene.windows.first,
+           let rootViewController = window.rootViewController {
+            rootViewController.presentedViewController?.present(alert, animated: true, completion: nil)
         }
     }
 }
