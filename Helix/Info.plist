@@ -16,5 +16,9 @@
 		</dict>
 		<dict/>
 	</array>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>We need access to your photo library to save the QR code image.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>We need access to your photo library to save the QR code image.</string>
 </dict>
 </plist>
