@@ -11,9 +11,9 @@ struct ContactInformationView: View {
     @Binding var businessCard: BusinessCard
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            TextField("Phone Number", text: Binding($businessCard.phoneNumber) ?? Binding.constant(""))
-            TextField("Email", text: Binding($businessCard.email) ?? Binding.constant(""))
+        VStack(spacing: 20) {
+            CustomTextField(title: "Phone Number", text: Binding($businessCard.phoneNumber) ?? Binding.constant(""))
+            CustomTextField(title: "Email", text: Binding($businessCard.email) ?? Binding.constant(""))
         }
     }
 }

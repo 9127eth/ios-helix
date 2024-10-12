@@ -13,27 +13,37 @@ struct ProfileImageView: View {
     @State private var inputImage: UIImage?
     
     var body: some View {
-        VStack {
+        VStack(spacing: 20) {
             if let imageUrl = businessCard.imageUrl, let url = URL(string: imageUrl) {
                 AsyncImage(url: url) { image in
                     image
                         .resizable()
-                        .scaledToFit()
+                        .scaledToFill()
+                        .frame(width: 200, height: 200)
+                        .clipShape(Circle())
+                        .overlay(Circle().stroke(AppColors.primary, lineWidth: 4))
+                        .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5)
                 } placeholder: {
                     ProgressView()
+                        .frame(width: 200, height: 200)
                 }
-                .frame(width: 200, height: 200)
-                .clipShape(Circle())
             } else {
                 Image(systemName: "person.circle.fill")
                     .resizable()
                     .scaledToFit()
                     .frame(width: 200, height: 200)
                     .foregroundColor(.gray)
+                    .overlay(Circle().stroke(AppColors.primary, lineWidth: 4))
+                    .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5)
             }
             
-            Button("Select Image") {
-                showImagePicker = true
+            Button(action: { showImagePicker = true }) {
+                Text("Select Image")
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 10)
+                    .background(AppColors.primary)
+                    .cornerRadius(20)
             }
         }
         .sheet(isPresented: $showImagePicker) {
@@ -46,7 +56,6 @@ struct ProfileImageView: View {
     
     private func uploadImage() {
         // Implement image upload logic here
-        // After successful upload, update businessCard.imageUrl
     }
 }
 
