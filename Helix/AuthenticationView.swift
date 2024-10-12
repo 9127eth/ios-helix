@@ -98,13 +98,16 @@ struct AuthenticationView: View {
                 .foregroundColor(AppColors.bodyPrimaryText)
                 .padding(.bottom, 10)
             
-            TextField("Email", text: $email)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-                .autocapitalization(.none)
-                .keyboardType(.emailAddress)
-            
-            SecureField("Password", text: $password)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
+            VStack(spacing: 15) {
+                TextField("Email", text: $email)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .autocapitalization(.none)
+                    .keyboardType(.emailAddress)
+                
+                SecureField("Password", text: $password)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+            }
+            .frame(maxWidth: 280)  // Set a maximum width for the input fields
             
             if !isLogin {
                 Toggle(isOn: $agreeToTerms) {
