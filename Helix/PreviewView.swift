@@ -13,26 +13,8 @@ struct PreviewView: View {
     @Binding var isPresented: Bool
     
     var body: some View {
-        ZStack {
-            // Dimmed background
-            Color.black.opacity(0.3)
-                .edgesIgnoringSafeArea(.all)
-                .onTapGesture {
-                    isPresented = false
-                }
-            
-            VStack {
-                Text("Preview")
-                    .font(.headline)
-                    .padding()
-                
-                SafariView(url: URL(string: card.getCardURL())!)
-                    .edgesIgnoringSafeArea(.all)
-            }
-            .background(Color.white)
-            .cornerRadius(10)
-            .padding()
-        }
+        SafariView(url: URL(string: card.getCardURL())!)
+            .edgesIgnoringSafeArea(.all)
     }
 }
 
