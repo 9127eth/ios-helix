@@ -16,32 +16,33 @@ struct ShareView: View {
     var body: some View {
         NavigationView {
             ScrollView {
-                VStack(alignment: .leading, spacing: 20) {
+                VStack(alignment: .leading, spacing: 10) {
                     Text(card.name)
-                        .font(.title)
+                        .font(.system(size: 40, weight: .bold))
                         .fontWeight(.bold)
                     
                     HStack(spacing: 5) {
                         if let jobTitle = card.jobTitle {
                             Text(jobTitle)
-                                .font(.subheadline)
-                                .foregroundColor(.gray)
+                                .font(.system(size: 20))
+                                .foregroundColor(.black)
                         }
                         
                         if card.jobTitle != nil && card.company != nil {
                             Text("|")
-                                .font(.subheadline)
-                                .foregroundColor(.gray.opacity(0.5))
+                                .font(.system(size: 20))
+                                .foregroundColor(.gray.opacity(0.8))
                         }
                         
                         if let company = card.company {
                             Text(company)
-                                .font(.subheadline)
+                                .font(.system(size: 20))
                                 .foregroundColor(.gray.opacity(0.8))
                         }
                     }
+                    .padding(.bottom, 20)
                     
-                    VStack(alignment: .center, spacing: 20) {
+                    VStack(alignment: .center, spacing: 30) {
                         if let qrCode = qrCode {
                             Image(uiImage: qrCode)
                                 .interpolation(.none)
@@ -55,35 +56,47 @@ struct ShareView: View {
                         Text(card.getCardURL())
                             .font(.caption)
                         
-                        Button(action: {
-                            UIPasteboard.general.string = card.getCardURL()
-                        }) {
-                            HStack {
-                                Image(systemName: "doc.on.doc")
-                                Text("Copy URL")
+                        // Buttons with adjusted width, standardized height, and increased spacing
+                        VStack(spacing: 15) {
+                            Button(action: {
+                                UIPasteboard.general.string = card.getCardURL()
+                            }) {
+                                HStack {
+                                    Image(systemName: "doc.on.doc")
+                                    Text("Copy URL")
+                                }
+                                .frame(maxWidth: .infinity)
+                                .frame(height: 44)
+                                .background(AppColors.primary)
+                                .foregroundColor(AppColors.primaryText)
+                                .cornerRadius(20)
                             }
-                            .padding()
-                            .background(AppColors.primary)
-                            .foregroundColor(AppColors.primaryText)
-                            .cornerRadius(8)
+                            .frame(width: 320)
+                            
+                            Button(action: {
+                                if let url = URL(string: card.getCardURL()) {
+                                    UIApplication.shared.open(url)
+                                }
+                            }) {
+                                HStack {
+                                    Image(systemName: "safari")
+                                    Text("View in Browser")
+                                }
+                                .frame(maxWidth: .infinity)
+                                .frame(height: 44)
+                                .background(Color.black)
+                                .foregroundColor(.white)
+                                .cornerRadius(20)
+                            }
+                            .frame(width: 320)
                         }
                         
-                        Button(action: {
-                            if let url = URL(string: card.getCardURL()) {
-                                UIApplication.shared.open(url)
-                            }
-                        }) {
-                            HStack {
-                                Image(systemName: "safari")
-                                Text("View in Browser")
-                            }
-                            .padding()
-                            .background(Color.black)
-                            .foregroundColor(.white)
-                            .cornerRadius(8)
-                        }
+                        // Section divider with a thin gray line and padding
+                        Divider()
+                            .background(Color.gray.opacity(0.5))
+                            .padding(.vertical, 10)
                         
-                        VStack(alignment: .center, spacing: 10) {
+                        VStack(alignment: .center, spacing: 15) {
                             Text("Share QR Code")
                                 .font(.headline)
                             
@@ -103,11 +116,13 @@ struct ShareView: View {
                                     Image(systemName: "qrcode")
                                     Text("Share QR Code")
                                 }
-                                .padding()
+                                .frame(maxWidth: .infinity)
+                                .frame(height: 44)
                                 .background(AppColors.primary)
                                 .foregroundColor(AppColors.primaryText)
-                                .cornerRadius(8)
+                                .cornerRadius(20)
                             }
+                            .frame(width: 320)
                         }
                     }
                     .frame(maxWidth: .infinity)
