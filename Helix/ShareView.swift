@@ -10,9 +10,14 @@ struct ShareView: View {
     let card: BusinessCard
     @Binding var isPresented: Bool
     @State private var qrCode: UIImage?
-    @State private var selectedFormat: String = "PNG"
+    @State private var selectedFormat: ImageFormat = .png
     @State private var noBackground: Bool = false
     @State private var showCopiedCheckmark = false
+    
+    enum ImageFormat: String, CaseIterable {
+        case png = "PNG"
+        case jpeg = "JPEG"
+    }
     
     var body: some View {
         NavigationView {
@@ -109,20 +114,22 @@ struct ShareView: View {
                             Text("Share QR Code")
                                 .font(.headline)
                             
-                            HStack {
-                                Picker("Format", selection: $selectedFormat) {
-                                    Text("PNG").tag("PNG")
-                                    Text("JPEG").tag("JPEG")
-                                    Text("SVG").tag("SVG")
+                            Picker("Select Format", selection: $selectedFormat) {
+                                ForEach(ImageFormat.allCases, id: \.self) { format in
+                                    Text(format.rawValue).tag(format)
                                 }
-                                .pickerStyle(MenuPickerStyle())
-                                
-                                Toggle("No background", isOn: $noBackground)
+                            }
+                            .pickerStyle(SegmentedPickerStyle())
+                            .padding(.horizontal)
+                            
+                            if selectedFormat == .png {
+                                Toggle("Transparent background", isOn: $noBackground)
+                                    .padding(.horizontal)
                             }
                             
-                            Button(action: downloadQRCode) {
+                            Button(action: shareQRCode) {
                                 HStack {
-                                    Image(systemName: "qrcode")
+                                    Image(systemName: "square.and.arrow.up")
                                     Text("Share QR Code")
                                 }
                                 .frame(maxWidth: .infinity)
@@ -177,9 +184,34 @@ struct ShareView: View {
         }
     }
     
-    func downloadQRCode() {
-        // Implement QR code download functionality here
-        // This would typically involve generating the QR code in the selected format
-        // and saving it to the device or sharing it via a share sheet
+    func shareQRCode() {
+        guard let qrCodeImage = qrCode else { return }
+        
+        let imageToShare: UIImage
+        if selectedFormat == .jpeg {
+            // Convert to JPEG (which doesn't support transparency)
+            imageToShare = qrCodeImage.jpegData(compressionQuality: 1.0)
+                .flatMap(UIImage.init) ?? qrCodeImage
+        } else {
+            // For PNG, use the existing image (with or without background)
+            if noBackground {
+                imageToShare = qrCodeImage
+            } else {
+                UIGraphicsBeginImageContextWithOptions(qrCodeImage.size, true, 0)
+                UIColor.white.setFill()
+                UIRectFill(CGRect(origin: .zero, size: qrCodeImage.size))
+                qrCodeImage.draw(in: CGRect(origin: .zero, size: qrCodeImage.size))
+                imageToShare = UIGraphicsGetImageFromCurrentImageContext() ?? qrCodeImage
+                UIGraphicsEndImageContext()
+            }
+        }
+        
+        let activityViewController = UIActivityViewController(activityItems: [imageToShare], applicationActivities: nil)
+        
+        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+           let window = windowScene.windows.first,
+           let rootViewController = window.rootViewController {
+            rootViewController.present(activityViewController, animated: true, completion: nil)
+        }
     }
 }
