@@ -203,6 +203,32 @@ class AuthenticationManager: NSObject, ObservableObject {
             }
         }
     }
+
+    func deleteAccount(completion: @escaping (Result<Void, Error>) -> Void) {
+        guard let user = Auth.auth().currentUser else {
+            completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "No user logged in"])))
+            return
+        }
+
+        // Delete user data from Firestore
+        let db = Firestore.firestore()
+        db.collection("users").document(user.uid).delete { error in
+            if let error = error {
+                print("Error deleting user data: \(error.localizedDescription)")
+                // Continue with account deletion even if Firestore deletion fails
+            }
+
+            // Delete the user account
+            user.delete { error in
+                if let error = error {
+                    completion(.failure(error))
+                } else {
+                    self.signOut() // Sign out after successful deletion
+                    completion(.success(()))
+                }
+            }
+        }
+    }
 }
 
 extension AuthenticationManager: ASAuthorizationControllerDelegate {

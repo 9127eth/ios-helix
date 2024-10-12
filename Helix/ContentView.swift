@@ -15,6 +15,7 @@ struct ContentView: View {
     @State private var isLoading = false
     @State private var errorMessage: String?
     @State private var selectedTab = 0
+    @State private var hasAppeared = false
     
     var body: some View {
         Group {
@@ -44,7 +45,7 @@ struct ContentView: View {
             Group {
                 if isLoading {
                     ProgressView()
-                } else if let error = errorMessage {
+                } else if let error = errorMessage, authManager.isAuthenticated {
                     Text(error)
                         .foregroundColor(.red)
                         .padding()
@@ -54,6 +55,18 @@ struct ContentView: View {
         .onChange(of: authManager.isAuthenticated) { newValue in
             if newValue {
                 fetchBusinessCards()
+            } else {
+                errorMessage = nil
+                businessCards = []
+            }
+        }
+        .onAppear {
+            if !hasAppeared {
+                hasAppeared = true
+                if !authManager.isAuthenticated {
+                    errorMessage = nil
+                    businessCards = []
+                }
             }
         }
         .environmentObject(authManager)
