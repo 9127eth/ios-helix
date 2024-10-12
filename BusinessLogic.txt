@@ -281,3 +281,20 @@ The URL for an inactive card should still be accessible but, it should have a po
 Implement this in a straightforward way that only changes the necessary code to implement the functionality. Nothing else. this is my first time coding.
 
 When a user goes from pro to free, we need to handle the business card url to not show the document after their subsctiption ends. Because the action we will take is after the sub has ended, we can is ispro as false to determine this.
+
+Logic for determining a card's URL
+
+This function determines the URL structure based on whether the card is primary or not. Here's the business logic:
+The function takes three parameters: userId, cardSlug, and isPrimary.
+It first retrieves the user's document from Firestore to get the username. Then Determine if the card being accessed is the primary card for the user.
+If the card is primary (isPrimary is true), the URL format is:
+
+      https://www.helixcard.app/c/{username}
+
+If the card is not primary, the URL format is:
+
+      https://www.helixcard.app/c/{username}/{cardSlug}
+
+The cardSlug is a property of the business card document.
+
+When fetching a card, they should first try to get the user by username, then fetch the appropriate card (either primary or by slug) from that user's business cards subcollection.

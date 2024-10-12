@@ -8,6 +8,7 @@ import SwiftUI
 
 struct BusinessCardItemView: View {
     var card: BusinessCard
+    @State private var showPreview = false
     
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -22,7 +23,7 @@ struct BusinessCardItemView: View {
                 Spacer()
                 
                 Menu {
-                    Button("Preview") { /* TODO: Implement preview action */ }
+                    Button("Preview") { showPreview = true }
                     Button("Share") { /* TODO: Implement share action */ }
                     Button("Edit") { /* TODO: Implement edit action */ }
                     Button("Delete", role: .destructive) { /* TODO: Implement delete action */ }
@@ -97,5 +98,8 @@ struct BusinessCardItemView: View {
         .background(AppColors.cardGridBackground)
         .cornerRadius(8)
         .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
+        .sheet(isPresented: $showPreview) {
+            PreviewView(card: card, isPresented: $showPreview)
+        }
     }
 }
