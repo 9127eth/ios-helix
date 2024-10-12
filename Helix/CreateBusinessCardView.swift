@@ -82,17 +82,12 @@ struct CreateBusinessCardView: View {
             .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 5)
             
             // Progress bar
-            ProgressView(value: Double(currentStep), total: Double(steps.count - 1))
-                .accentColor(AppColors.primary)
-                .padding(.horizontal)
+            CreateProgressBar(currentStep: currentStep)
+                .padding()
             
             // Content
             ScrollView {
                 VStack(spacing: 20) {
-                    Text(steps[currentStep])
-                        .font(.system(size: 24, weight: .bold))
-                        .padding(.top, 20)
-                    
                     switch currentStep {
                     case 0:
                         BasicInformationView(businessCard: $businessCard)
