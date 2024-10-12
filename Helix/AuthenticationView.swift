@@ -152,11 +152,14 @@ struct AuthenticationView: View {
     }
     
     private func handleEmailAuth() {
+        print("handleEmailAuth called")
         if isLogin {
+            print("Attempting to sign in with email: \(email)")
             authManager.signInWithEmail(email: email, password: password) { result in
                 handleAuthResult(result)
             }
         } else {
+            print("Attempting to sign up with email: \(email)")
             authManager.signUpWithEmail(email: email, password: password) { result in
                 handleAuthResult(result)
             }
@@ -186,7 +189,11 @@ struct AuthenticationView: View {
         switch result {
         case .success(let user):
             print("Authentication successful for user: \(user.uid)")
+            DispatchQueue.main.async {
+                authManager.isAuthenticated = true
+            }
         case .failure(let error):
+            print("Authentication failed: \(error.localizedDescription)")
             alertMessage = error.localizedDescription
             showingAlert = true
         }

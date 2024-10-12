@@ -14,7 +14,7 @@ struct HelixApp: App {
     
     var body: some Scene {
         WindowGroup {
-            AuthenticationView()
+            ContentView()
         }
     }
 }
