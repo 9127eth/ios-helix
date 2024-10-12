@@ -61,6 +61,15 @@ struct BusinessCard: Identifiable, Codable {
         return fullName.trimmingCharacters(in: .whitespacesAndNewlines)
     }
     
+    func getCardURL() -> String {
+        let baseURL = "https://www.helixcard.app/c"
+        if isPrimary {
+            return "\(baseURL)/\(username ?? "")"
+        } else {
+            return "\(baseURL)/\(username ?? "")/\(cardSlug)"
+        }
+    }
+    
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         cardSlug = try container.decode(String.self, forKey: .cardSlug)
