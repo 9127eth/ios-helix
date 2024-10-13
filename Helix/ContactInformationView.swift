@@ -13,25 +13,37 @@ struct ContactInformationView: View {
     @State private var phoneNumber = ""
     @State private var email = ""
     @State private var isPhoneNumberValid = false
-    @State private var isEmailValid = false
+    @State private var isEmailValid = true
+    @State private var showEmailError = false
+    
+    var isNextButtonEnabled: Bool {
+        return email.isEmpty || isEmailValid
+    }
     
     var body: some View {
-        VStack(spacing: 20) {
+        VStack(alignment: .leading, spacing: 20) {
+            Text("Contact Information")
+                .font(.headline)
+                .padding(.bottom, 4)
+            
             PhoneNumberTextField(phoneNumber: $phoneNumber, isValid: $isPhoneNumberValid)
             
             CustomTextField(title: "Email", text: $email)
                 .onChange(of: email) { _, newValue in
-                    isEmailValid = isValidEmail(newValue)
+                    if newValue.isEmpty {
+                        isEmailValid = true
+                        showEmailError = false
+                    } else {
+                        isEmailValid = isValidEmail(newValue)
+                        showEmailError = !isEmailValid
+                    }
                 }
             
-            Button("Save") {
-                if isPhoneNumberValid && isEmailValid {
-                    businessCard.phoneNumber = phoneNumber
-                    businessCard.email = email
-                    // Additional save logic here
-                }
+            if showEmailError {
+                Text("Invalid email format")
+                    .foregroundColor(.red)
+                    .font(.caption)
             }
-            .disabled(!isPhoneNumberValid || !isEmailValid)
         }
         .onAppear {
             phoneNumber = businessCard.phoneNumber ?? ""
