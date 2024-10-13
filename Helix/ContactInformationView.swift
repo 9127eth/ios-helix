@@ -52,19 +52,18 @@ struct PhoneNumberTextField: View {
     @State private var selectedCountry: CountryInfo
     @State private var localPhoneNumber: String = ""
     
-    private let phoneUtil = NBPhoneNumberUtil.sharedInstance()
-    private let countries: [CountryInfo]
+    private static let phoneUtil = NBPhoneNumberUtil.sharedInstance()
+    private static let countriesData = initializeCountries()
+    private let countries: [CountryInfo] = Self.countriesData.countries
+    private let defaultCountry: CountryInfo = Self.countriesData.defaultCountry
     
     init(phoneNumber: Binding<String>, isValid: Binding<Bool>) {
         self._phoneNumber = phoneNumber
         self._isValid = isValid
-        
-        let (countryList, defaultCountry) = Self.initializeCountries()
-        self.countries = countryList
         self._selectedCountry = State(initialValue: defaultCountry)
     }
     
-    private static func initializeCountries() -> ([CountryInfo], CountryInfo) {
+    private static func initializeCountries() -> (countries: [CountryInfo], defaultCountry: CountryInfo) {
         let phoneUtil = NBPhoneNumberUtil.sharedInstance()
         let allRegions = Locale.isoRegionCodes
         let countryList = allRegions.compactMap { regionCode -> CountryInfo? in
@@ -76,14 +75,14 @@ struct PhoneNumberTextField: View {
         }.sorted { $0.name < $1.name }
         
         let defaultCountry = countryList.first(where: { $0.code == "US" }) ?? countryList[0]
-        return (countryList, defaultCountry)
+        return (countries: countryList, defaultCountry: defaultCountry)
     }
     
     var body: some View {
         VStack {
             HStack {
                 Picker("Country", selection: $selectedCountry) {
-                    ForEach(countries, id: \.code) { country in
+                    ForEach(countries) { country in
                         Text("\(country.flag) +\(country.prefix)")
                             .tag(country)
                     }
@@ -98,18 +97,18 @@ struct PhoneNumberTextField: View {
                     .padding(8)
                     .background(Color.white)
                     .cornerRadius(8)
-                    .onChange(of: localPhoneNumber) { _, _ in
+                    .onChange(of: localPhoneNumber) { _ in
                         validatePhoneNumber()
                     }
             }
             
             if !isValid && !localPhoneNumber.isEmpty {
-                Text("Invalid phone number")
+                Text("Invalid phone number format")
                     .foregroundColor(.red)
                     .font(.caption)
             }
         }
-        .onChange(of: selectedCountry) { _, _ in
+        .onChange(of: selectedCountry) { _ in
             validatePhoneNumber()
         }
         .onAppear {
@@ -119,12 +118,9 @@ struct PhoneNumberTextField: View {
     
     private func parseInitialPhoneNumber() {
         do {
-            if let parsedNumber = try phoneUtil?.parse(phoneNumber, defaultRegion: nil) {
-                if let countryCode = parsedNumber.countryCode?.stringValue,
-                   let country = countries.first(where: { $0.prefix == countryCode }) {
-                    selectedCountry = country
-                }
-                localPhoneNumber = try phoneUtil?.format(parsedNumber, numberFormat: .NATIONAL) ?? phoneNumber
+            if let parsedNumber = try Self.phoneUtil?.parse(phoneNumber, defaultRegion: selectedCountry.code) {
+                // Use INTERNATIONAL format to include country code
+                localPhoneNumber = try Self.phoneUtil?.format(parsedNumber, numberFormat: .INTERNATIONAL) ?? phoneNumber
                 validatePhoneNumber() // Ensure isValid is set correctly
             } else {
                 localPhoneNumber = phoneNumber
@@ -136,30 +132,33 @@ struct PhoneNumberTextField: View {
     }
     
     private func validatePhoneNumber() {
-        guard let phoneUtil = phoneUtil else {
+        guard let phoneUtil = Self.phoneUtil else {
             isValid = false
             return
         }
         
         do {
-            let fullNumber = "+\(selectedCountry.prefix)\(localPhoneNumber)"
+            // Use the full number input by the user
+            let fullNumber = localPhoneNumber
             let parsedNumber = try phoneUtil.parse(fullNumber, defaultRegion: selectedCountry.code)
-            isValid = phoneUtil.isValidNumber(parsedNumber)
+            
+            // Use isPossibleNumber instead of isValidNumber
+            isValid = phoneUtil.isPossibleNumber(parsedNumber)
             if isValid {
+                // Format the number to E164 for storage
                 phoneNumber = try phoneUtil.format(parsedNumber, numberFormat: .E164)
-                localPhoneNumber = try phoneUtil.format(parsedNumber, numberFormat: .NATIONAL)
                 
-                // Update selectedCountry based on the parsed number
-                if let countryCode = parsedNumber.countryCode?.stringValue,
-                   let country = countries.first(where: { $0.prefix == countryCode }) {
-                    selectedCountry = country
-                }
+                // Optionally, format it to INTERNATIONAL for display
+                localPhoneNumber = try phoneUtil.format(parsedNumber, numberFormat: .INTERNATIONAL)
+                
+                // Ensure selectedCountry remains the same
             } else {
+                // Keep the user's input as is
                 phoneNumber = fullNumber
             }
         } catch {
             isValid = false
-            phoneNumber = "+\(selectedCountry.prefix)\(localPhoneNumber)"
+            phoneNumber = localPhoneNumber
             print("Error validating phone number: \(error)")
         }
     }
