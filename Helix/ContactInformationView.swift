@@ -10,8 +10,6 @@ import libPhoneNumber
 
 struct ContactInformationView: View {
     @Binding var businessCard: BusinessCard
-    @State private var phoneNumber = ""
-    @State private var email = ""
     @State private var isPhoneNumberValid = false
     @State private var isEmailValid = true
     @State private var showEmailError = false
@@ -21,31 +19,33 @@ struct ContactInformationView: View {
         case phoneNumber, email
     }
     
-    var isNextButtonEnabled: Bool {
-        return email.isEmpty || isEmailValid
-    }
-    
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
             Text("Contact Information")
                 .font(.headline)
                 .padding(.bottom, 4)
             
-            PhoneNumberTextField(phoneNumber: $phoneNumber, isValid: $isPhoneNumberValid)
+            PhoneNumberTextField(phoneNumber: Binding(
+                get: { businessCard.phoneNumber ?? "" },
+                set: { businessCard.phoneNumber = $0.isEmpty ? nil : $0 }
+            ), isValid: $isPhoneNumberValid)
                 .focused($focusedField, equals: .phoneNumber)
                 .onSubmit { focusedField = .email }
             
-            CustomTextField(title: "Email", text: $email)
+            CustomTextField(title: "Email", text: Binding(
+                get: { businessCard.email ?? "" },
+                set: { businessCard.email = $0.isEmpty ? nil : $0 }
+            ))
                 .focused($focusedField, equals: .email)
                 .keyboardType(.emailAddress)
                 .onSubmit { focusedField = nil }
-                .onChange(of: email) { newValue in
-                    if newValue.isEmpty {
+                .onChange(of: businessCard.email) { newValue in
+                    if let email = newValue, !email.isEmpty {
+                        isEmailValid = isValidEmail(email)
+                        showEmailError = !isEmailValid
+                    } else {
                         isEmailValid = true
                         showEmailError = false
-                    } else {
-                        isEmailValid = isValidEmail(newValue)
-                        showEmailError = !isEmailValid
                     }
                 }
             
@@ -54,10 +54,6 @@ struct ContactInformationView: View {
                     .foregroundColor(.red)
                     .font(.caption)
             }
-        }
-        .onAppear {
-            phoneNumber = businessCard.phoneNumber ?? ""
-            email = businessCard.email ?? ""
         }
     }
     
