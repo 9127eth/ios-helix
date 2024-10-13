@@ -9,21 +9,70 @@ import SwiftUI
 
 struct SocialLinksView: View {
     @Binding var businessCard: BusinessCard
-    
+    @State private var showingAddLinkPopup = false
+    @State private var availableSocialLinks: [SocialLinkType] = [.facebook, .instagram, .tiktok, .youtube, .discord, .twitch, .snapchat, .telegram, .whatsapp, .threads]
+
     var body: some View {
-        VStack(spacing: 20) {
-            CustomTextField(title: "LinkedIn", text: Binding($businessCard.linkedIn) ?? Binding.constant(""))
-            CustomTextField(title: "Twitter", text: Binding($businessCard.twitter) ?? Binding.constant(""))
-            CustomTextField(title: "Facebook", text: Binding($businessCard.facebookUrl) ?? Binding.constant(""))
-            CustomTextField(title: "Instagram", text: Binding($businessCard.instagramUrl) ?? Binding.constant(""))
-            CustomTextField(title: "TikTok", text: Binding($businessCard.tiktokUrl) ?? Binding.constant(""))
-            CustomTextField(title: "YouTube", text: Binding($businessCard.youtubeUrl) ?? Binding.constant(""))
-            CustomTextField(title: "Discord", text: Binding($businessCard.discordUrl) ?? Binding.constant(""))
-            CustomTextField(title: "Twitch", text: Binding($businessCard.twitchUrl) ?? Binding.constant(""))
-            CustomTextField(title: "Snapchat", text: Binding($businessCard.snapchatUrl) ?? Binding.constant(""))
-            CustomTextField(title: "Telegram", text: Binding($businessCard.telegramUrl) ?? Binding.constant(""))
-            CustomTextField(title: "WhatsApp", text: Binding($businessCard.whatsappUrl) ?? Binding.constant(""))
-            CustomTextField(title: "Threads", text: Binding($businessCard.threadsUrl) ?? Binding.constant(""))
+        VStack(alignment: .leading, spacing: 20) {
+            Text("Social Links")
+                .font(.headline)
+                .padding(.bottom, 4)
+            
+            ForEach(SocialLinkType.allCases, id: \.self) { linkType in
+                if let linkValue = businessCard.socialLinkValue(for: linkType) {
+                    SocialLinkRow(linkType: linkType, value: Binding<String?>(
+                        get: { linkValue },
+                        set: { newValue in
+                            if let newValue = newValue, !newValue.isEmpty {
+                                businessCard.updateSocialLink(type: linkType, value: newValue)
+                            } else {
+                                businessCard.updateSocialLink(type: linkType, value: nil)
+                            }
+                        }
+                    ), onRemove: {
+                        businessCard.updateSocialLink(type: linkType, value: nil)
+                        availableSocialLinks.append(linkType)
+                    })
+                }
+            }
+            
+            Button(action: {
+                showingAddLinkPopup = true
+            }) {
+                HStack {
+                    Image(systemName: "plus.circle.fill")
+                    Text("Add Social Link")
+                }
+            }
+            .padding()
+            .background(Color.blue.opacity(0.1))
+            .cornerRadius(8)
+        }
+        .sheet(isPresented: $showingAddLinkPopup) {
+            AddSocialLinkView(availableLinks: $availableSocialLinks, businessCard: $businessCard, isPresented: $showingAddLinkPopup)
+        }
+    }
+}
+
+struct SocialLinkRow: View {
+    let linkType: SocialLinkType
+    @Binding var value: String?
+    let onRemove: () -> Void
+
+    var body: some View {
+        HStack {
+            Image(linkType.iconName)
+                .resizable()
+                .scaledToFit()
+                .frame(width: 24, height: 24)
+            CustomTextField(title: linkType.displayName, text: Binding(
+                get: { value ?? "" },
+                set: { value = $0.isEmpty ? nil : $0 }
+            ))
+            Button(action: onRemove) {
+                Image(systemName: "xmark.circle.fill")
+                    .foregroundColor(.red)
+            }
         }
     }
 }

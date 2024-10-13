@@ -113,10 +113,6 @@ struct ContentView: View {
                 } ?? []
                 
                 print("Fetched \(self.businessCards.count) business cards")
-                
-                if self.businessCards.isEmpty {
-                    errorMessage = "No business cards found"
-                }
             }
         }
     }

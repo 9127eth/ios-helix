@@ -13,7 +13,11 @@ struct WebLinksView: View {
     @State private var newLinkDisplayText = ""
     
     var body: some View {
-        VStack(spacing: 20) {
+        VStack(alignment: .leading, spacing: 20) {
+            Text("Web Links")
+                .font(.headline)
+                .padding(.bottom, 4)
+            
             ForEach(businessCard.webLinks ?? [], id: \.url) { link in
                 HStack {
                     Text(link.displayText)

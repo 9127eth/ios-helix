@@ -200,9 +200,78 @@ struct BusinessCard: Identifiable, Codable {
         try container.encode(isActive, forKey: .isActive)
         try container.encode(isPro ?? false, forKey: .isPro)
     }
+
+    mutating func setSocialLinkValue(for linkType: SocialLinkType, value: String) {
+        switch linkType {
+        case .linkedIn: self.linkedIn = value
+        case .twitter: self.twitter = value
+        case .facebook: self.facebookUrl = value
+        case .instagram: self.instagramUrl = value
+        case .tiktok: self.tiktokUrl = value
+        case .youtube: self.youtubeUrl = value
+        case .discord: self.discordUrl = value
+        case .twitch: self.twitchUrl = value
+        case .snapchat: self.snapchatUrl = value
+        case .telegram: self.telegramUrl = value
+        case .whatsapp: self.whatsappUrl = value
+        case .threads: self.threadsUrl = value
+        }
+    }
+
+    mutating func removeSocialLink(_ linkType: SocialLinkType) {
+        switch linkType {
+        case .linkedIn: self.linkedIn = nil
+        case .twitter: self.twitter = nil
+        case .facebook: self.facebookUrl = nil
+        case .instagram: self.instagramUrl = nil
+        case .tiktok: self.tiktokUrl = nil
+        case .youtube: self.youtubeUrl = nil
+        case .discord: self.discordUrl = nil
+        case .twitch: self.twitchUrl = nil
+        case .snapchat: self.snapchatUrl = nil
+        case .telegram: self.telegramUrl = nil
+        case .whatsapp: self.whatsappUrl = nil
+        case .threads: self.threadsUrl = nil
+        }
+    }
+
+    mutating func updateSocialLink(type: SocialLinkType, value: String?) {
+        switch type {
+        case .linkedIn: self.linkedIn = value
+        case .twitter: self.twitter = value
+        case .facebook: self.facebookUrl = value
+        case .instagram: self.instagramUrl = value
+        case .tiktok: self.tiktokUrl = value
+        case .youtube: self.youtubeUrl = value
+        case .discord: self.discordUrl = value
+        case .twitch: self.twitchUrl = value
+        case .snapchat: self.snapchatUrl = value
+        case .telegram: self.telegramUrl = value
+        case .whatsapp: self.whatsappUrl = value
+        case .threads: self.threadsUrl = value
+        }
+    }
+
+    func socialLinkValue(for linkType: SocialLinkType) -> String? {
+        switch linkType {
+        case .linkedIn: return linkedIn
+        case .twitter: return twitter
+        case .facebook: return facebookUrl
+        case .instagram: return instagramUrl
+        case .tiktok: return tiktokUrl
+        case .youtube: return youtubeUrl
+        case .discord: return discordUrl
+        case .twitch: return twitchUrl
+        case .snapchat: return snapchatUrl
+        case .telegram: return telegramUrl
+        case .whatsapp: return whatsappUrl
+        case .threads: return threadsUrl
+        }
+    }
 }
 
 struct WebLink: Codable {
     let url: String
     let displayText: String
 }
+
