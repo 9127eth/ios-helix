@@ -79,29 +79,44 @@ struct PhoneNumberTextField: View {
     }
     
     var body: some View {
-        VStack {
-            HStack {
-                Picker("Country", selection: $selectedCountry) {
-                    ForEach(countries) { country in
-                        Text("\(country.flag) +\(country.prefix)")
-                            .tag(country)
+        VStack(alignment: .leading, spacing: 4) {
+            Text("Mobile Number")
+                .font(.system(size: 14, weight: .medium))
+                .foregroundColor(.gray)
+            HStack(spacing: 8) {
+                Menu {
+                    Picker("Country", selection: $selectedCountry) {
+                        ForEach(countries) { country in
+                            Text("\(country.flag) +\(country.prefix) \(country.name)")
+                                .tag(country)
+                        }
                     }
+                } label: {
+                    Text(selectedCountry.flag)
+                        .frame(width: 40, height: 40)
+                        .background(Color(UIColor.systemBackground))
+                        .cornerRadius(8)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 8)
+                                .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+                        )
                 }
-                .pickerStyle(MenuPickerStyle())
-                .frame(width: 120)
-                .background(Color.white)
-                .cornerRadius(8)
-                
+
                 TextField("Phone Number", text: $localPhoneNumber)
                     .keyboardType(.phonePad)
-                    .padding(8)
-                    .background(Color.white)
+                    .padding(.horizontal, 12)
+                    .frame(height: 40)
+                    .background(Color(UIColor.systemBackground))
                     .cornerRadius(8)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 8)
+                            .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+                    )
                     .onChange(of: localPhoneNumber) { _ in
                         validatePhoneNumber()
                     }
             }
-            
+
             if !isValid && !localPhoneNumber.isEmpty {
                 Text("Invalid phone number format")
                     .foregroundColor(.red)
