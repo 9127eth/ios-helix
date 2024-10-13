@@ -7,8 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		024C7F572CBB408E0018FC08 /* PhoneNumberKit in Frameworks */ = {isa = PBXBuildFile; productRef = 024C7F562CBB408E0018FC08 /* PhoneNumberKit */; };
-		024C7F592CBB408E0018FC08 /* PhoneNumberKit-Static in Frameworks */ = {isa = PBXBuildFile; productRef = 024C7F582CBB408E0018FC08 /* PhoneNumberKit-Static */; };
+		0252AE802CBB58740076FAE0 /* libPhoneNumber in Frameworks */ = {isa = PBXBuildFile; productRef = 0252AE7F2CBB58740076FAE0 /* libPhoneNumber */; };
 		02F464802CB4EDA40034711F /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = 02F4647F2CB4EDA40034711F /* FirebaseAnalytics */; };
 		02F464822CB4EDA40034711F /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 02F464812CB4EDA40034711F /* FirebaseAuth */; };
 		02F464842CB4EDA40034711F /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 02F464832CB4EDA40034711F /* FirebaseFirestore */; };
@@ -100,14 +99,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				02F464CA2CB788C00034711F /* GoogleSignInSwift in Frameworks */,
-				024C7F572CBB408E0018FC08 /* PhoneNumberKit in Frameworks */,
 				02F464C92CB788C00034711F /* GoogleSignIn in Frameworks */,
 				02F464802CB4EDA40034711F /* FirebaseAnalytics in Frameworks */,
 				02F464822CB4EDA40034711F /* FirebaseAuth in Frameworks */,
+				0252AE802CBB58740076FAE0 /* libPhoneNumber in Frameworks */,
 				02F464AD2CB788300034711F /* GoogleSignInSwift in Frameworks */,
 				02F464842CB4EDA40034711F /* FirebaseFirestore in Frameworks */,
 				02F464882CB4EDA40034711F /* FirebaseStorage in Frameworks */,
-				024C7F592CBB408E0018FC08 /* PhoneNumberKit-Static in Frameworks */,
 				02F464862CB4EDA40034711F /* FirebaseFunctions in Frameworks */,
 				02F464AB2CB788300034711F /* GoogleSignIn in Frameworks */,
 			);
@@ -189,8 +187,7 @@
 				02F464AC2CB788300034711F /* GoogleSignInSwift */,
 				02F464892CB4EDA40034711F /* GoogleSignIn */,
 				02F4648A2CB4EDA40034711F /* GoogleSignInSwift */,
-				024C7F562CBB408E0018FC08 /* PhoneNumberKit */,
-				024C7F582CBB408E0018FC08 /* PhoneNumberKit-Static */,
+				0252AE7F2CBB58740076FAE0 /* libPhoneNumber */,
 			);
 			productName = Helix;
 			productReference = 02F4644F2CB4E6130034711F /* Helix.app */;
@@ -277,7 +274,7 @@
 			packageReferences = (
 				02F4647E2CB4EDA40034711F /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 				02F464A92CB788300034711F /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
-				024C7F552CBB408E0018FC08 /* XCRemoteSwiftPackageReference "PhoneNumberKit" */,
+				0252AE7E2CBB58740076FAE0 /* XCRemoteSwiftPackageReference "libPhoneNumber-iOS" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 02F464502CB4E6130034711F /* Products */;
@@ -652,12 +649,12 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		024C7F552CBB408E0018FC08 /* XCRemoteSwiftPackageReference "PhoneNumberKit" */ = {
+		0252AE7E2CBB58740076FAE0 /* XCRemoteSwiftPackageReference "libPhoneNumber-iOS" */ = {
 			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/marmelroy/PhoneNumberKit.git";
+			repositoryURL = "https://github.com/iziz/libPhoneNumber-iOS";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 4.0.0;
+				minimumVersion = 1.2.0;
 			};
 		};
 		02F4647E2CB4EDA40034711F /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
@@ -679,15 +676,10 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		024C7F562CBB408E0018FC08 /* PhoneNumberKit */ = {
+		0252AE7F2CBB58740076FAE0 /* libPhoneNumber */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 024C7F552CBB408E0018FC08 /* XCRemoteSwiftPackageReference "PhoneNumberKit" */;
-			productName = PhoneNumberKit;
-		};
-		024C7F582CBB408E0018FC08 /* PhoneNumberKit-Static */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 024C7F552CBB408E0018FC08 /* XCRemoteSwiftPackageReference "PhoneNumberKit" */;
-			productName = "PhoneNumberKit-Static";
+			package = 0252AE7E2CBB58740076FAE0 /* XCRemoteSwiftPackageReference "libPhoneNumber-iOS" */;
+			productName = libPhoneNumber;
 		};
 		02F4647F2CB4EDA40034711F /* FirebaseAnalytics */ = {
 			isa = XCSwiftPackageProductDependency;

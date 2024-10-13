@@ -1,5 +1,5 @@
 {
-  "originHash" : "63cd59ca6d8894b5f8568df8415fe913ba877c531e4cb7735bfc5824bdcdf35b",
+  "originHash" : "71fe0047bb35f5f622e10c00a4aa6f0e84a6de31ad3b5fca73a1c4d6fb0b285a",
   "pins" : [
     {
       "identity" : "abseil-cpp-binary",
@@ -119,21 +119,21 @@
       }
     },
     {
+      "identity" : "libphonenumber-ios",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/iziz/libPhoneNumber-iOS",
+      "state" : {
+        "revision" : "3220b4027117c41f076f1bcc7f3c492ab8957348",
+        "version" : "1.2.0"
+      }
+    },
+    {
       "identity" : "nanopb",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/firebase/nanopb.git",
       "state" : {
         "revision" : "b7e1104502eca3a213b46303391ca4d3bc8ddec1",
         "version" : "2.30910.0"
-      }
-    },
-    {
-      "identity" : "phonenumberkit",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/marmelroy/PhoneNumberKit.git",
-      "state" : {
-        "revision" : "28aee1bd9d4a8fa46304c598b73231b043161e63",
-        "version" : "4.0.0"
       }
     },
     {
