@@ -29,6 +29,7 @@ struct ContactInformationView: View {
             PhoneNumberTextField(phoneNumber: $phoneNumber, isValid: $isPhoneNumberValid)
             
             CustomTextField(title: "Email", text: $email)
+                .keyboardType(.emailAddress)
                 .onChange(of: email) { _, newValue in
                     if newValue.isEmpty {
                         isEmailValid = true
