@@ -12,6 +12,7 @@ struct SocialLinksView: View {
     @State private var showingAddLinkPopup = false
     @State private var availableSocialLinks: [SocialLinkType] = SocialLinkType.allCases
     @State private var selectedLinks: Set<SocialLinkType> = [.twitter, .linkedIn]
+    @FocusState private var focusedLink: SocialLinkType?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
@@ -20,35 +21,34 @@ struct SocialLinksView: View {
                 .padding(.bottom, 4)
             
             ForEach(Array(selectedLinks), id: \.self) { linkType in
-                SocialLinkRow(linkType: linkType, value: Binding(
-                    get: { businessCard.socialLinkValue(for: linkType) ?? "" },
-                    set: { newValue in
-                        if let newValue = newValue {
-                            let trimmedValue = newValue.trimmingCharacters(in: .whitespacesAndNewlines)
-                            if !trimmedValue.isEmpty {
-                                businessCard.updateSocialLink(type: linkType, value: trimmedValue)
+                SocialLinkRow(
+                    linkType: linkType,
+                    value: Binding(
+                        get: { businessCard.socialLinkValue(for: linkType) ?? "" },
+                        set: { newValue in
+                            if let newValue = newValue {
+                                let trimmedValue = newValue.trimmingCharacters(in: .whitespacesAndNewlines)
+                                if !trimmedValue.isEmpty {
+                                    businessCard.updateSocialLink(type: linkType, value: trimmedValue)
+                                } else {
+                                    businessCard.removeSocialLink(linkType)
+                                }
                             } else {
                                 businessCard.removeSocialLink(linkType)
-                                selectedLinks.remove(linkType)
-                                if !availableSocialLinks.contains(linkType) {
-                                    availableSocialLinks.append(linkType)
-                                }
-                            }
-                        } else {
-                            businessCard.removeSocialLink(linkType)
-                            selectedLinks.remove(linkType)
-                            if !availableSocialLinks.contains(linkType) {
-                                availableSocialLinks.append(linkType)
                             }
                         }
+                    ),
+                    isFocused: focusedLink == linkType,
+                    onCommit: {
+                        if let currentIndex = Array(selectedLinks).firstIndex(of: linkType),
+                           currentIndex < selectedLinks.count - 1 {
+                            focusedLink = Array(selectedLinks)[currentIndex + 1]
+                        } else {
+                            focusedLink = nil
+                        }
                     }
-                ), onRemove: {
-                    businessCard.removeSocialLink(linkType)
-                    selectedLinks.remove(linkType)
-                    if !availableSocialLinks.contains(linkType) {
-                        availableSocialLinks.append(linkType)
-                    }
-                })
+                )
+                .focused($focusedLink, equals: linkType)
             }
             
             Button(action: {
@@ -76,7 +76,8 @@ struct SocialLinksView: View {
 struct SocialLinkRow: View {
     let linkType: SocialLinkType
     @Binding var value: String?
-    let onRemove: () -> Void
+    let isFocused: Bool
+    let onCommit: () -> Void
 
     var body: some View {
         HStack {
@@ -88,7 +89,11 @@ struct SocialLinkRow: View {
                 get: { value ?? "" },
                 set: { value = $0.isEmpty ? nil : $0 }
             ))
-            Button(action: onRemove) {
+            .onSubmit(onCommit)
+            Button(action: {
+                value = nil
+                onCommit()
+            }) {
                 Image(systemName: "xmark.circle.fill")
                     .foregroundColor(.red)
             }

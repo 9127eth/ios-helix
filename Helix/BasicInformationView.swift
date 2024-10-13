@@ -8,6 +8,11 @@ import SwiftUI
 
 struct BasicInformationView: View {
     @Binding var businessCard: BusinessCard
+    @FocusState private var focusedField: Field?
+    
+    enum Field: Hashable {
+        case firstName, middleName, lastName, prefix, pronouns
+    }
     
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -15,28 +20,33 @@ struct BasicInformationView: View {
                 .font(.headline)
                 .padding(.bottom, 4)
             
-            CustomTextField(title: "First Name*", text: $businessCard.firstName)
+            CustomTextField(title: "First Name*", text: $businessCard.firstName, onCommit: { focusedField = .middleName })
+                .focused($focusedField, equals: .firstName)
             
             CustomTextField(title: "Middle Name", text: Binding(
                 get: { businessCard.middleName ?? "" },
                 set: { businessCard.middleName = $0.isEmpty ? nil : $0 }
-            ))
+            ), onCommit: { focusedField = .lastName })
+                .focused($focusedField, equals: .middleName)
             
             CustomTextField(title: "Last Name", text: Binding(
                 get: { businessCard.lastName ?? "" },
                 set: { businessCard.lastName = $0.isEmpty ? nil : $0 }
-            ))
+            ), onCommit: { focusedField = .prefix })
+                .focused($focusedField, equals: .lastName)
             
             HStack(spacing: 16) {
                 CustomTextField(title: "Prefix", text: Binding(
                     get: { businessCard.prefix ?? "" },
                     set: { businessCard.prefix = $0.isEmpty ? nil : $0 }
-                ))
+                ), onCommit: { focusedField = .pronouns })
+                    .focused($focusedField, equals: .prefix)
                 
                 CustomTextField(title: "Pronouns", text: Binding(
                     get: { businessCard.pronouns ?? "" },
                     set: { businessCard.pronouns = $0.isEmpty ? nil : $0 }
-                ))
+                ), onCommit: { focusedField = nil })
+                    .focused($focusedField, equals: .pronouns)
             }
         }
         .padding()

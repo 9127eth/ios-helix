@@ -9,6 +9,7 @@ import SwiftUI
 
 struct DescriptionView: View {
     @Binding var businessCard: BusinessCard
+    @FocusState private var isFocused: Bool
     
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -16,7 +17,8 @@ struct DescriptionView: View {
                 .font(.headline)
                 .padding(.bottom, 8)
             
-            CustomTextField(title: "", text: $businessCard.description)
+            CustomTextField(title: "", text: $businessCard.description, onCommit: { isFocused = false })
+                .focused($isFocused)
                 .padding(.bottom, 16)
             
             Text("This is for your reference only and will not be visible on your digital business card. Examples of card names are Work, Personal, etc.")

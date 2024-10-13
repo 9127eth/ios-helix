@@ -10,18 +10,21 @@ import SwiftUI
 struct CustomTextField: View {
     let title: String
     @Binding var text: String
+    var onCommit: (() -> Void)?
     
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             Text(title)
                 .font(.system(size: 14, weight: .medium))
                 .foregroundColor(.gray)
-            TextField("", text: $text)
-                .padding(.vertical, 8)
-                .padding(.horizontal, 12)
-                .background(Color.white)
-                .cornerRadius(8)
-                .shadow(color: Color.black.opacity(0.05), radius: 3, x: 0, y: 1)
+            TextField("", text: $text, onCommit: {
+                onCommit?()
+            })
+            .padding(.vertical, 8)
+            .padding(.horizontal, 12)
+            .background(Color.white)
+            .cornerRadius(8)
+            .shadow(color: Color.black.opacity(0.05), radius: 3, x: 0, y: 1)
         }
     }
 }
