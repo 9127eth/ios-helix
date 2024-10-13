@@ -23,13 +23,12 @@ struct WebLinksView: View {
                 .font(.headline)
                 .padding(.bottom, 4)
             
-            // Removed the ForEach loop that displayed the final links
-            
             ForEach(linkInputs.indices, id: \.self) { index in
                 HStack(alignment: .top) {
                     VStack(spacing: 10) {
                         CustomTextField(title: "Link", text: $linkInputs[index].url, onCommit: { focusedField = .displayText(index) })
                             .focused($focusedField, equals: .url(index))
+                            .animation(.none, value: linkInputs[index].url)
                         CustomTextField(title: "Display Text (optional)", text: $linkInputs[index].displayText, onCommit: {
                             if index < linkInputs.count - 1 {
                                 focusedField = .url(index + 1)
@@ -38,7 +37,9 @@ struct WebLinksView: View {
                             }
                         })
                         .focused($focusedField, equals: .displayText(index))
+                        .animation(.none, value: linkInputs[index].displayText)
                     }
+                    .layoutPriority(1)
                     
                     Button(action: { removeLink(at: index) }) {
                         Image(systemName: "xmark.circle.fill")
@@ -60,6 +61,7 @@ struct WebLinksView: View {
                     .cornerRadius(20)
             }
         }
+        .animation(.none)
         .onAppear(perform: loadExistingLinks)
         .onChange(of: linkInputs) { _ in
             updateBusinessCard()
