@@ -15,6 +15,11 @@ struct ContactInformationView: View {
     @State private var isPhoneNumberValid = false
     @State private var isEmailValid = true
     @State private var showEmailError = false
+    @FocusState private var focusedField: Field?
+    
+    enum Field: Hashable {
+        case phoneNumber, email
+    }
     
     var isNextButtonEnabled: Bool {
         return email.isEmpty || isEmailValid
@@ -27,10 +32,14 @@ struct ContactInformationView: View {
                 .padding(.bottom, 4)
             
             PhoneNumberTextField(phoneNumber: $phoneNumber, isValid: $isPhoneNumberValid)
+                .focused($focusedField, equals: .phoneNumber)
+                .onSubmit { focusedField = .email }
             
             CustomTextField(title: "Email", text: $email)
+                .focused($focusedField, equals: .email)
                 .keyboardType(.emailAddress)
-                .onChange(of: email) { _, newValue in
+                .onSubmit { focusedField = nil }
+                .onChange(of: email) { newValue in
                     if newValue.isEmpty {
                         isEmailValid = true
                         showEmailError = false

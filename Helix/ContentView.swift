@@ -56,6 +56,7 @@ struct ContentView: View {
                 }
             }
         )
+        .dismissKeyboardOnTap()
         .onChange(of: authManager.isAuthenticated) { newValue in
             if newValue {
                 fetchBusinessCards()

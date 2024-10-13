@@ -10,6 +10,12 @@ import SwiftUI
 struct WebLinksView: View {
     @Binding var businessCard: BusinessCard
     @State private var linkInputs: [(url: String, displayText: String)] = [(url: "", displayText: "")]
+    @FocusState private var focusedField: Field?
+    
+    enum Field: Hashable {
+        case url(Int)
+        case displayText(Int)
+    }
     
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
@@ -39,8 +45,16 @@ struct WebLinksView: View {
             ForEach(linkInputs.indices, id: \.self) { index in
                 HStack(alignment: .top) {
                     VStack(spacing: 10) {
-                        CustomTextField(title: "Link", text: $linkInputs[index].url)
-                        CustomTextField(title: "Display Text (optional)", text: $linkInputs[index].displayText)
+                        CustomTextField(title: "Link", text: $linkInputs[index].url, onCommit: { focusedField = .displayText(index) })
+                            .focused($focusedField, equals: .url(index))
+                        CustomTextField(title: "Display Text (optional)", text: $linkInputs[index].displayText, onCommit: {
+                            if index < linkInputs.count - 1 {
+                                focusedField = .url(index + 1)
+                            } else {
+                                focusedField = nil
+                            }
+                        })
+                        .focused($focusedField, equals: .displayText(index))
                     }
                     
                     Button(action: { removeLink(at: index) }) {
@@ -67,6 +81,7 @@ struct WebLinksView: View {
     
     private func addNewLinkInput() {
         linkInputs.append((url: "", displayText: ""))
+        focusedField = .url(linkInputs.count - 1)
     }
     
     private func removeLink(at index: Int) {
