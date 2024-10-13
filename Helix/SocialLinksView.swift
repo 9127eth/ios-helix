@@ -11,7 +11,6 @@ struct SocialLinksView: View {
     @Binding var businessCard: BusinessCard
     @State private var showingAddLinkPopup = false
     @State private var availableSocialLinks: [SocialLinkType] = SocialLinkType.allCases
-    @State private var selectedLinks: Set<SocialLinkType> = [.twitter, .linkedIn]
     @FocusState private var focusedLink: SocialLinkType?
 
     var body: some View {
@@ -20,29 +19,29 @@ struct SocialLinksView: View {
                 .font(.headline)
                 .padding(.bottom, 4)
             
-            ForEach(Array(selectedLinks), id: \.self) { linkType in
+            ForEach(Array(businessCard.socialLinks.keys), id: \.self) { linkType in
                 SocialLinkRow(
                     linkType: linkType,
                     value: Binding(
-                        get: { businessCard.socialLinkValue(for: linkType) ?? "" },
+                        get: { businessCard.socialLinks[linkType] ?? "" },
                         set: { newValue in
                             if let newValue = newValue {
                                 let trimmedValue = newValue.trimmingCharacters(in: .whitespacesAndNewlines)
                                 if !trimmedValue.isEmpty {
-                                    businessCard.updateSocialLink(type: linkType, value: trimmedValue)
+                                    businessCard.socialLinks[linkType] = trimmedValue
                                 } else {
-                                    businessCard.removeSocialLink(linkType)
+                                    businessCard.socialLinks.removeValue(forKey: linkType)
                                 }
                             } else {
-                                businessCard.removeSocialLink(linkType)
+                                businessCard.socialLinks.removeValue(forKey: linkType)
                             }
                         }
                     ),
                     isFocused: focusedLink == linkType,
                     onCommit: {
-                        if let currentIndex = Array(selectedLinks).firstIndex(of: linkType),
-                           currentIndex < selectedLinks.count - 1 {
-                            focusedLink = Array(selectedLinks)[currentIndex + 1]
+                        if let currentIndex = Array(businessCard.socialLinks.keys).firstIndex(of: linkType),
+                           currentIndex < businessCard.socialLinks.count - 1 {
+                            focusedLink = Array(businessCard.socialLinks.keys)[currentIndex + 1]
                         } else {
                             focusedLink = nil
                         }
@@ -66,9 +65,26 @@ struct SocialLinksView: View {
         .sheet(isPresented: $showingAddLinkPopup) {
             AddSocialLinkView(
                 availableLinks: $availableSocialLinks,
-                selectedLinks: $selectedLinks,
+                selectedLinks: Binding(
+                    get: { Set(businessCard.socialLinks.keys) },
+                    set: { newSelectedLinks in
+                        for linkType in SocialLinkType.allCases {
+                            if newSelectedLinks.contains(linkType) && !businessCard.socialLinks.keys.contains(linkType) {
+                                businessCard.socialLinks[linkType] = ""
+                            } else if !newSelectedLinks.contains(linkType) && businessCard.socialLinks.keys.contains(linkType) {
+                                businessCard.socialLinks.removeValue(forKey: linkType)
+                            }
+                        }
+                    }
+                ),
                 isPresented: $showingAddLinkPopup
             )
+        }
+        .onAppear {
+            if businessCard.socialLinks.isEmpty {
+                businessCard.socialLinks[.twitter] = ""
+                businessCard.socialLinks[.linkedIn] = ""
+            }
         }
     }
 }
@@ -79,18 +95,24 @@ struct SocialLinkRow: View {
     let isFocused: Bool
     let onCommit: () -> Void
 
+    @State private var localValue: String = ""
+
     var body: some View {
         HStack {
             Image(linkType.iconName)
                 .resizable()
                 .scaledToFit()
                 .frame(width: 24, height: 24)
-            CustomTextField(title: linkType.displayName, text: Binding(
-                get: { value ?? "" },
-                set: { value = $0.isEmpty ? nil : $0 }
-            ))
-            .onSubmit(onCommit)
+            CustomTextField(title: linkType.displayName, text: $localValue)
+                .onAppear {
+                    localValue = value ?? ""
+                }
+                .onChange(of: localValue) { newValue in
+                    value = newValue.isEmpty ? nil : newValue
+                }
+                .onSubmit(onCommit)
             Button(action: {
+                localValue = ""
                 value = nil
                 onCommit()
             }) {
