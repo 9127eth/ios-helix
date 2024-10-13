@@ -10,7 +10,7 @@ import SwiftUI
 struct SocialLinksView: View {
     @Binding var businessCard: BusinessCard
     @State private var showingAddLinkPopup = false
-    @State private var availableSocialLinks: [SocialLinkType] = SocialLinkType.allCases.filter { $0 != .twitter && $0 != .linkedIn }
+    @State private var availableSocialLinks: [SocialLinkType] = SocialLinkType.allCases
     @State private var selectedLinks: Set<SocialLinkType> = [.twitter, .linkedIn]
 
     var body: some View {
@@ -29,30 +29,24 @@ struct SocialLinksView: View {
                                 businessCard.updateSocialLink(type: linkType, value: trimmedValue)
                             } else {
                                 businessCard.removeSocialLink(linkType)
-                                if linkType != .twitter && linkType != .linkedIn {
-                                    selectedLinks.remove(linkType)
-                                    if !availableSocialLinks.contains(linkType) {
-                                        availableSocialLinks.append(linkType)
-                                    }
-                                }
-                            }
-                        } else {
-                            businessCard.removeSocialLink(linkType)
-                            if linkType != .twitter && linkType != .linkedIn {
                                 selectedLinks.remove(linkType)
                                 if !availableSocialLinks.contains(linkType) {
                                     availableSocialLinks.append(linkType)
                                 }
                             }
+                        } else {
+                            businessCard.removeSocialLink(linkType)
+                            selectedLinks.remove(linkType)
+                            if !availableSocialLinks.contains(linkType) {
+                                availableSocialLinks.append(linkType)
+                            }
                         }
                     }
                 ), onRemove: {
-                    if linkType != .twitter && linkType != .linkedIn {
-                        businessCard.removeSocialLink(linkType)
-                        selectedLinks.remove(linkType)
-                        if !availableSocialLinks.contains(linkType) {
-                            availableSocialLinks.append(linkType)
-                        }
+                    businessCard.removeSocialLink(linkType)
+                    selectedLinks.remove(linkType)
+                    if !availableSocialLinks.contains(linkType) {
+                        availableSocialLinks.append(linkType)
                     }
                 })
             }
