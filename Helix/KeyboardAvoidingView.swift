@@ -18,7 +18,7 @@ struct KeyboardAvoidingView<Content: View>: View {
     var body: some View {
         GeometryReader { geometry in
             content
-                .padding(.bottom, keyboardHeight)
+                .padding(.bottom, max(keyboardHeight - geometry.safeAreaInsets.bottom, 0))
                 .animation(.easeOut(duration: 0.16))
                 .onAppear {
                     setupKeyboardObservers(geometry: geometry)
