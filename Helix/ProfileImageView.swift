@@ -62,7 +62,17 @@ struct ProfileImageView: View {
     }
     
     private func uploadImage() {
+        guard let inputImage = inputImage else { return }
         // Implement image upload logic here
+        // After successful upload, update businessCard.imageUrl
+        // For now, let's use a temporary local URL
+        if let imageData = inputImage.jpegData(compressionQuality: 0.8),
+           let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first {
+            let fileName = UUID().uuidString + ".jpg"
+            let fileURL = documentsDirectory.appendingPathComponent(fileName)
+            try? imageData.write(to: fileURL)
+            businessCard.imageUrl = fileURL.absoluteString
+        }
     }
 }
 
