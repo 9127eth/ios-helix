@@ -23,24 +23,7 @@ struct WebLinksView: View {
                 .font(.headline)
                 .padding(.bottom, 4)
             
-            ForEach(businessCard.webLinks ?? [], id: \.id) { link in
-                VStack {
-                    HStack {
-                        Text(link.displayText)
-                            .font(.system(size: 16, weight: .medium))
-                        Spacer()
-                        Text(link.url)
-                            .font(.system(size: 14))
-                            .foregroundColor(.gray)
-                    }
-                    .padding()
-                    .background(Color.white)
-                    .cornerRadius(10)
-                    .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
-                    
-                    Divider()
-                }
-            }
+            // Removed the ForEach loop that displayed the final links
             
             ForEach(linkInputs.indices, id: \.self) { index in
                 HStack(alignment: .top) {
