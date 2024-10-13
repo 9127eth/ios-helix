@@ -10,7 +10,8 @@ import SwiftUI
 struct SocialLinksView: View {
     @Binding var businessCard: BusinessCard
     @State private var showingAddLinkPopup = false
-    @State private var availableSocialLinks: [SocialLinkType] = [.facebook, .instagram, .tiktok, .youtube, .discord, .twitch, .snapchat, .telegram, .whatsapp, .threads]
+    @State private var availableSocialLinks: [SocialLinkType] = SocialLinkType.allCases.filter { $0 != .twitter && $0 != .linkedIn }
+    @State private var selectedLinks: Set<SocialLinkType> = [.twitter, .linkedIn]
 
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
@@ -18,22 +19,42 @@ struct SocialLinksView: View {
                 .font(.headline)
                 .padding(.bottom, 4)
             
-            ForEach(SocialLinkType.allCases, id: \.self) { linkType in
-                if let linkValue = businessCard.socialLinkValue(for: linkType) {
-                    SocialLinkRow(linkType: linkType, value: Binding<String?>(
-                        get: { linkValue },
-                        set: { newValue in
-                            if let newValue = newValue, !newValue.isEmpty {
-                                businessCard.updateSocialLink(type: linkType, value: newValue)
+            ForEach(Array(selectedLinks), id: \.self) { linkType in
+                SocialLinkRow(linkType: linkType, value: Binding(
+                    get: { businessCard.socialLinkValue(for: linkType) ?? "" },
+                    set: { newValue in
+                        if let newValue = newValue {
+                            let trimmedValue = newValue.trimmingCharacters(in: .whitespacesAndNewlines)
+                            if !trimmedValue.isEmpty {
+                                businessCard.updateSocialLink(type: linkType, value: trimmedValue)
                             } else {
-                                businessCard.updateSocialLink(type: linkType, value: nil)
+                                businessCard.removeSocialLink(linkType)
+                                if linkType != .twitter && linkType != .linkedIn {
+                                    selectedLinks.remove(linkType)
+                                    if !availableSocialLinks.contains(linkType) {
+                                        availableSocialLinks.append(linkType)
+                                    }
+                                }
+                            }
+                        } else {
+                            businessCard.removeSocialLink(linkType)
+                            if linkType != .twitter && linkType != .linkedIn {
+                                selectedLinks.remove(linkType)
+                                if !availableSocialLinks.contains(linkType) {
+                                    availableSocialLinks.append(linkType)
+                                }
                             }
                         }
-                    ), onRemove: {
-                        businessCard.updateSocialLink(type: linkType, value: nil)
-                        availableSocialLinks.append(linkType)
-                    })
-                }
+                    }
+                ), onRemove: {
+                    if linkType != .twitter && linkType != .linkedIn {
+                        businessCard.removeSocialLink(linkType)
+                        selectedLinks.remove(linkType)
+                        if !availableSocialLinks.contains(linkType) {
+                            availableSocialLinks.append(linkType)
+                        }
+                    }
+                })
             }
             
             Button(action: {
@@ -49,7 +70,11 @@ struct SocialLinksView: View {
             .cornerRadius(8)
         }
         .sheet(isPresented: $showingAddLinkPopup) {
-            AddSocialLinkView(availableLinks: $availableSocialLinks, businessCard: $businessCard, isPresented: $showingAddLinkPopup)
+            AddSocialLinkView(
+                availableLinks: $availableSocialLinks,
+                selectedLinks: $selectedLinks,
+                isPresented: $showingAddLinkPopup
+            )
         }
     }
 }

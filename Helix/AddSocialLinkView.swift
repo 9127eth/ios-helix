@@ -9,43 +9,44 @@ import SwiftUI
 
 struct AddSocialLinkView: View {
     @Binding var availableLinks: [SocialLinkType]
-    @Binding var businessCard: BusinessCard
+    @Binding var selectedLinks: Set<SocialLinkType>
     @Binding var isPresented: Bool
-    @State private var selectedLink: SocialLinkType?
-    @State private var linkValue: String = ""
 
     var body: some View {
         NavigationView {
-            Form {
-                Picker("Select Social Link", selection: $selectedLink) {
-                    ForEach(availableLinks, id: \.self) { linkType in
-                        Text(linkType.displayName).tag(Optional(linkType))
+            List {
+                ForEach(availableLinks, id: \.self) { linkType in
+                    Button(action: {
+                        if selectedLinks.contains(linkType) {
+                            selectedLinks.remove(linkType)
+                        } else {
+                            selectedLinks.insert(linkType)
+                        }
+                    }) {
+                        HStack {
+                            Image(linkType.iconName)
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 24, height: 24)
+                            Text(linkType.displayName)
+                            Spacer()
+                            if selectedLinks.contains(linkType) {
+                                Image(systemName: "checkmark")
+                                    .foregroundColor(.blue)
+                            }
+                        }
                     }
                 }
-
-                if let selected = selectedLink {
-                    TextField(selected.displayName, text: $linkValue)
-                        .autocapitalization(.none)
-                        .keyboardType(.URL)
-                }
             }
-            .navigationTitle("Add Social Link")
+            .listStyle(PlainListStyle())
+            .navigationTitle("Add Social Links")
             .navigationBarItems(
                 leading: Button("Cancel") { isPresented = false },
                 trailing: Button("Add") {
-                    addSocialLink()
+                    isPresented = false
                 }
-                .disabled(selectedLink == nil || linkValue.isEmpty)
+                .disabled(selectedLinks.isEmpty)
             )
         }
-    }
-
-    private func addSocialLink() {
-        guard let selected = selectedLink else { return }
-        businessCard.setSocialLinkValue(for: selected, value: linkValue)
-        if let index = availableLinks.firstIndex(of: selected) {
-            availableLinks.remove(at: index)
-        }
-        isPresented = false
     }
 }
