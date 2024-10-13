@@ -119,8 +119,8 @@ struct PhoneNumberTextField: View {
     private func parseInitialPhoneNumber() {
         do {
             if let parsedNumber = try Self.phoneUtil?.parse(phoneNumber, defaultRegion: selectedCountry.code) {
-                // Use INTERNATIONAL format to include country code
-                localPhoneNumber = try Self.phoneUtil?.format(parsedNumber, numberFormat: .INTERNATIONAL) ?? phoneNumber
+                // Format the number without country code for display
+                localPhoneNumber = try Self.phoneUtil?.format(parsedNumber, numberFormat: .NATIONAL) ?? phoneNumber
                 validatePhoneNumber() // Ensure isValid is set correctly
             } else {
                 localPhoneNumber = phoneNumber
@@ -138,27 +138,24 @@ struct PhoneNumberTextField: View {
         }
         
         do {
-            // Use the full number input by the user
-            let fullNumber = localPhoneNumber
+            // Prepend the country code to the local number for parsing
+            let fullNumber = "+\(selectedCountry.prefix)\(localPhoneNumber)"
             let parsedNumber = try phoneUtil.parse(fullNumber, defaultRegion: selectedCountry.code)
             
-            // Use isPossibleNumber instead of isValidNumber
             isValid = phoneUtil.isPossibleNumber(parsedNumber)
             if isValid {
                 // Format the number to E164 for storage
                 phoneNumber = try phoneUtil.format(parsedNumber, numberFormat: .E164)
                 
-                // Optionally, format it to INTERNATIONAL for display
-                localPhoneNumber = try phoneUtil.format(parsedNumber, numberFormat: .INTERNATIONAL)
-                
-                // Ensure selectedCountry remains the same
+                // Format the number without country code for display
+                localPhoneNumber = try phoneUtil.format(parsedNumber, numberFormat: .NATIONAL)
             } else {
                 // Keep the user's input as is
                 phoneNumber = fullNumber
             }
         } catch {
             isValid = false
-            phoneNumber = localPhoneNumber
+            phoneNumber = "+\(selectedCountry.prefix)\(localPhoneNumber)"
             print("Error validating phone number: \(error)")
         }
     }
