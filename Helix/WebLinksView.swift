@@ -9,7 +9,7 @@ import SwiftUI
 
 struct WebLinksView: View {
     @Binding var businessCard: BusinessCard
-    @State private var linkInputs: [(url: String, displayText: String)] = [(url: "", displayText: "")]
+    @State private var linkInputs: [WebLink] = []
     @FocusState private var focusedField: Field?
     
     enum Field: Hashable {
@@ -23,7 +23,7 @@ struct WebLinksView: View {
                 .font(.headline)
                 .padding(.bottom, 4)
             
-            ForEach(businessCard.webLinks ?? [], id: \.url) { link in
+            ForEach(businessCard.webLinks ?? [], id: \.id) { link in
                 VStack {
                     HStack {
                         Text(link.displayText)
@@ -77,14 +77,30 @@ struct WebLinksView: View {
                     .cornerRadius(20)
             }
         }
+        .onAppear(perform: loadExistingLinks)
+        .onChange(of: linkInputs) { _ in
+            updateBusinessCard()
+        }
+    }
+    
+    private func loadExistingLinks() {
+        linkInputs = businessCard.webLinks ?? []
+        if linkInputs.isEmpty {
+            linkInputs.append(WebLink(url: "", displayText: ""))
+        }
     }
     
     private func addNewLinkInput() {
-        linkInputs.append((url: "", displayText: ""))
+        linkInputs.append(WebLink(url: "", displayText: ""))
         focusedField = .url(linkInputs.count - 1)
     }
     
     private func removeLink(at index: Int) {
         linkInputs.remove(at: index)
+        updateBusinessCard()
+    }
+    
+    private func updateBusinessCard() {
+        businessCard.webLinks = linkInputs.filter { !$0.url.isEmpty }
     }
 }

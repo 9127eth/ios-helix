@@ -19,11 +19,20 @@ struct ProfessionalInformationView: View {
         VStack(alignment: .leading, spacing: 20) {
             Text("Professional Information")
                 .font(.headline)
-            CustomTextField(title: "Credentials", text: Binding($businessCard.credentials) ?? Binding.constant(""), onCommit: { focusedField = .jobTitle })
+            CustomTextField(title: "Credentials", text: Binding(
+                get: { businessCard.credentials ?? "" },
+                set: { businessCard.credentials = $0.isEmpty ? nil : $0 }
+            ), onCommit: { focusedField = .jobTitle })
                 .focused($focusedField, equals: .credentials)
-            CustomTextField(title: "Job Title", text: Binding($businessCard.jobTitle) ?? Binding.constant(""), onCommit: { focusedField = .company })
+            CustomTextField(title: "Job Title", text: Binding(
+                get: { businessCard.jobTitle ?? "" },
+                set: { businessCard.jobTitle = $0.isEmpty ? nil : $0 }
+            ), onCommit: { focusedField = .company })
                 .focused($focusedField, equals: .jobTitle)
-            CustomTextField(title: "Company", text: Binding($businessCard.company) ?? Binding.constant(""), onCommit: { focusedField = nil })
+            CustomTextField(title: "Company", text: Binding(
+                get: { businessCard.company ?? "" },
+                set: { businessCard.company = $0.isEmpty ? nil : $0 }
+            ), onCommit: { focusedField = nil })
                 .focused($focusedField, equals: .company)
         }
     }
