@@ -6,7 +6,7 @@
 //
 
 import SwiftUI
-import PhoneNumberKit
+import libPhoneNumber
 
 struct ContactInformationView: View {
     @Binding var businessCard: BusinessCard
@@ -20,7 +20,7 @@ struct ContactInformationView: View {
             PhoneNumberTextField(phoneNumber: $phoneNumber, isValid: $isPhoneNumberValid)
             
             CustomTextField(title: "Email", text: $email)
-                .onChange(of: email) { newValue in
+                .onChange(of: email) { _, newValue in
                     isEmailValid = isValidEmail(newValue)
                 }
             
@@ -51,23 +51,31 @@ struct PhoneNumberTextField: View {
     @Binding var isValid: Bool
     @State private var selectedCountry: CountryInfo
     
-    private let phoneNumberKit = PhoneNumberKit()
+    private let phoneUtil = NBPhoneNumberUtil.sharedInstance()
     private let countries: [CountryInfo]
     
     init(phoneNumber: Binding<String>, isValid: Binding<Bool>) {
         self._phoneNumber = phoneNumber
         self._isValid = isValid
         
-        let allCountries = phoneNumberKit.allCountries().compactMap { code -> CountryInfo? in
-            guard let name = phoneNumberKit.countryName(for: code),
-                  let prefix = phoneNumberKit.countryCode(for: code) else {
+        let (countryList, defaultCountry) = Self.initializeCountries()
+        self.countries = countryList
+        self._selectedCountry = State(initialValue: defaultCountry)
+    }
+    
+    private static func initializeCountries() -> ([CountryInfo], CountryInfo) {
+        let phoneUtil = NBPhoneNumberUtil.sharedInstance()
+        let allRegions = Locale.isoRegionCodes
+        let countryList = allRegions.compactMap { regionCode -> CountryInfo? in
+            guard let name = (Locale.current as NSLocale).displayName(forKey: .countryCode, value: regionCode),
+                  let code = phoneUtil?.getCountryCode(forRegion: regionCode) else {
                 return nil
             }
-            return CountryInfo(code: code, name: name, prefix: prefix)
+            return CountryInfo(code: regionCode, name: name, prefix: code.stringValue)
         }.sorted { $0.name < $1.name }
         
-        self.countries = allCountries
-        self._selectedCountry = State(initialValue: allCountries.first(where: { $0.code == "US" }) ?? allCountries[0])
+        let defaultCountry = countryList.first(where: { $0.code == "US" }) ?? countryList[0]
+        return (countryList, defaultCountry)
     }
     
     var body: some View {
@@ -80,7 +88,7 @@ struct PhoneNumberTextField: View {
                     }
                 }
                 .pickerStyle(MenuPickerStyle())
-                .frame(width: 120)
+                .frame(width: 200)
                 .background(Color.white)
                 .cornerRadius(8)
                 
@@ -89,7 +97,7 @@ struct PhoneNumberTextField: View {
                     .padding(8)
                     .background(Color.white)
                     .cornerRadius(8)
-                    .onChange(of: phoneNumber) { _ in
+                    .onChange(of: phoneNumber) { _, _ in
                         validatePhoneNumber()
                     }
             }
@@ -103,11 +111,18 @@ struct PhoneNumberTextField: View {
     }
     
     private func validatePhoneNumber() {
+        guard let phoneUtil = phoneUtil else {
+            isValid = false
+            return
+        }
+        
         do {
             let fullNumber = "+\(selectedCountry.prefix)\(phoneNumber)"
-            let parsedNumber = try phoneNumberKit.parse(fullNumber)
-            phoneNumber = phoneNumberKit.format(parsedNumber, toType: .international)
-            isValid = true
+            let parsedNumber = try phoneUtil.parse(fullNumber, defaultRegion: selectedCountry.code)
+            isValid = phoneUtil.isValidNumber(parsedNumber)
+            if isValid {
+                phoneNumber = try phoneUtil.format(parsedNumber, numberFormat: .INTERNATIONAL)
+            }
         } catch {
             isValid = false
         }
@@ -118,7 +133,7 @@ struct CountryInfo: Identifiable, Hashable {
     let id = UUID()
     let code: String
     let name: String
-    let prefix: UInt64
+    let prefix: String
     
     var flag: String {
         String(String.UnicodeScalarView(
