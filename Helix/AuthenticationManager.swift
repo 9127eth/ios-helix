@@ -51,67 +51,37 @@ class AuthenticationManager: NSObject, ObservableObject {
         }
     }
     
-    func signUpWithEmail(email: String, password: String, completion: @escaping (Result<User, Error>) -> Void) {
-        Auth.auth().createUser(withEmail: email, password: password) { [weak self] authResult, error in
-            if let user = authResult?.user {
-                self?.createUserDocument(for: user) { result in
-                    switch result {
-                    case .success:
-                        completion(.success(user))
-                    case .failure(let error):
-                        completion(.failure(error))
-                    }
-                }
-            } else if let error = error {
-                completion(.failure(error))
-            }
-        }
+    func signUpWithEmail(email: String, password: String) async throws -> User {
+        let authResult = try await Auth.auth().createUser(withEmail: email, password: password)
+        let user = authResult.user
+        try await createUserDocument(for: user)
+        return user
     }
     
-    func signInWithGoogle(presenting viewController: UIViewController, completion: @escaping (Result<User, Error>) -> Void) {
+    func signInWithGoogle(presenting viewController: UIViewController) async throws -> User {
         guard let clientID = getGoogleClientID() else {
-            completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "Failed to retrieve Google Client ID"])))
-            return
+            throw NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "Failed to retrieve Google Client ID"])
         }
         
         let config = GIDConfiguration(clientID: clientID)
         GIDSignIn.sharedInstance.configuration = config
         
-        GIDSignIn.sharedInstance.signIn(withPresenting: viewController) { [weak self] result, error in
-            if let error = error {
-                completion(.failure(error))
-                return
-            }
-            
-            guard let user = result?.user,
-                  let idToken = user.idToken?.tokenString else {
-                completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "Failed to get user info from Google Sign In"])))
-                return
-            }
-            
-            let credential = GoogleAuthProvider.credential(withIDToken: idToken, accessToken: user.accessToken.tokenString)
-            
-            Auth.auth().signIn(with: credential) { [weak self] authResult, error in
-                if let error = error {
-                    completion(.failure(error))
-                } else if let user = authResult?.user {
-                    self?.createUserDocument(for: user) { result in
-                        switch result {
-                        case .success:
-                            completion(.success(user))
-                        case .failure(let error):
-                            completion(.failure(error))
-                        }
-                    }
-                } else {
-                    completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "Unknown error occurred"])))
-                }
-            }
+        let result = try await GIDSignIn.sharedInstance.signIn(withPresenting: viewController)
+        
+        guard let idToken = result.user.idToken?.tokenString else {
+            throw NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "Failed to get ID token from Google Sign In"])
         }
+        
+        let credential = GoogleAuthProvider.credential(withIDToken: idToken, accessToken: result.user.accessToken.tokenString)
+        
+        let authResult = try await Auth.auth().signIn(with: credential)
+        let user = authResult.user
+        
+        try await createUserDocument(for: user)
+        return user
     }
     
-    func signInWithApple(completion: @escaping (Result<User, Error>) -> Void) {
-        self.appleSignInCompletion = completion
+    func signInWithApple() async throws -> User {
         let nonce = randomNonceString()
         currentNonce = nonce
         let appleIDProvider = ASAuthorizationAppleIDProvider()
@@ -119,10 +89,31 @@ class AuthenticationManager: NSObject, ObservableObject {
         request.requestedScopes = [.fullName, .email]
         request.nonce = sha256(nonce)
         
-        let authorizationController = ASAuthorizationController(authorizationRequests: [request])
-        authorizationController.delegate = self
-        authorizationController.presentationContextProvider = self
-        authorizationController.performRequests()
+        let result = try await withCheckedThrowingContinuation { continuation in
+            let authorizationController = ASAuthorizationController(authorizationRequests: [request])
+            authorizationController.delegate = AppleSignInDelegate(continuation: continuation)
+            authorizationController.performRequests()
+        }
+        
+        guard let appleIDCredential = result as? ASAuthorizationAppleIDCredential,
+              let appleIDToken = appleIDCredential.identityToken,
+              let idTokenString = String(data: appleIDToken, encoding: .utf8) else {
+            throw NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "Unable to fetch identity token"])
+        }
+        
+        guard let nonce = currentNonce else {
+            throw NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "Invalid state: A login callback was received, but no login request was sent."])
+        }
+        
+        let credential = OAuthProvider.credential(withProviderID: "apple.com",
+                                                  idToken: idTokenString,
+                                                  rawNonce: nonce)
+        
+        let authResult = try await Auth.auth().signIn(with: credential)
+        let user = authResult.user
+        
+        try await createUserDocument(for: user)
+        return user
     }
     
     func signOut() {
@@ -196,61 +187,58 @@ class AuthenticationManager: NSObject, ObservableObject {
         }
     }
     
-    private func createUserDocument(for user: User, completion: @escaping (Result<Void, Error>) -> Void) {
+    func createUserDocument(for user: User) async throws {
         let db = Firestore.firestore()
         let userRef = db.collection("users").document(user.uid)
         
-        userRef.getDocument { [weak self] (document, error) in
-            if let error = error {
-                completion(.failure(error))
-                return
-            }
+        let document = try await userRef.getDocument()
+        
+        if document.exists {
+            // User document already exists, no need to create
+            return
+        } else {
+            // User document doesn't exist, create it
+            let username = await generateUniqueUsername()
             
-            if let document = document, document.exists {
-                // User document already exists, no need to create
-                completion(.success(()))
-            } else {
-                // User document doesn't exist, create it
-                let username = self?.generateUniqueUsername() ?? ""
-                
-                let userData: [String: Any] = [
-                    "createdAt": FieldValue.serverTimestamp(),
-                    "isPro": false,
-                    "primaryCardId": username,
-                    "primaryCardPlaceholder": true,
-                    "stripeCustomerId": "",
-                    "stripeSubscriptionId": "",
-                    "updatedAt": FieldValue.serverTimestamp(),
-                    "username": username
-                ]
-                
-                userRef.setData(userData) { error in
-                    if let error = error {
-                        completion(.failure(error))
-                    } else {
-                        completion(.success(()))
-                    }
-                }
-            }
+            let userData: [String: Any] = [
+                "createdAt": FieldValue.serverTimestamp(),
+                "isPro": false,
+                "primaryCardId": username,
+                "primaryCardPlaceholder": true,
+                "stripeCustomerId": "",
+                "stripeSubscriptionId": "",
+                "updatedAt": FieldValue.serverTimestamp(),
+                "username": username
+            ]
+            
+            try await userRef.setData(userData)
         }
     }
 
-    private func generateUniqueUsername() -> String {
+    private func generateUniqueUsername() async -> String {
         let characters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
         var username: String
         
         repeat {
             username = String((0..<5).map { _ in characters.randomElement()! })
-        } while !isUsernameUnique(username)
+        } while !(await isUsernameUnique(username))
         
         return username
     }
 
-    private func isUsernameUnique(_ username: String) -> Bool {
-        // Implement a check against Firestore to ensure the username is unique
-        // This is a placeholder and should be replaced with actual Firestore query
-        // Return true if unique, false if not
-        return true
+    private func isUsernameUnique(_ username: String) async -> Bool {
+        let db = Firestore.firestore()
+        do {
+            let querySnapshot = try await db.collection("users")
+                .whereField("username", isEqualTo: username)
+                .limit(to: 1)
+                .getDocuments()
+            
+            return querySnapshot.documents.isEmpty
+        } catch {
+            print("Error checking username uniqueness: \(error)")
+            return false
+        }
     }
 
     func deleteAccount(completion: @escaping (Result<Void, Error>) -> Void) {
@@ -301,11 +289,11 @@ extension AuthenticationManager: ASAuthorizationControllerDelegate {
             
             Auth.auth().signIn(with: credential) { [weak self] authResult, error in
                 if let user = authResult?.user {
-                    self?.createUserDocument(for: user) { result in
-                        switch result {
-                        case .success:
+                    Task {
+                        do {
+                            try await self?.createUserDocument(for: user)
                             self?.appleSignInCompletion?(.success(user))
-                        case .failure(let error):
+                        } catch {
                             self?.appleSignInCompletion?(.failure(error))
                         }
                     }
@@ -327,5 +315,22 @@ extension AuthenticationManager: ASAuthorizationControllerDelegate {
 extension AuthenticationManager: ASAuthorizationControllerPresentationContextProviding {
     func presentationAnchor(for controller: ASAuthorizationController) -> ASPresentationAnchor {
         return UIApplication.shared.windows.first!
+    }
+}
+
+// Helper class for Apple Sign In
+private class AppleSignInDelegate: NSObject, ASAuthorizationControllerDelegate {
+    let continuation: CheckedContinuation<ASAuthorization, Error>
+    
+    init(continuation: CheckedContinuation<ASAuthorization, Error>) {
+        self.continuation = continuation
+    }
+    
+    func authorizationController(controller: ASAuthorizationController, didCompleteWithAuthorization authorization: ASAuthorization) {
+        continuation.resume(returning: authorization)
+    }
+    
+    func authorizationController(controller: ASAuthorizationController, didCompleteWithError error: Error) {
+        continuation.resume(throwing: error)
     }
 }

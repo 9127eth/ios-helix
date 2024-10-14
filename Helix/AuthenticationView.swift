@@ -98,16 +98,13 @@ struct AuthenticationView: View {
                 .foregroundColor(AppColors.bodyPrimaryText)
                 .padding(.bottom, 10)
             
-            VStack(spacing: 15) {
-                TextField("Email", text: $email)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                    .autocapitalization(.none)
-                    .keyboardType(.emailAddress)
-                
-                SecureField("Password", text: $password)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-            }
-            .frame(maxWidth: 280)  // Set a maximum width for the input fields
+            TextField("Email", text: $email)
+                .textFieldStyle(RoundedBorderTextFieldStyle())
+                .autocapitalization(.none)
+                .keyboardType(.emailAddress)
+            
+            SecureField("Password", text: $password)
+                .textFieldStyle(RoundedBorderTextFieldStyle())
             
             if !isLogin {
                 Toggle(isOn: $agreeToTerms) {
@@ -163,8 +160,13 @@ struct AuthenticationView: View {
             }
         } else {
             print("Attempting to sign up with email: \(email)")
-            authManager.signUpWithEmail(email: email, password: password) { result in
-                handleAuthResult(result)
+            Task {
+                do {
+                    let user = try await authManager.signUpWithEmail(email: email, password: password)
+                    handleAuthResult(.success(user))
+                } catch {
+                    handleAuthResult(.failure(error))
+                }
             }
         }
     }
@@ -176,15 +178,25 @@ struct AuthenticationView: View {
             print("Failed to get root view controller")
             return
         }
-        
-        authManager.signInWithGoogle(presenting: rootViewController) { result in
-            handleAuthResult(result)
+
+        Task {
+            do {
+                let user = try await authManager.signInWithGoogle(presenting: rootViewController)
+                handleAuthResult(.success(user))
+            } catch {
+                handleAuthResult(.failure(error))
+            }
         }
     }
     
     private func signInWithApple() {
-        authManager.signInWithApple { result in
-            handleAuthResult(result)
+        Task {
+            do {
+                let user = try await authManager.signInWithApple()
+                handleAuthResult(.success(user))
+            } catch {
+                handleAuthResult(.failure(error))
+            }
         }
     }
     
