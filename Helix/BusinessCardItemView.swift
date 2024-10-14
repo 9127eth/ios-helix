@@ -10,6 +10,7 @@ struct BusinessCardItemView: View {
     var card: BusinessCard
     @State private var showPreview = false
     @State private var showShare = false
+    @State private var showingEditView = false
     
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -26,7 +27,7 @@ struct BusinessCardItemView: View {
                 Menu {
                     Button("Preview") { showPreview = true }
                     Button("Share") { showShare = true }
-                    Button("Edit") { /* TODO: Implement edit action */ }
+                    Button("Edit") { showingEditView = true }
                     Button("Delete", role: .destructive) { /* TODO: Implement delete action */ }
                 } label: {
                     Image(systemName: "ellipsis")
@@ -104,6 +105,9 @@ struct BusinessCardItemView: View {
         }
         .sheet(isPresented: $showShare) {
             ShareView(card: card, isPresented: $showShare)
+        }
+        .sheet(isPresented: $showingEditView) {
+            EditBusinessCardView(businessCard: $card)
         }
     }
 }
