@@ -75,7 +75,7 @@ struct BusinessCard: Identifiable, Codable {
         id: String? = nil,
         cardSlug: String = UUID().uuidString,
         userId: String? = nil,
-        isPrimary: Bool = true,
+        isPrimary: Bool = false,
         username: String = "",
         firstName: String = "",
         middleName: String? = nil,
