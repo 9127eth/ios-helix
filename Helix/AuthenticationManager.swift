@@ -198,7 +198,7 @@ class AuthenticationManager: NSObject, ObservableObject {
             return
         } else {
             // User document doesn't exist, create it
-            let username = await generateUniqueUsername()
+            let username = try await generateUniqueUsername()
             
             let userData: [String: Any] = [
                 "createdAt": FieldValue.serverTimestamp(),
@@ -215,14 +215,20 @@ class AuthenticationManager: NSObject, ObservableObject {
         }
     }
 
-    private func generateUniqueUsername() async -> String {
+    private func generateUniqueUsername() async throws -> String {
         let characters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
         var username: String
-        
+        var attempts = 0
+        let maxAttempts = 10
+
         repeat {
-            username = String((0..<5).map { _ in characters.randomElement()! })
-        } while !(await isUsernameUnique(username))
-        
+            username = String((0..<6).map { _ in characters.randomElement()! })
+            attempts += 1
+            if attempts >= maxAttempts {
+                throw NSError(domain: "com.helix.error", code: 1001, userInfo: [NSLocalizedDescriptionKey: "Failed to generate a unique username after \(maxAttempts) attempts"])
+            }
+        } while !(try await isUsernameUnique(username))
+
         return username
     }
 
