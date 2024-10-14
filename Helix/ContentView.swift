@@ -37,6 +37,11 @@ struct ContentView: View {
                         .tag(1)
                 }
                 .onAppear(perform: fetchBusinessCards)
+                .onChange(of: showCreateCard) { newValue in
+                    if !newValue {
+                        fetchBusinessCards()
+                    }
+                }
                 .overlay(
                     Group {
                         if isLoading {

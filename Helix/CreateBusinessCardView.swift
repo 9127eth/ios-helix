@@ -116,56 +116,84 @@ struct CreateBusinessCardView: View {
     }
 
     private func saveBusinessCard() {
-        guard let userId = authManager.currentUser?.uid else {
-            print("Error: No authenticated user found")
-            return
-        }
-        
-        let db = Firestore.firestore()
-        let userRef = db.collection("users").document(userId)
-        
-        userRef.getDocument { (document, error) in
-            if let document = document, document.exists {
-                let userData = document.data()
-                let isPro = userData?["isPro"] as? Bool ?? false
-                let username = userData?["username"] as? String ?? ""
-                let primaryCardPlaceholder = userData?["primaryCardPlaceholder"] as? Bool ?? true
+        Task {
+            do {
+                guard let userId = authManager.currentUser?.uid else {
+                    print("Error: No authenticated user found")
+                    return
+                }
                 
-                var cardData = self.businessCard
-                cardData.username = username
-                cardData.isPrimary = primaryCardPlaceholder
-                cardData.isActive = isPro || primaryCardPlaceholder
-                cardData.cardSlug = primaryCardPlaceholder ? username : UUID().uuidString
-                cardData.createdAt = Date()
-                cardData.updatedAt = Date()
+                let db = Firestore.firestore()
+                let userRef = db.collection("users").document(userId)
                 
-                let businessCardsRef = userRef.collection("businessCards")
+                let document = try await userRef.getDocument()
                 
-                do {
+                if let userData = document.data() {
+                    let isPro = userData["isPro"] as? Bool ?? false
+                    let username = userData["username"] as? String ?? ""
+                    let primaryCardPlaceholder = userData["primaryCardPlaceholder"] as? Bool ?? true
+                    
+                    var cardData = self.businessCard
+                    cardData.username = username
+                    cardData.isPrimary = primaryCardPlaceholder
+                    cardData.isActive = isPro || primaryCardPlaceholder
+                    
+                    if primaryCardPlaceholder {
+                        cardData.cardSlug = username
+                    } else {
+                        cardData.cardSlug = try await generateUniqueSlug()
+                    }
+                    
+                    cardData.createdAt = Date()
+                    cardData.updatedAt = Date()
+                    
+                    let businessCardsRef = userRef.collection("businessCards")
+                    
                     var cardDict = try cardData.asDictionary()
                     cardDict["createdAt"] = FieldValue.serverTimestamp()
                     cardDict["updatedAt"] = FieldValue.serverTimestamp()
                     
-                    businessCardsRef.document(cardData.cardSlug).setData(cardDict) { error in
-                        if let error = error {
-                            print("Error adding document: \(error)")
-                        } else {
-                            print("Business card successfully added!")
-                            if primaryCardPlaceholder {
-                                userRef.updateData([
-                                    "primaryCardId": cardData.cardSlug,
-                                    "primaryCardPlaceholder": false
-                                ])
-                            }
-                            self.presentationMode.wrappedValue.dismiss()
-                        }
+                    try await businessCardsRef.document(cardData.cardSlug).setData(cardDict)
+                    
+                    print("Business card successfully added!")
+                    if primaryCardPlaceholder {
+                        try await userRef.updateData([
+                            "primaryCardId": cardData.cardSlug,
+                            "primaryCardPlaceholder": false
+                        ])
                     }
-                } catch {
-                    print("Error converting business card to dictionary: \(error)")
+                    self.presentationMode.wrappedValue.dismiss()
+                } else {
+                    print("Error fetching user document")
                 }
-            } else {
-                print("Error fetching user document: \(error?.localizedDescription ?? "Unknown error")")
+            } catch {
+                print("Error saving business card: \(error.localizedDescription)")
             }
         }
+    }
+
+    private func generateUniqueSlug() async throws -> String {
+        let characters = "abcdefghijklmnopqrstuvwxyz0123456789"
+        let blacklist = ["ass", "fuck", "shit", "dick", "cunt", "bitch"]
+        let db = Firestore.firestore()
+        let maxAttempts = 10
+        
+        for _ in 0..<maxAttempts {
+            let slug = String((0..<3).map { _ in characters.randomElement()! })
+            
+            if !blacklist.contains(slug) {
+                let query = db.collection("users").document(authManager.currentUser!.uid)
+                    .collection("businessCards")
+                    .whereField("cardSlug", isEqualTo: slug)
+                
+                let snapshot = try await query.getDocuments()
+                
+                if snapshot.documents.isEmpty {
+                    return slug
+                }
+            }
+        }
+        
+        throw NSError(domain: "com.helix.error", code: 1002, userInfo: [NSLocalizedDescriptionKey: "Failed to generate a unique slug after \(maxAttempts) attempts"])
     }
 }
