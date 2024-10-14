@@ -7,6 +7,7 @@
 
 import SwiftUI
 import FirebaseStorage
+import FirebaseAuth
 
 struct ProfileImageView: View {
     @Binding var businessCard: BusinessCard
@@ -83,8 +84,14 @@ struct ProfileImageView: View {
         
         let storage = Storage.storage()
         let storageRef = storage.reference()
+        
+        guard let userId = Auth.auth().currentUser?.uid else {
+            // Handle the case where there's no authenticated user
+            return
+        }
+        
         let imageName = UUID().uuidString + ".jpg"
-        let imageRef = storageRef.child("profile_images/\(imageName)")
+        let imageRef = storageRef.child("images/\(userId)/\(imageName)")
         
         let metadata = StorageMetadata()
         metadata.contentType = "image/jpeg"

@@ -213,6 +213,14 @@ struct BusinessCard: Identifiable, Codable {
     func socialLinkValue(for type: SocialLinkType) -> String? {
         return socialLinks[type]
     }
+
+    func asDictionary() throws -> [String: Any] {
+        let data = try JSONEncoder().encode(self)
+        guard let dictionary = try JSONSerialization.jsonObject(with: data, options: .allowFragments) as? [String: Any] else {
+            throw NSError(domain: "BusinessCard", code: 0, userInfo: [NSLocalizedDescriptionKey: "Failed to convert to dictionary"])
+        }
+        return dictionary
+    }
 }
 
 struct WebLink: Identifiable, Codable, Equatable {

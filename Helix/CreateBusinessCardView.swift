@@ -14,6 +14,7 @@ struct CreateBusinessCardView: View {
         // Initialize your businessCard properties here
     )
     @Environment(\.presentationMode) var presentationMode
+    @EnvironmentObject var authManager: AuthenticationManager
 
     let steps = ["Basic Information", "Professional Information", "Description", "Contact Information", "Social Links", "Web Links", "Profile Image"]
 
@@ -31,7 +32,7 @@ struct CreateBusinessCardView: View {
                     .font(.system(size: 18, weight: .semibold))
                 Spacer()
                 Button(action: { saveBusinessCard() }) {
-                    Text("Save")
+                    Text("Done")
                         .foregroundColor(AppColors.primary)
                         .font(.system(size: 16, weight: .medium))
                 }
@@ -105,6 +106,29 @@ struct CreateBusinessCardView: View {
     }
 
     private func saveBusinessCard() {
-        // Your save functionality here
+        guard let userId = authManager.currentUser?.uid else {
+            print("Error: No authenticated user found")
+            return
+        }
+        
+        let db = Firestore.firestore()
+        let businessCardsRef = db.collection("users").document(userId).collection("businessCards")
+        
+        do {
+            var cardData = try businessCard.asDictionary()
+            cardData["createdAt"] = FieldValue.serverTimestamp()
+            cardData["updatedAt"] = FieldValue.serverTimestamp()
+            
+            businessCardsRef.addDocument(data: cardData) { error in
+                if let error = error {
+                    print("Error adding document: \(error)")
+                } else {
+                    print("Business card successfully added!")
+                    self.presentationMode.wrappedValue.dismiss()
+                }
+            }
+        } catch {
+            print("Error converting business card to dictionary: \(error)")
+        }
     }
 }
