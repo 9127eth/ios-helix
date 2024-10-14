@@ -52,9 +52,16 @@ class AuthenticationManager: NSObject, ObservableObject {
     }
     
     func signUpWithEmail(email: String, password: String, completion: @escaping (Result<User, Error>) -> Void) {
-        Auth.auth().createUser(withEmail: email, password: password) { authResult, error in
+        Auth.auth().createUser(withEmail: email, password: password) { [weak self] authResult, error in
             if let user = authResult?.user {
-                completion(.success(user))
+                self?.createUserDocument(for: user) { result in
+                    switch result {
+                    case .success:
+                        completion(.success(user))
+                    case .failure(let error):
+                        completion(.failure(error))
+                    }
+                }
             } else if let error = error {
                 completion(.failure(error))
             }
@@ -70,7 +77,7 @@ class AuthenticationManager: NSObject, ObservableObject {
         let config = GIDConfiguration(clientID: clientID)
         GIDSignIn.sharedInstance.configuration = config
         
-        GIDSignIn.sharedInstance.signIn(withPresenting: viewController) { result, error in
+        GIDSignIn.sharedInstance.signIn(withPresenting: viewController) { [weak self] result, error in
             if let error = error {
                 completion(.failure(error))
                 return
@@ -84,11 +91,18 @@ class AuthenticationManager: NSObject, ObservableObject {
             
             let credential = GoogleAuthProvider.credential(withIDToken: idToken, accessToken: user.accessToken.tokenString)
             
-            Auth.auth().signIn(with: credential) { authResult, error in
+            Auth.auth().signIn(with: credential) { [weak self] authResult, error in
                 if let error = error {
                     completion(.failure(error))
                 } else if let user = authResult?.user {
-                    completion(.success(user))
+                    self?.createUserDocument(for: user) { result in
+                        switch result {
+                        case .success:
+                            completion(.success(user))
+                        case .failure(let error):
+                            completion(.failure(error))
+                        }
+                    }
                 } else {
                     completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "Unknown error occurred"])))
                 }
@@ -182,26 +196,61 @@ class AuthenticationManager: NSObject, ObservableObject {
         }
     }
     
-    func createUserDocument(for user: User, username: String) {
+    private func createUserDocument(for user: User, completion: @escaping (Result<Void, Error>) -> Void) {
         let db = Firestore.firestore()
         let userRef = db.collection("users").document(user.uid)
         
-        let userData: [String: Any] = [
-            "username": username,
-            "isPro": false,
-            "primaryCardId": username,  // Updated to use username as primaryCardId
-            "primaryCardPlaceholder": false,
-            "createdAt": FieldValue.serverTimestamp(),
-            "updatedAt": FieldValue.serverTimestamp()
-        ]
-        
-        userRef.setData(userData) { error in
+        userRef.getDocument { [weak self] (document, error) in
             if let error = error {
-                print("Error creating user document: \(error)")
+                completion(.failure(error))
+                return
+            }
+            
+            if let document = document, document.exists {
+                // User document already exists, no need to create
+                completion(.success(()))
             } else {
-                print("User document created successfully")
+                // User document doesn't exist, create it
+                let username = self?.generateUniqueUsername() ?? ""
+                
+                let userData: [String: Any] = [
+                    "createdAt": FieldValue.serverTimestamp(),
+                    "isPro": false,
+                    "primaryCardId": username,
+                    "primaryCardPlaceholder": true,
+                    "stripeCustomerId": "",
+                    "stripeSubscriptionId": "",
+                    "updatedAt": FieldValue.serverTimestamp(),
+                    "username": username
+                ]
+                
+                userRef.setData(userData) { error in
+                    if let error = error {
+                        completion(.failure(error))
+                    } else {
+                        completion(.success(()))
+                    }
+                }
             }
         }
+    }
+
+    private func generateUniqueUsername() -> String {
+        let characters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+        var username: String
+        
+        repeat {
+            username = String((0..<5).map { _ in characters.randomElement()! })
+        } while !isUsernameUnique(username)
+        
+        return username
+    }
+
+    private func isUsernameUnique(_ username: String) -> Bool {
+        // Implement a check against Firestore to ensure the username is unique
+        // This is a placeholder and should be replaced with actual Firestore query
+        // Return true if unique, false if not
+        return true
     }
 
     func deleteAccount(completion: @escaping (Result<Void, Error>) -> Void) {
@@ -252,7 +301,14 @@ extension AuthenticationManager: ASAuthorizationControllerDelegate {
             
             Auth.auth().signIn(with: credential) { [weak self] authResult, error in
                 if let user = authResult?.user {
-                    self?.appleSignInCompletion?(.success(user))
+                    self?.createUserDocument(for: user) { result in
+                        switch result {
+                        case .success:
+                            self?.appleSignInCompletion?(.success(user))
+                        case .failure(let error):
+                            self?.appleSignInCompletion?(.failure(error))
+                        }
+                    }
                 } else if let error = error {
                     self?.appleSignInCompletion?(.failure(error))
                 }

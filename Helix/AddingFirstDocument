@@ -1,0 +1,47 @@
+Below are the requirements for the initial firestoredocument that is added to a user when they sign up.
+
+When a user signs up, we need to add a document to their collection. We will use the firebase auth id as the document id.
+This is is known as the users userId.
+
+The fields for the document are as follows:
+    createdAt
+    ""
+    (string)
+
+
+    isPro
+    defaults to false
+    (boolean)
+
+
+    primaryCardId
+    "[username]"
+    (string)
+
+
+    primaryCardPlaceholder
+   defaults to true
+    (boolean)
+
+
+    stripeCustomerId
+    ""
+    (string)
+
+
+    stripeSubscriptionId
+    ""
+    (string)
+
+
+    updatedAt
+    ""
+    (string)
+
+
+    username
+    "[unique 5 character string]"
+
+The username is a unique 5 character string that is generated for the user. It is used in the url to access the user's business card. It must be unique so when creating a username, we need to check if it already exists. If it does, we need to generate a new one.
+
+These requirements are only for when a user first creates their account.
