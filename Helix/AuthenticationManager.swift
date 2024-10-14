@@ -203,7 +203,7 @@ class AuthenticationManager: NSObject, ObservableObject {
             let userData: [String: Any] = [
                 "createdAt": FieldValue.serverTimestamp(),
                 "isPro": false,
-                "primaryCardId": "",
+                "primaryCardId": username,  // Set primaryCardId to the username
                 "primaryCardPlaceholder": true,
                 "stripeCustomerId": "",
                 "stripeSubscriptionId": "",
