@@ -8,8 +8,10 @@ import SwiftUI
 //
 
 struct AddCardButton: View {
+    var action: () -> Void
+    
     var body: some View {
-        Button(action: { /* TODO: Implement add card action */ }) {
+        Button(action: action) {
             VStack {
                 Image(systemName: "plus.circle")
                     .font(.largeTitle)
@@ -25,4 +27,3 @@ struct AddCardButton: View {
         .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
     }
 }
-
