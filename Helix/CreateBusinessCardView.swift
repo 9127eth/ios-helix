@@ -112,23 +112,50 @@ struct CreateBusinessCardView: View {
         }
         
         let db = Firestore.firestore()
-        let businessCardsRef = db.collection("users").document(userId).collection("businessCards")
+        let userRef = db.collection("users").document(userId)
         
-        do {
-            var cardData = try businessCard.asDictionary()
-            cardData["createdAt"] = FieldValue.serverTimestamp()
-            cardData["updatedAt"] = FieldValue.serverTimestamp()
-            
-            businessCardsRef.addDocument(data: cardData) { error in
-                if let error = error {
-                    print("Error adding document: \(error)")
-                } else {
-                    print("Business card successfully added!")
-                    self.presentationMode.wrappedValue.dismiss()
+        userRef.getDocument { (document, error) in
+            if let document = document, document.exists {
+                let userData = document.data()
+                let isPro = userData?["isPro"] as? Bool ?? false
+                let username = userData?["username"] as? String ?? ""
+                let primaryCardPlaceholder = userData?["primaryCardPlaceholder"] as? Bool ?? true
+                
+                var cardData = self.businessCard
+                cardData.username = username
+                cardData.isPrimary = primaryCardPlaceholder
+                cardData.isActive = isPro || primaryCardPlaceholder
+                cardData.cardSlug = primaryCardPlaceholder ? username : UUID().uuidString
+                cardData.createdAt = Date()
+                cardData.updatedAt = Date()
+                
+                let businessCardsRef = userRef.collection("businessCards")
+                
+                do {
+                    var cardDict = try cardData.asDictionary()
+                    cardDict["createdAt"] = FieldValue.serverTimestamp()
+                    cardDict["updatedAt"] = FieldValue.serverTimestamp()
+                    
+                    businessCardsRef.document(cardData.cardSlug).setData(cardDict) { error in
+                        if let error = error {
+                            print("Error adding document: \(error)")
+                        } else {
+                            print("Business card successfully added!")
+                            if primaryCardPlaceholder {
+                                userRef.updateData([
+                                    "primaryCardId": cardData.cardSlug,
+                                    "primaryCardPlaceholder": false
+                                ])
+                            }
+                            self.presentationMode.wrappedValue.dismiss()
+                        }
+                    }
+                } catch {
+                    print("Error converting business card to dictionary: \(error)")
                 }
+            } else {
+                print("Error fetching user document: \(error?.localizedDescription ?? "Unknown error")")
             }
-        } catch {
-            print("Error converting business card to dictionary: \(error)")
         }
     }
 }

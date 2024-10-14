@@ -13,7 +13,7 @@ struct BusinessCard: Identifiable, Codable {
     var cardSlug: String
     var userId: String?  // Make this optional
     var isPrimary: Bool
-    var username: String?
+    var username: String
     var firstName: String
     var middleName: String?
     var lastName: String?
@@ -65,9 +65,9 @@ struct BusinessCard: Identifiable, Codable {
     func getCardURL() -> String {
         let baseURL = "https://www.helixcard.app/c"
         if isPrimary {
-            return "\(baseURL)/\(username ?? "")"
+            return "\(baseURL)/\(username)"
         } else {
-            return "\(baseURL)/\(username ?? "")/\(cardSlug)"
+            return "\(baseURL)/\(username)/\(cardSlug)"
         }
     }
     
@@ -76,7 +76,7 @@ struct BusinessCard: Identifiable, Codable {
         cardSlug: String = UUID().uuidString,
         userId: String? = nil,
         isPrimary: Bool = true,
-        username: String? = nil,
+        username: String = "",
         firstName: String = "",
         middleName: String? = nil,
         lastName: String? = nil,
