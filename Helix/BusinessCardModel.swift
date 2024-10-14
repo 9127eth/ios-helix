@@ -221,6 +221,28 @@ struct BusinessCard: Identifiable, Codable {
         }
         return dictionary
     }
+
+    func saveChanges() async throws {
+        guard let userId = self.userId, let id = self.id else {
+            throw NSError(domain: "com.yourapp.error", code: 1001, userInfo: [NSLocalizedDescriptionKey: "Invalid user or card ID"])
+        }
+        
+        let db = Firestore.firestore()
+        let cardRef = db.collection("users").document(userId).collection("businessCards").document(id)
+        
+        try await cardRef.setData(self.asDictionary(), merge: true)
+    }
+
+    static func saveChanges(_ card: BusinessCard) async throws {
+        guard let userId = card.userId, let id = card.id else {
+            throw NSError(domain: "com.yourapp.error", code: 1001, userInfo: [NSLocalizedDescriptionKey: "Invalid user or card ID"])
+        }
+        
+        let db = Firestore.firestore()
+        let cardRef = db.collection("users").document(userId).collection("businessCards").document(id)
+        
+        try await cardRef.setData(card.asDictionary(), merge: true)
+    }
 }
 
 struct WebLink: Identifiable, Codable, Equatable {
