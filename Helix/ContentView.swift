@@ -102,9 +102,6 @@ struct ContentView: View {
                     do {
                         var card = try document.data(as: BusinessCard.self)
                         card.id = document.documentID
-                        if card.username == nil {
-                            card.username = document.documentID // Use document ID as fallback username
-                        }
                         print("Successfully decoded card: \(card.id ?? "Unknown ID")")
                         return card
                     } catch {

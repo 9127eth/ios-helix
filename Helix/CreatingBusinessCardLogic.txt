@@ -1,0 +1,104 @@
+Below are the business logic and detailed steps for creating a business card in the Helix app.
+
+Overview
+The primary goal is to allow users to create digital business cards that are stored in a Firestore database. The creation process involves several steps to ensure that:
+Users are authenticated.
+Users adhere to the limitations based on their subscription status (free or pro).
+Business cards are correctly saved and associated with the user.
+Special handling is provided for the primary business card.
+Appropriate user feedback is provided throughout the process.
+---
+Detailed Business Logic
+1. User Authentication
+Ensure the User is Logged In:
+Before initiating the business card creation process, verify that the user is authenticated.
+If the user is not logged in, prompt them to do so, as they cannot create a card without an account.
+2. Access and Fetch User Data
+Retrieve User Information from Firestore:
+Access the user's document in the users collection using their unique uid.
+Fetch relevant fields such as:
+isPro: Indicates if the user has a pro subscription.
+primaryCardPlaceholder: A flag that shows if the user has deleted their primary card and needs to set a new one.
+username: A unique identifier for pro users, used in their business card URLs.
+3. Check Card Creation Eligibility
+Determine if the User Can Create More Cards:
+Free Users:
+Limited to creating one active business card.
+If they have reached the limit, prompt them to upgrade to a pro subscription to create more cards.
+Pro Users:
+Allowed to create multiple business cards (limit defined by PRO_USER_CARD_LIMIT).
+If they have reached their limit, inform them and suggest contacting support to increase their limit or manage existing cards.
+Handle Primary Card Placeholder:
+If primaryCardPlaceholder is true, it means the user has deleted their primary card and needs to create a new one.
+In this case, allow them to create a new card even if they have reached their card limit.
+4. Collect Business Card Data
+Gather Information from the User:
+Provide a form for the user to input their business card details, such as:
+First name, middle name, last name.
+Job title, company name.
+Contact information: phone number, email address.
+Additional fields like social media links, custom messages, etc.
+Validate the input data to ensure it meets required formats and constraints.
+5. Generate a Unique Card Slug
+Create a cardSlug for URL Generation:
+For Primary Cards:
+If the user is setting up a primary card (either the first card or replacing a deleted primary card):
+Use the user's username as the cardSlug if they are a pro user.
+If they are a free user without a username, generate a random slug or use their uid.
+For Non-Primary Cards:
+Generate a unique, random cardSlug to avoid URL conflicts.
+Ensure the cardSlug is unique within the user's business cards.
+6. Prepare Business Card Data for Saving
+Assemble the Data Object:
+Combine the user's input with system-generated fields, including:
+cardSlug: The unique identifier for the card.
+isPrimary: A boolean indicating if this card is the user's primary card.
+isActive: Determines if the card is active and visible to others.
+For free users, only the primary card is active.
+For pro users, all cards can be active.
+createdAt and updatedAt timestamps.
+Additional computed fields like name, which concatenates first and last names.
+7. Save the Business Card to Firestore
+Use a Batched Write for Atomicity:
+Begin a batch operation to ensure all changes are committed together.
+Create or Update the Business Card Document:
+Save the assembled business card data under the user's businessCards subcollection using the cardSlug as the document ID.
+Handle Primary Card Fields:
+If the card is the primary card:
+Update the user's primaryCardId to the new cardSlug.
+Set primaryCardPlaceholder to false.
+Commit the Batch:
+Execute the batched write to save all changes atomically.
+8. Provide User Feedback and Navigation
+Confirm Success to the User:
+Inform the user that their business card was created successfully.
+Redirect or Navigate Appropriately:
+Return the user to their dashboard or the newly created business card's page.
+Ensure that they can view, share, or edit their new card immediately.
+---
+Special Considerations
+A. Handling Primary Cards
+Initial Card Creation:
+When a user creates their very first card, it is automatically designated as their primary card.
+Replacing a Deleted Primary Card:
+If a user deletes their primary card, primaryCardPlaceholder is set to true.
+The next card they create will be set as the new primary card.
+B. Subscription Status Impact
+Free Users:
+Limited to one active card, which is their primary card.
+Cannot create additional active cards unless they upgrade.
+Pro Users:
+Can create multiple active cards up to a predefined limit.
+Have the ability to set any of their cards as the primary card.
+When their subscription status changes to false (e.g., they cancel their subscription):
+Non-primary cards become inactive.
+The app should inform them that these cards require a subscription to be reactivated.
+They can still edit inactive cards, but sharing features may be disabled.
+C. URL Generation
+Primary Card URLs:
+For pro users with a username:
+The card can be accessed via a personalized URL like https://yourapp.com/c/{username}.
+For free users or when a username is not available:
+Use the cardSlug or a generated identifier in the URL.
+Non-Primary Card URLs:
+Constructed using the user's identifier and the cardSlug, such as https://yourapp.com/c/{userId}/{cardSlug}.
