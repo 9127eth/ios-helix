@@ -216,7 +216,8 @@ class AuthenticationManager: NSObject, ObservableObject {
     }
 
     private func generateUniqueUsername() async throws -> String {
-        let characters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+        let characters = "abcdefghijklmnopqrstuvwxyz0123456789"
+        let blacklist = ["nig", "fag", "ass", "sex", "fat", "gay"]
         var username: String
         var attempts = 0
         let maxAttempts = 10
@@ -227,7 +228,7 @@ class AuthenticationManager: NSObject, ObservableObject {
             if attempts >= maxAttempts {
                 throw NSError(domain: "com.helix.error", code: 1001, userInfo: [NSLocalizedDescriptionKey: "Failed to generate a unique username after \(maxAttempts) attempts"])
             }
-        } while !(try await isUsernameUnique(username))
+        } while !(try await isUsernameUnique(username)) || containsBlacklistedWord(username, blacklist: blacklist)
 
         return username
     }
@@ -245,6 +246,10 @@ class AuthenticationManager: NSObject, ObservableObject {
             print("Error checking username uniqueness: \(error)")
             return false
         }
+    }
+
+    private func containsBlacklistedWord(_ username: String, blacklist: [String]) -> Bool {
+        return blacklist.contains { username.contains($0) }
     }
 
     func deleteAccount(completion: @escaping (Result<Void, Error>) -> Void) {
