@@ -15,7 +15,7 @@ struct BusinessCardGridView: View {
     
     var body: some View {
         ScrollView {
-            LazyVGrid(columns: gridItems, spacing: 16) {
+            LazyVStack(spacing: 16) {
                 ForEach(businessCards) { card in
                     BusinessCardItemView(card: card)
                 }
@@ -24,13 +24,5 @@ struct BusinessCardGridView: View {
             .padding()
         }
         .background(AppColors.background)
-        .onAppear {
-            print("BusinessCardGridView appeared with \(businessCards.count) cards")
-        }
-    }
-    
-    private var gridItems: [GridItem] {
-        let columns = sizeClass == .compact ? 1 : 2
-        return Array(repeating: GridItem(.flexible(), spacing: 16), count: columns)
     }
 }
