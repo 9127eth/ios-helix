@@ -6,11 +6,14 @@
 //
 
 import SwiftUI
+import FirebaseStorage
 
 struct ProfileImageView: View {
     @Binding var businessCard: BusinessCard
     @State private var showImagePicker = false
     @State private var inputImage: UIImage?
+    @State private var isUploading = false
+    @State private var uploadError: String?
     
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
@@ -42,13 +45,23 @@ struct ProfileImageView: View {
                         .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5)
                 }
                 
-                Button(action: { showImagePicker = true }) {
-                    Text("Select Image")
+                Button(action: { 
+                    showImagePicker = true 
+                    uploadError = nil
+                }) {
+                    Text(isUploading ? "Uploading..." : "Select Image")
                         .foregroundColor(.white)
                         .padding(.horizontal, 20)
                         .padding(.vertical, 10)
-                        .background(AppColors.primary)
+                        .background(isUploading ? Color.gray : AppColors.primary)
                         .cornerRadius(20)
+                }
+                .disabled(isUploading)
+                
+                if let error = uploadError {
+                    Text(error)
+                        .foregroundColor(.red)
+                        .font(.caption)
                 }
             }
         }
@@ -62,16 +75,47 @@ struct ProfileImageView: View {
     }
     
     private func uploadImage() {
-        guard let inputImage = inputImage else { return }
-        // Implement image upload logic here
-        // After successful upload, update businessCard.imageUrl
-        // For now, let's use a temporary local URL
-        if let imageData = inputImage.jpegData(compressionQuality: 0.8),
-           let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first {
-            let fileName = UUID().uuidString + ".jpg"
-            let fileURL = documentsDirectory.appendingPathComponent(fileName)
-            try? imageData.write(to: fileURL)
-            businessCard.imageUrl = fileURL.absoluteString
+        guard let inputImage = inputImage,
+              let imageData = inputImage.jpegData(compressionQuality: 0.8) else { return }
+        
+        isUploading = true
+        uploadError = nil
+        
+        let storage = Storage.storage()
+        let storageRef = storage.reference()
+        let imageName = UUID().uuidString + ".jpg"
+        let imageRef = storageRef.child("profile_images/\(imageName)")
+        
+        let metadata = StorageMetadata()
+        metadata.contentType = "image/jpeg"
+        
+        imageRef.putData(imageData, metadata: metadata) { (metadata, error) in
+            if let error = error {
+                DispatchQueue.main.async {
+                    self.uploadError = "Error uploading image: \(error.localizedDescription)"
+                    self.isUploading = false
+                }
+                return
+            }
+            
+            imageRef.downloadURL { (url, error) in
+                DispatchQueue.main.async {
+                    self.isUploading = false
+                }
+                
+                if let error = error {
+                    DispatchQueue.main.async {
+                        self.uploadError = "Error getting download URL: \(error.localizedDescription)"
+                    }
+                    return
+                }
+                
+                if let downloadURL = url {
+                    DispatchQueue.main.async {
+                        self.businessCard.imageUrl = downloadURL.absoluteString
+                    }
+                }
+            }
         }
     }
 }
