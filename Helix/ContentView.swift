@@ -36,6 +36,9 @@ struct ContentView: View {
                         }
                         .tag(1)
                 }
+                .fullScreenCover(isPresented: $showCreateCard) {
+                    CreateBusinessCardView(showCreateCard: $showCreateCard)
+                }
                 .onAppear(perform: fetchBusinessCards)
                 .onChange(of: showCreateCard) { newValue in
                     if !newValue {
