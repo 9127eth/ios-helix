@@ -9,12 +9,14 @@ import FirebaseFirestore
 import FirebaseAuth
 
 struct CreateBusinessCardView: View {
+    @Binding var showCreateCard: Bool
     @State private var currentStep = 0
     @State private var businessCard = BusinessCard(
         // Initialize your businessCard properties here
     )
     @Environment(\.presentationMode) var presentationMode
     @EnvironmentObject var authManager: AuthenticationManager
+    @State private var showCancelConfirmation = false
 
     let steps = ["Basic Information", "Professional Information", "Description", "Contact Information", "Social Links", "Web Links", "Profile Image"]
 
@@ -22,7 +24,7 @@ struct CreateBusinessCardView: View {
         VStack(spacing: 0) {
             // Header
             HStack {
-                Button(action: { presentationMode.wrappedValue.dismiss() }) {
+                Button(action: { showCancelConfirmation = true }) {
                     Image(systemName: "xmark")
                         .foregroundColor(.gray)
                         .font(.system(size: 20, weight: .medium))
@@ -103,6 +105,14 @@ struct CreateBusinessCardView: View {
         }
         .background(AppColors.background)
         .edgesIgnoringSafeArea(.bottom)
+        .confirmationDialog("Are you sure you want to cancel?", isPresented: $showCancelConfirmation, titleVisibility: .visible) {
+            Button("Cancel without saving", role: .destructive) {
+                showCreateCard = false
+            }
+            Button("Continue editing", role: .cancel) {}
+        } message: {
+            Text("Your progress will be lost if you cancel now.")
+        }
     }
 
     private func saveBusinessCard() {

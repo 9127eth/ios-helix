@@ -9,6 +9,7 @@ import SwiftUI
 
 struct BusinessCardGridView: View {
     let businessCards: [BusinessCard]
+    @Binding var showCreateCard: Bool
     
     @Environment(\.horizontalSizeClass) var sizeClass
     
@@ -18,7 +19,7 @@ struct BusinessCardGridView: View {
                 ForEach(businessCards) { card in
                     BusinessCardItemView(card: card)
                 }
-                AddCardButton()
+                AddCardButton(action: { showCreateCard = true })
             }
             .padding()
         }

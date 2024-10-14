@@ -16,64 +16,43 @@ struct ContentView: View {
     @State private var errorMessage: String?
     @State private var selectedTab = 0
     @State private var hasAppeared = false
+    @State private var showCreateCard = false
     
     var body: some View {
         Group {
             if authManager.isAuthenticated {
-                if businessCards.isEmpty {
-                    CreateBusinessCardView()
-                } else {
-                    TabView(selection: $selectedTab) {
-                        BusinessCardGridView(businessCards: businessCards)
-                            .tabItem {
-                                Image(systemName: "rectangle.on.rectangle")
-                                Text("Cards")
-                            }
-                            .tag(0)
-                        
-                        SettingsView()
-                            .tabItem {
-                                Image(systemName: "gear")
-                                Text("Settings")
-                            }
-                            .tag(1)
-                    }
-                    .onAppear(perform: fetchBusinessCards)
+                TabView(selection: $selectedTab) {
+                    BusinessCardGridView(businessCards: businessCards, showCreateCard: $showCreateCard)
+                        .tabItem {
+                            Image(systemName: "rectangle.on.rectangle")
+                            Text("Cards")
+                        }
+                        .tag(0)
+                    
+                    SettingsView()
+                        .tabItem {
+                            Image(systemName: "gear")
+                            Text("Settings")
+                        }
+                        .tag(1)
                 }
+                .onAppear(perform: fetchBusinessCards)
+                .overlay(
+                    Group {
+                        if isLoading {
+                            ProgressView()
+                        } else if let error = errorMessage {
+                            Text(error)
+                                .foregroundColor(.red)
+                                .padding()
+                        }
+                    }
+                )
             } else {
                 AuthenticationView()
             }
         }
         .background(AppColors.background)
-        .overlay(
-            Group {
-                if isLoading {
-                    ProgressView()
-                } else if let error = errorMessage, authManager.isAuthenticated {
-                    Text(error)
-                        .foregroundColor(.red)
-                        .padding()
-                }
-            }
-        )
-        .dismissKeyboardOnTap()
-        .onChange(of: authManager.isAuthenticated) { newValue in
-            if newValue {
-                fetchBusinessCards()
-            } else {
-                errorMessage = nil
-                businessCards = []
-            }
-        }
-        .onAppear {
-            if !hasAppeared {
-                hasAppeared = true
-                if !authManager.isAuthenticated {
-                    errorMessage = nil
-                    businessCards = []
-                }
-            }
-        }
         .environmentObject(authManager)
     }
     
