@@ -7,6 +7,7 @@
 import SwiftUI
 import Foundation
 import FirebaseFirestore
+import FirebaseAuth
 
 struct BusinessCard: Identifiable, Codable {
     @DocumentID var id: String?
@@ -240,16 +241,16 @@ struct BusinessCard: Identifiable, Codable {
     }
 
     static func saveChanges(_ card: BusinessCard) async throws {
-        guard let userId = card.userId, let id = card.id else {
-            throw NSError(domain: "com.yourapp.error", code: 1001, userInfo: [NSLocalizedDescriptionKey: "Invalid user or card ID"])
+        guard let currentUser = Auth.auth().currentUser else {
+            throw NSError(domain: "com.yourapp.error", code: 1001, userInfo: [NSLocalizedDescriptionKey: "No authenticated user found"])
         }
         
         let db = Firestore.firestore()
-        let cardRef = db.collection("users").document(userId).collection("businessCards").document(id)
+        let cardRef = db.collection("users").document(currentUser.uid).collection("businessCards").document(card.cardSlug)
         
         do {
             try await cardRef.setData(card.asDictionary(), merge: true)
-            print("Successfully saved changes for card: \(id)")
+            print("Successfully saved changes for card: \(card.cardSlug)")
         } catch {
             print("Error saving changes: \(error.localizedDescription)")
             throw error
