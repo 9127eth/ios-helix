@@ -10,6 +10,12 @@ import SwiftUI
 struct ProfessionalInformationView: View {
     @Binding var businessCard: BusinessCard
     @FocusState private var focusedField: Field?
+    var showHeader: Bool
+    
+    init(businessCard: Binding<BusinessCard>, showHeader: Bool = true) {
+        self._businessCard = businessCard
+        self.showHeader = showHeader
+    }
     
     enum Field: Hashable {
         case credentials, jobTitle, company
@@ -17,8 +23,10 @@ struct ProfessionalInformationView: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
-            Text("Professional Information")
-                .font(.headline)
+            if showHeader {
+                Text("Professional Information")
+                    .font(.headline)
+            }
             CustomTextField(title: "Credentials", text: Binding(
                 get: { businessCard.credentials ?? "" },
                 set: { businessCard.credentials = $0.isEmpty ? nil : $0 }

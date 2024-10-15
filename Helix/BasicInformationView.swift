@@ -9,6 +9,12 @@ import SwiftUI
 struct BasicInformationView: View {
     @Binding var businessCard: BusinessCard
     @FocusState private var focusedField: Field?
+    var showHeader: Bool
+    
+    init(businessCard: Binding<BusinessCard>, showHeader: Bool = true) {
+        self._businessCard = businessCard
+        self.showHeader = showHeader
+    }
     
     enum Field: Hashable {
         case firstName, middleName, lastName, prefix, pronouns
@@ -16,9 +22,11 @@ struct BasicInformationView: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text("Basic Information")
-                .font(.headline)
-                .padding(.bottom, 4)
+            if showHeader {
+                Text("Basic Information")
+                    .font(.headline)
+                    .padding(.bottom, 4)
+            }
             
             CustomTextField(title: "First Name*", text: $businessCard.firstName, onCommit: { focusedField = .middleName })
                 .focused($focusedField, equals: .firstName)

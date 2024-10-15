@@ -21,47 +21,61 @@ struct ContentView: View {
     var body: some View {
         Group {
             if authManager.isAuthenticated {
-                TabView(selection: $selectedTab) {
-                    BusinessCardGridView(businessCards: businessCards, showCreateCard: $showCreateCard)
-                        .tabItem {
-                            Image(systemName: "rectangle.on.rectangle")
-                            Text("Cards")
-                        }
-                        .tag(0)
-                    
-                    SettingsView()
-                        .tabItem {
-                            Image(systemName: "gear")
-                            Text("Settings")
-                        }
-                        .tag(1)
-                }
-                .fullScreenCover(isPresented: $showCreateCard) {
-                    CreateBusinessCardView(showCreateCard: $showCreateCard)
-                }
-                .onAppear(perform: fetchBusinessCards)
-                .onChange(of: showCreateCard) { newValue in
-                    if !newValue {
-                        fetchBusinessCards()
-                    }
-                }
-                .overlay(
-                    Group {
-                        if isLoading {
-                            ProgressView()
-                        } else if let error = errorMessage {
-                            Text(error)
-                                .foregroundColor(.red)
-                                .padding()
-                        }
-                    }
-                )
+                authenticatedView
             } else {
                 AuthenticationView()
             }
         }
         .background(AppColors.background)
         .environmentObject(authManager)
+    }
+    
+    private var authenticatedView: some View {
+        TabView(selection: $selectedTab) {
+            businessCardTab
+            settingsTab
+        }
+        .fullScreenCover(isPresented: $showCreateCard) {
+            CreateBusinessCardView(showCreateCard: $showCreateCard)
+        }
+        .onAppear(perform: fetchBusinessCards)
+        .onChange(of: showCreateCard) { newValue in
+            if !newValue {
+                fetchBusinessCards()
+            }
+        }
+        .overlay(loadingOverlay)
+    }
+    
+    private var businessCardTab: some View {
+        BusinessCardGridView(businessCards: $businessCards, showCreateCard: $showCreateCard)
+            .tabItem {
+                Image(systemName: "rectangle.on.rectangle")
+                Text("Cards")
+            }
+            .tag(0)
+    }
+    
+    private var settingsTab: some View {
+        SettingsView()
+            .tabItem {
+                Image(systemName: "gear")
+                Text("Settings")
+            }
+            .tag(1)
+    }
+    
+    @ViewBuilder
+    private var loadingOverlay: some View {
+        Group {
+            if isLoading {
+                ProgressView()
+            } else if let error = errorMessage {
+                Text(error)
+                    .foregroundColor(.red)
+                    .padding()
+            }
+        }
     }
     
     private func fetchBusinessCards() {

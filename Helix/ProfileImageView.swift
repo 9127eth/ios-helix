@@ -15,12 +15,20 @@ struct ProfileImageView: View {
     @State private var inputImage: UIImage?
     @State private var isUploading = false
     @State private var uploadError: String?
+    var showHeader: Bool
+    
+    init(businessCard: Binding<BusinessCard>, showHeader: Bool = true) {
+        self._businessCard = businessCard
+        self.showHeader = showHeader
+    }
     
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
-            Text("Add an Image")
-                .font(.headline)
-                .padding(.bottom, 4)
+            if showHeader {
+                Text("Add an Image")
+                    .font(.headline)
+                    .padding(.bottom, 4)
+            }
             
             VStack(spacing: 20) {
                 if let imageUrl = businessCard.imageUrl, let url = URL(string: imageUrl) {

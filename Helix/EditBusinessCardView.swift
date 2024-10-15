@@ -18,7 +18,7 @@ struct EditBusinessCardView: View {
     @State private var showingSaveError = false
     @State private var saveErrorMessage = ""
     
-    let sections = ["Basic Information", "Contact Information", "Social Links", "Web Links", "Profile Image", "Custom Header/Message", "Document"]
+    let sections = ["Description", "Basic Information", "Professional Information", "Contact Information", "Social Links", "Web Links", "Profile Image", "Custom Header/Message", "Document"]
     
     var body: some View {
         NavigationView {
@@ -82,20 +82,26 @@ struct EditBusinessCardView: View {
     
     func sectionContent(for section: String) -> some View {
         switch section {
+        case "Description":
+            return AnyView(DescriptionView(businessCard: $businessCard, showHeader: false))
         case "Basic Information":
-            return AnyView(BasicInformationView(businessCard: $businessCard))
+            return AnyView(BasicInformationView(businessCard: $businessCard, showHeader: false))
+        case "Professional Information":
+            return AnyView(ProfessionalInformationView(businessCard: $businessCard, showHeader: false))
         case "Contact Information":
-            return AnyView(ContactInformationView(businessCard: $businessCard))
+            return AnyView(ContactInformationView(businessCard: $businessCard, showHeader: false))
         case "Social Links":
-            return AnyView(SocialLinksView(businessCard: $businessCard))
+            return AnyView(SocialLinksView(businessCard: $businessCard, showHeader: false))
         case "Web Links":
-            return AnyView(WebLinksView(businessCard: $businessCard))
+            return AnyView(WebLinksView(businessCard: $businessCard, showHeader: false))
         case "Profile Image":
-            return AnyView(ProfileImageView(businessCard: $businessCard))
+            return AnyView(ProfileImageView(businessCard: $businessCard, showHeader: false))
         case "Custom Header/Message":
-            return AnyView(CustomHeaderMessageView(businessCard: $businessCard))
+            // Implement this view if it exists
+            return AnyView(EmptyView())
         case "Document":
-            return AnyView(DocumentView(businessCard: $businessCard))
+            // Implement this view if it exists
+            return AnyView(EmptyView())
         default:
             return AnyView(EmptyView())
         }

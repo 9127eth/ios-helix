@@ -11,6 +11,12 @@ struct WebLinksView: View {
     @Binding var businessCard: BusinessCard
     @State private var linkInputs: [WebLink] = []
     @FocusState private var focusedField: Field?
+    var showHeader: Bool
+    
+    init(businessCard: Binding<BusinessCard>, showHeader: Bool = true) {
+        self._businessCard = businessCard
+        self.showHeader = showHeader
+    }
     
     enum Field: Hashable {
         case url(Int)
@@ -19,9 +25,11 @@ struct WebLinksView: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
-            Text("Web Links")
-                .font(.headline)
-                .padding(.bottom, 4)
+            if showHeader {
+                Text("Web Links")
+                    .font(.headline)
+                    .padding(.bottom, 4)
+            }
             
             ForEach(linkInputs.indices, id: \.self) { index in
                 HStack(alignment: .top) {

@@ -12,13 +12,20 @@ struct SocialLinksView: View {
     @State private var showingAddLinkPopup = false
     @State private var availableSocialLinks: [SocialLinkType] = SocialLinkType.allCases
     @FocusState private var focusedLink: SocialLinkType?
+    var showHeader: Bool
+    
+    init(businessCard: Binding<BusinessCard>, showHeader: Bool = true) {
+        self._businessCard = businessCard
+        self.showHeader = showHeader
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
-            Text("Social Links")
-                .font(.headline)
-                .padding(.bottom, 4)
-            
+            if showHeader {
+                Text("Social Links")
+                    .font(.headline)
+                    .padding(.bottom, 4)
+            }
             ForEach(Array(businessCard.socialLinks.keys), id: \.self) { linkType in
                 SocialLinkRow(
                     linkType: linkType,

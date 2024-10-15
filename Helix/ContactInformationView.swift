@@ -14,6 +14,12 @@ struct ContactInformationView: View {
     @State private var isEmailValid = true
     @State private var showEmailError = false
     @FocusState private var focusedField: Field?
+    var showHeader: Bool
+    
+    init(businessCard: Binding<BusinessCard>, showHeader: Bool = true) {
+        self._businessCard = businessCard
+        self.showHeader = showHeader
+    }
     
     enum Field: Hashable {
         case phoneNumber, email
@@ -21,9 +27,11 @@ struct ContactInformationView: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
-            Text("Contact Information")
-                .font(.headline)
-                .padding(.bottom, 4)
+            if showHeader {
+                Text("Contact Information")
+                    .font(.headline)
+                    .padding(.bottom, 4)
+            }
             
             PhoneNumberTextField(phoneNumber: Binding(
                 get: { businessCard.phoneNumber ?? "" },

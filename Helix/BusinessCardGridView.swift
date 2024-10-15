@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct BusinessCardGridView: View {
-    let businessCards: [BusinessCard]
+    @Binding var businessCards: [BusinessCard]
     @Binding var showCreateCard: Bool
     
     @Environment(\.horizontalSizeClass) var sizeClass
@@ -21,8 +21,8 @@ struct BusinessCardGridView: View {
                 Spacer(minLength: UIScreen.main.bounds.height * 0.07)
                 
                 LazyVStack(spacing: 16) {
-                    ForEach(businessCards) { card in
-                        BusinessCardItemView(card: card)
+                    ForEach($businessCards) { $card in
+                        BusinessCardItemView(card: $card)
                     }
                     AddCardButton(action: { showCreateCard = true })
                 }
