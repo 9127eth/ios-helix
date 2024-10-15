@@ -95,8 +95,7 @@ struct EditBusinessCardView: View {
         case "Profile Image":
             return AnyView(ProfileImageView(businessCard: card, showHeader: false))
         case "Custom Header/Message":
-            // Implement this view if it exists
-            return AnyView(EmptyView())
+            return AnyView(CustomSectionView(businessCard: card, showHeader: false))
         case "Document":
             return AnyView(DocumentView(businessCard: card, showHeader: false))
         default:
