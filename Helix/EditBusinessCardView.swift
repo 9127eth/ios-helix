@@ -98,8 +98,7 @@ struct EditBusinessCardView: View {
             // Implement this view if it exists
             return AnyView(EmptyView())
         case "Document":
-            // Implement this view if it exists
-            return AnyView(EmptyView())
+            return AnyView(DocumentView(businessCard: card, showHeader: false))
         default:
             return AnyView(EmptyView())
         }
