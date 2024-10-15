@@ -57,7 +57,7 @@ struct ContentView: View {
     }
     
     private var settingsTab: some View {
-        SettingsView()
+        SettingsView(isAuthenticated: $authManager.isAuthenticated)
             .tabItem {
                 Image(systemName: "gear")
                 Text("Settings")
