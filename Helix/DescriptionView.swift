@@ -18,11 +18,11 @@ struct DescriptionView: View {
     }
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
+        VStack(alignment: .leading, spacing: 16) {
             if showHeader {
                 Text("Card Name")
                     .font(.headline)
-                    .padding(.bottom, 8)
+                    .padding(.bottom, 16)
             }
             
             CustomTextField(title: "", text: $businessCard.description, onCommit: { isFocused = false })
@@ -34,6 +34,5 @@ struct DescriptionView: View {
                 .foregroundColor(.gray)
                 .fixedSize(horizontal: false, vertical: true)
         }
-        .padding()
     }
 }

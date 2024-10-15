@@ -24,8 +24,9 @@ struct SocialLinksView: View {
             if showHeader {
                 Text("Social Links")
                     .font(.headline)
-                    .padding(.bottom, 4)
+                    .padding(.bottom, 16)
             }
+            
             ForEach(Array(businessCard.socialLinks.keys), id: \.self) { linkType in
                 SocialLinkRow(
                     linkType: linkType,
@@ -69,6 +70,7 @@ struct SocialLinksView: View {
             .background(Color.blue.opacity(0.1))
             .cornerRadius(8)
         }
+        .padding(.top, showHeader ? 0 : 16)
         .sheet(isPresented: $showingAddLinkPopup) {
             AddSocialLinkView(
                 availableLinks: $availableSocialLinks,
