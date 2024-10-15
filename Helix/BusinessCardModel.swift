@@ -256,6 +256,23 @@ struct BusinessCard: Identifiable, Codable {
             throw error
         }
     }
+
+    static func delete(_ card: BusinessCard) async throws {
+        guard let currentUser = Auth.auth().currentUser, let cardId = card.id else {
+            throw NSError(domain: "com.yourapp.error", code: 1001, userInfo: [NSLocalizedDescriptionKey: "No authenticated user found or invalid card ID"])
+        }
+        
+        let db = Firestore.firestore()
+        let cardRef = db.collection("users").document(currentUser.uid).collection("businessCards").document(cardId)
+        
+        do {
+            try await cardRef.delete()
+            print("Successfully deleted card: \(cardId)")
+        } catch {
+            print("Error deleting card: \(error.localizedDescription)")
+            throw error
+        }
+    }
 }
 
 struct WebLink: Identifiable, Codable, Equatable {
