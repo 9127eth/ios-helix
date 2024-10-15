@@ -10,6 +10,7 @@ import FirebaseFirestore
 
 struct EditBusinessCardView: View {
     @Binding var businessCard: BusinessCard
+    @State private var editedCard: BusinessCard
     @Environment(\.presentationMode) var presentationMode
     @State private var showingCancelConfirmation = false
     @State private var showingSaveError = false
@@ -35,7 +36,7 @@ struct EditBusinessCardView: View {
                                 }
                             )
                         ) {
-                            sectionContent(for: section)
+                            sectionContent(for: section, card: $editedCard)
                                 .padding(.top, 16)
                         } label: {
                             Text(section)
@@ -60,15 +61,13 @@ struct EditBusinessCardView: View {
                 }
             }
         }
-        .alert(isPresented: $showingCancelConfirmation) {
-            Alert(
-                title: Text("Confirm Cancel"),
-                message: Text("Are you sure you want to cancel? Any unsaved changes will be lost."),
-                primaryButton: .default(Text("Continue Editing")),
-                secondaryButton: .destructive(Text("Cancel Editing")) {
-                    presentationMode.wrappedValue.dismiss()
-                }
-            )
+        .alert("Confirm Cancel", isPresented: $showingCancelConfirmation) {
+            Button("Continue Editing", role: .cancel) {}
+            Button("Discard Changes", role: .destructive) {
+                presentationMode.wrappedValue.dismiss()
+            }
+        } message: {
+            Text("Are you sure you want to cancel? Any unsaved changes will be lost.")
         }
         .alert(isPresented: $showingSaveError) {
             Alert(
@@ -79,22 +78,22 @@ struct EditBusinessCardView: View {
         }
     }
     
-    func sectionContent(for section: String) -> some View {
+    func sectionContent(for section: String, card: Binding<BusinessCard>) -> some View {
         switch section {
         case "Description":
-            return AnyView(DescriptionView(businessCard: $businessCard, showHeader: false))
+            return AnyView(DescriptionView(businessCard: card, showHeader: false))
         case "Basic Information":
-            return AnyView(BasicInformationView(businessCard: $businessCard, showHeader: false))
+            return AnyView(BasicInformationView(businessCard: card, showHeader: false))
         case "Professional Information":
-            return AnyView(ProfessionalInformationView(businessCard: $businessCard, showHeader: false))
+            return AnyView(ProfessionalInformationView(businessCard: card, showHeader: false))
         case "Contact Information":
-            return AnyView(ContactInformationView(businessCard: $businessCard, showHeader: false))
+            return AnyView(ContactInformationView(businessCard: card, showHeader: false))
         case "Social Links":
-            return AnyView(SocialLinksView(businessCard: $businessCard, showHeader: false))
+            return AnyView(SocialLinksView(businessCard: card, showHeader: false))
         case "Web Links":
-            return AnyView(WebLinksView(businessCard: $businessCard, showHeader: false))
+            return AnyView(WebLinksView(businessCard: card, showHeader: false))
         case "Profile Image":
-            return AnyView(ProfileImageView(businessCard: $businessCard, showHeader: false))
+            return AnyView(ProfileImageView(businessCard: card, showHeader: false))
         case "Custom Header/Message":
             // Implement this view if it exists
             return AnyView(EmptyView())
@@ -109,7 +108,8 @@ struct EditBusinessCardView: View {
     func saveChanges() {
         Task {
             do {
-                try await BusinessCard.saveChanges(businessCard)
+                try await BusinessCard.saveChanges(editedCard)
+                businessCard = editedCard // Update the original card
                 presentationMode.wrappedValue.dismiss()
             } catch {
                 saveErrorMessage = error.localizedDescription
@@ -120,5 +120,6 @@ struct EditBusinessCardView: View {
     
     init(businessCard: Binding<BusinessCard>) {
         self._businessCard = businessCard
+        self._editedCard = State(initialValue: businessCard.wrappedValue)
     }
 }
