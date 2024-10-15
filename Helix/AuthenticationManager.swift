@@ -271,11 +271,17 @@ class AuthenticationManager: NSObject, ObservableObject {
                 if let error = error {
                     completion(.failure(error))
                 } else {
-                    self.signOut() // Sign out after successful deletion
+                    self.signOut()
+                    self.resetAuthState() // Reset the authentication state
                     completion(.success(()))
                 }
             }
         }
+    }
+
+    func resetAuthState() {
+        self.user = nil
+        self.isAuthenticated = false
     }
 }
 

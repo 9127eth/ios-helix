@@ -10,6 +10,7 @@ import Firebase
 struct SettingsView: View {
     @EnvironmentObject var authManager: AuthenticationManager
     @State private var showDeleteConfirmation = false
+    @Binding var isAuthenticated: Bool
 
     var body: some View {
         NavigationView {
@@ -47,7 +48,9 @@ struct SettingsView: View {
             switch result {
             case .success:
                 print("Account deleted successfully")
-                // Handle successful deletion (e.g., navigate to login screen)
+                DispatchQueue.main.async {
+                    self.isAuthenticated = false // This will trigger navigation back to the auth screen
+                }
             case .failure(let error):
                 print("Failed to delete account: \(error.localizedDescription)")
                 // Handle error (e.g., show an error alert)
