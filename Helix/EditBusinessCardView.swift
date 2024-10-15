@@ -17,6 +17,7 @@ struct EditBusinessCardView: View {
     @State private var saveErrorMessage = ""
     @State private var expandedSections: Set<String> = []
     @State private var showingDeleteConfirmation = false
+    @State private var showPreview = false
     
     let sections = ["Description", "Basic Information", "Professional Information", "Contact Information", "Social Links", "Web Links", "Profile Image", "Custom Header/Message", "Document"]
     
@@ -58,8 +59,13 @@ struct EditBusinessCardView: View {
                     }
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Save") {
-                        saveChanges()
+                    HStack {
+                        Button(action: { showPreview = true }) {
+                            Text("Preview")
+                        }
+                        Button("Save") {
+                            saveChanges()
+                        }
                     }
                 }
             }
@@ -87,6 +93,9 @@ struct EditBusinessCardView: View {
         } message: {
             Text("Are you sure you want to delete this business card? This action is irreversible.")
         }
+        .sheet(isPresented: $showPreview) {
+            PreviewView(card: editedCard, isPresented: $showPreview)
+        }
     }
     
     private var deleteButton: some View {
@@ -99,12 +108,12 @@ struct EditBusinessCardView: View {
                     Image(systemName: "trash")
                     Text("Delete")
                 }
+                .foregroundColor(.white)
+                .padding(.vertical, 8)  // Reduced vertical padding
+                .padding(.horizontal, 16)
+                .background(Color.red)
+                .cornerRadius(8)
             }
-            .foregroundColor(.white)
-            .padding()
-            .background(Color.red)
-            .cornerRadius(8)
-            Spacer()
         }
         .padding(.top, 20)
     }
