@@ -11,12 +11,10 @@ import FirebaseFirestore
 struct EditBusinessCardView: View {
     @Binding var businessCard: BusinessCard
     @Environment(\.presentationMode) var presentationMode
-    @State private var showingDeleteConfirmation = false
     @State private var showingCancelConfirmation = false
-    @State private var showingPreview = false
-    @State private var expandedSections: Set<String> = []
     @State private var showingSaveError = false
     @State private var saveErrorMessage = ""
+    @State private var expandedSections: Set<String> = []
     
     let sections = ["Description", "Basic Information", "Professional Information", "Contact Information", "Social Links", "Web Links", "Profile Image", "Custom Header/Message", "Document"]
     
@@ -64,12 +62,12 @@ struct EditBusinessCardView: View {
         }
         .alert(isPresented: $showingCancelConfirmation) {
             Alert(
-                title: Text("Discard Changes?"),
-                message: Text("Are you sure you want to discard your changes?"),
-                primaryButton: .destructive(Text("Discard")) {
+                title: Text("Confirm Cancel"),
+                message: Text("Are you sure you want to cancel? Any unsaved changes will be lost."),
+                primaryButton: .default(Text("Continue Editing")),
+                secondaryButton: .destructive(Text("Cancel Editing")) {
                     presentationMode.wrappedValue.dismiss()
-                },
-                secondaryButton: .cancel()
+                }
             )
         }
         .alert(isPresented: $showingSaveError) {
@@ -118,5 +116,9 @@ struct EditBusinessCardView: View {
                 showingSaveError = true
             }
         }
+    }
+    
+    init(businessCard: Binding<BusinessCard>) {
+        self._businessCard = businessCard
     }
 }
