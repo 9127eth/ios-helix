@@ -30,7 +30,7 @@ struct ContactInformationView: View {
             if showHeader {
                 Text("Contact Information")
                     .font(.headline)
-                    .padding(.bottom, 4)
+                    .padding(.bottom, 16)
             }
             
             PhoneNumberTextField(phoneNumber: Binding(
@@ -63,6 +63,7 @@ struct ContactInformationView: View {
                     .font(.caption)
             }
         }
+        .padding(.top, showHeader ? 0 : 16)
     }
     
     private func isValidEmail(_ email: String) -> Bool {

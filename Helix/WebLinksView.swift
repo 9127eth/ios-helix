@@ -28,7 +28,7 @@ struct WebLinksView: View {
             if showHeader {
                 Text("Web Links")
                     .font(.headline)
-                    .padding(.bottom, 4)
+                    .padding(.bottom, 16)
             }
             
             ForEach(linkInputs.indices, id: \.self) { index in
@@ -69,6 +69,7 @@ struct WebLinksView: View {
                     .cornerRadius(20)
             }
         }
+        .padding(.top, showHeader ? 0 : 16)
         .animation(.none)
         .onAppear(perform: loadExistingLinks)
         .onChange(of: linkInputs) { _ in

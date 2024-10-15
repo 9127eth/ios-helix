@@ -38,6 +38,7 @@ struct EditBusinessCardView: View {
                             )
                         ) {
                             sectionContent(for: section)
+                                .padding(.top, 16)
                         } label: {
                             Text(section)
                                 .font(.headline)

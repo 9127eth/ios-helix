@@ -25,7 +25,7 @@ struct BasicInformationView: View {
             if showHeader {
                 Text("Basic Information")
                     .font(.headline)
-                    .padding(.bottom, 4)
+                    .padding(.bottom, 16)
             }
             
             CustomTextField(title: "First Name*", text: $businessCard.firstName, onCommit: { focusedField = .middleName })
@@ -57,7 +57,7 @@ struct BasicInformationView: View {
                     .focused($focusedField, equals: .pronouns)
             }
         }
-        .padding()
+        .padding(.top, showHeader ? 0 : 16)
     }
 }
 
