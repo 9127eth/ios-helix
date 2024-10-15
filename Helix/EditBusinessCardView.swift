@@ -16,6 +16,7 @@ struct EditBusinessCardView: View {
     @State private var showingSaveError = false
     @State private var saveErrorMessage = ""
     @State private var expandedSections: Set<String> = []
+    @State private var showingDeleteConfirmation = false
     
     let sections = ["Description", "Basic Information", "Professional Information", "Contact Information", "Social Links", "Web Links", "Profile Image", "Custom Header/Message", "Document"]
     
@@ -43,6 +44,8 @@ struct EditBusinessCardView: View {
                                 .font(.headline)
                         }
                     }
+                    
+                    deleteButton
                 }
                 .padding()
             }
@@ -76,6 +79,34 @@ struct EditBusinessCardView: View {
                 dismissButton: .default(Text("OK"))
             )
         }
+        .alert("Confirm Deletion", isPresented: $showingDeleteConfirmation) {
+            Button("Cancel", role: .cancel) {}
+            Button("Delete", role: .destructive) {
+                deleteBusinessCard()
+            }
+        } message: {
+            Text("Are you sure you want to delete this business card? This action is irreversible.")
+        }
+    }
+    
+    private var deleteButton: some View {
+        HStack {
+            Spacer()
+            Button(action: {
+                showingDeleteConfirmation = true
+            }) {
+                HStack {
+                    Image(systemName: "trash")
+                    Text("Delete")
+                }
+            }
+            .foregroundColor(.white)
+            .padding()
+            .background(Color.red)
+            .cornerRadius(8)
+            Spacer()
+        }
+        .padding(.top, 20)
     }
     
     func sectionContent(for section: String, card: Binding<BusinessCard>) -> some View {
@@ -111,6 +142,18 @@ struct EditBusinessCardView: View {
                 presentationMode.wrappedValue.dismiss()
             } catch {
                 saveErrorMessage = error.localizedDescription
+                showingSaveError = true
+            }
+        }
+    }
+    
+    private func deleteBusinessCard() {
+        Task {
+            do {
+                try await BusinessCard.delete(editedCard)
+                presentationMode.wrappedValue.dismiss()
+            } catch {
+                saveErrorMessage = "Failed to delete business card: \(error.localizedDescription)"
                 showingSaveError = true
             }
         }

@@ -11,6 +11,7 @@ struct BusinessCardItemView: View {
     @State private var showPreview = false
     @State private var showShare = false
     @State private var showingEditView = false
+    @State private var showingDeleteConfirmation = false
     
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -28,7 +29,9 @@ struct BusinessCardItemView: View {
                     Button("Preview") { showPreview = true }
                     Button("Share") { showShare = true }
                     Button("Edit") { showingEditView = true }
-                    Button("Delete", role: .destructive) { /* TODO: Implement delete action */ }
+                    Button("Delete", role: .destructive) {
+                        showingDeleteConfirmation = true
+                    }
                 } label: {
                     Image(systemName: "ellipsis")
                         .foregroundColor(AppColors.bodyPrimaryText)
@@ -77,7 +80,7 @@ struct BusinessCardItemView: View {
                 Spacer()
                 
                 HStack(spacing: 16) {
-                    Button(action: { /* TODO: Implement edit action */ }) {
+                    Button(action: { showingEditView = true }) {
                         Image(systemName: "square.and.pencil")
                             .frame(width: 30, height: 30)
                     }
@@ -108,6 +111,28 @@ struct BusinessCardItemView: View {
         }
         .sheet(isPresented: $showingEditView) {
             EditBusinessCardView(businessCard: $card)
+        }
+        .alert("Confirm Deletion", isPresented: $showingDeleteConfirmation) {
+            Button("Cancel", role: .cancel) {}
+            Button("Delete", role: .destructive) {
+                deleteCard()
+            }
+        } message: {
+            Text("Are you sure you want to delete this business card? This action cannot be undone.")
+        }
+    }
+    
+    private func deleteCard() {
+        Task {
+            do {
+                try await BusinessCard.delete(card)
+                // Here you would typically update your app's state to remove the card from the list
+                // This might involve notifying a parent view or using an environment object
+                print("Card deleted successfully")
+            } catch {
+                print("Error deleting card: \(error.localizedDescription)")
+                // Here you might want to show an error alert to the user
+            }
         }
     }
 }
