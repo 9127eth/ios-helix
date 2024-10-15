@@ -230,7 +230,13 @@ struct BusinessCard: Identifiable, Codable {
         let db = Firestore.firestore()
         let cardRef = db.collection("users").document(userId).collection("businessCards").document(id)
         
-        try await cardRef.setData(self.asDictionary(), merge: true)
+        do {
+            try await cardRef.setData(self.asDictionary(), merge: true)
+            print("Successfully saved changes for card: \(id)")
+        } catch {
+            print("Error saving changes: \(error.localizedDescription)")
+            throw error
+        }
     }
 
     static func saveChanges(_ card: BusinessCard) async throws {
@@ -241,7 +247,13 @@ struct BusinessCard: Identifiable, Codable {
         let db = Firestore.firestore()
         let cardRef = db.collection("users").document(userId).collection("businessCards").document(id)
         
-        try await cardRef.setData(card.asDictionary(), merge: true)
+        do {
+            try await cardRef.setData(card.asDictionary(), merge: true)
+            print("Successfully saved changes for card: \(id)")
+        } catch {
+            print("Error saving changes: \(error.localizedDescription)")
+            throw error
+        }
     }
 }
 
