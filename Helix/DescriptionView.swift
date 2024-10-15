@@ -10,12 +10,20 @@ import SwiftUI
 struct DescriptionView: View {
     @Binding var businessCard: BusinessCard
     @FocusState private var isFocused: Bool
+    var showHeader: Bool
+    
+    init(businessCard: Binding<BusinessCard>, showHeader: Bool = true) {
+        self._businessCard = businessCard
+        self.showHeader = showHeader
+    }
     
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            Text("Card Name")
-                .font(.headline)
-                .padding(.bottom, 8)
+            if showHeader {
+                Text("Card Name")
+                    .font(.headline)
+                    .padding(.bottom, 8)
+            }
             
             CustomTextField(title: "", text: $businessCard.description, onCommit: { isFocused = false })
                 .focused($isFocused)

@@ -7,7 +7,7 @@
 import SwiftUI
 
 struct BusinessCardItemView: View {
-    var card: BusinessCard
+    @Binding var card: BusinessCard
     @State private var showPreview = false
     @State private var showShare = false
     @State private var showingEditView = false
