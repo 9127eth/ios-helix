@@ -11,22 +11,29 @@ struct SettingsView: View {
     @EnvironmentObject var authManager: AuthenticationManager
     @State private var showDeleteConfirmation = false
     @Binding var isAuthenticated: Bool
+    @AppStorage("isDarkMode") private var isDarkMode = false
 
     var body: some View {
         NavigationView {
             List {
-                Button(action: {
-                    authManager.signOut()
-                }) {
-                    Text("Sign Out")
-                        .foregroundColor(.red)
+                Section(header: Text("Appearance")) {
+                    Toggle("Dark Mode", isOn: $isDarkMode)
                 }
 
-                Button(action: {
-                    showDeleteConfirmation = true
-                }) {
-                    Text("Delete Account")
-                        .foregroundColor(.red)
+                Section(header: Text("Account")) {
+                    Button(action: {
+                        authManager.signOut()
+                    }) {
+                        Text("Sign Out")
+                            .foregroundColor(.red)
+                    }
+
+                    Button(action: {
+                        showDeleteConfirmation = true
+                    }) {
+                        Text("Delete Account")
+                            .foregroundColor(.red)
+                    }
                 }
             }
             .navigationTitle("Settings")
@@ -44,17 +51,6 @@ struct SettingsView: View {
     }
 
     private func deleteAccount() {
-        authManager.deleteAccount { result in
-            switch result {
-            case .success:
-                print("Account deleted successfully")
-                DispatchQueue.main.async {
-                    self.isAuthenticated = false // This will trigger navigation back to the auth screen
-                }
-            case .failure(let error):
-                print("Failed to delete account: \(error.localizedDescription)")
-                // Handle error (e.g., show an error alert)
-            }
-        }
+        // Implement account deletion logic here
     }
 }

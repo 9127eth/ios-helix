@@ -20,16 +20,16 @@ struct CreateBusinessCardView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            // Header
+            // Navigation bar
             HStack {
                 Button(action: { showCancelConfirmation = true }) {
-                    Image(systemName: "xmark")
-                        .foregroundColor(.gray)
-                        .font(.system(size: 20, weight: .medium))
+                    Text("Cancel")
+                        .foregroundColor(AppColors.primary)
                 }
                 Spacer()
-                Text("Create Card")
-                    .font(.system(size: 18, weight: .semibold))
+                Text("Create Business Card")
+                    .font(.headline)
+                    .foregroundColor(AppColors.bodyPrimaryText)
                 Spacer()
                 Button(action: { saveBusinessCard() }) {
                     Text("Done")
@@ -38,7 +38,7 @@ struct CreateBusinessCardView: View {
                 }
             }
             .padding()
-            .background(Color.white)
+            .background(AppColors.barMenuBackground)
             .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 5)
             
             // Progress bar

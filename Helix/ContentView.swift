@@ -19,6 +19,7 @@ struct ContentView: View {
     @State private var hasAppeared = false
     @State private var showCreateCard = false
     @State private var username: String = ""
+    @AppStorage("isDarkMode") private var isDarkMode = false
     
     var body: some View {
         Group {
@@ -29,6 +30,7 @@ struct ContentView: View {
             }
         }
         .background(AppColors.background)
+        .preferredColorScheme(isDarkMode ? .dark : .light)
         .environmentObject(authManager)
     }
     

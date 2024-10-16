@@ -26,13 +26,19 @@ struct AuthenticationView: View {
             Color(AppColors.background)
                 .edgesIgnoringSafeArea(.all)
 
-            VStack(spacing: 20) {
+            VStack(spacing: 30) {
                 headerView
-                
-                authButtonsView
                 
                 if showEmailAuth {
                     emailAuthView
+                } else {
+                    authButtonsView
+                    orSeparator
+                    Button(action: { showEmailAuth = true }) {
+                        Text("Sign up with email")
+                            .foregroundColor(AppColors.primary)
+                            .underline()
+                    }
                 }
             }
             .padding()
