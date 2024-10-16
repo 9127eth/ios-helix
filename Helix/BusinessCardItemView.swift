@@ -16,6 +16,7 @@ struct BusinessCardItemView: View {
     @State private var showShare = false
     @State private var showingEditView = false
     @State private var showingDeleteConfirmation = false
+    @Environment(\.colorScheme) var colorScheme
     
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -61,7 +62,7 @@ struct BusinessCardItemView: View {
             Spacer()
             
             Divider()
-                .background(Color.gray.opacity(0.3))
+                .background(AppColors.divider)
             
             HStack {
                 HStack(spacing: 4) {
@@ -98,7 +99,7 @@ struct BusinessCardItemView: View {
                     }
                     .disabled(!card.isActive)
                 }
-                .foregroundColor(.black)
+                .foregroundColor(colorScheme == .dark ? Color(hex: 0xdddee3) : .black)
                 .font(.system(size: 18))
             }
         }

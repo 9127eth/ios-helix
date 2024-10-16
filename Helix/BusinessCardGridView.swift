@@ -13,6 +13,7 @@ struct BusinessCardGridView: View {
     let username: String  // Add this line to receive the username
     
     @Environment(\.horizontalSizeClass) var sizeClass
+    @Environment(\.colorScheme) var colorScheme
     
     var body: some View {
         ScrollView {
@@ -23,7 +24,12 @@ struct BusinessCardGridView: View {
                 
                 LazyVStack(spacing: 16) {
                     ForEach($businessCards) { $card in
-                        BusinessCardItemView(card: $card, username: username)  // Pass the username here
+                        BusinessCardItemView(card: $card, username: username)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 8)
+                                    .stroke(Color(hex: 0xe5e6ed), lineWidth: 1)
+                                    .opacity(colorScheme == .dark ? 1 : 0)
+                            )
                     }
                     AddCardButton(action: { showCreateCard = true })
                 }

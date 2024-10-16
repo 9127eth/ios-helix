@@ -90,11 +90,11 @@ struct CreateBusinessCardView: View {
                             Text("Next")
                             Image(systemName: "chevron.right")
                         }
-                        .foregroundColor(.white)
+                        .foregroundColor(AppColors.buttonText)
                     }
                     .padding(.horizontal, 20)
                     .padding(.vertical, 10)
-                    .background(currentStep == 0 && businessCard.firstName.isEmpty ? Color.gray : AppColors.primary)
+                    .background(currentStep == 0 && businessCard.firstName.isEmpty ? Color.gray : AppColors.buttonBackground)
                     .cornerRadius(20)
                     .disabled(currentStep == 0 && businessCard.firstName.isEmpty)
                 }
