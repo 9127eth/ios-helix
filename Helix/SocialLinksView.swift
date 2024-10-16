@@ -107,29 +107,63 @@ struct SocialLinkRow: View {
     let onCommit: () -> Void
 
     @State private var localValue: String = ""
+    @State private var offset: CGFloat = 0
 
     var body: some View {
-        HStack {
-            Image(linkType.iconName)
-                .resizable()
-                .scaledToFit()
-                .frame(width: 24, height: 24)
-            CustomTextField(title: linkType.displayName, text: $localValue)
-                .onAppear {
-                    localValue = value ?? ""
+        ZStack {
+            GeometryReader { geometry in
+                HStack(spacing: 0) {
+                    Spacer()
+                    Button(action: {
+                        withAnimation {
+                            localValue = ""
+                            value = nil
+                            onCommit()
+                            offset = 0
+                        }
+                    }) {
+                        Image(systemName: "trash")
+                            .foregroundColor(.red)
+                            .font(.system(size: 20))
+                    }
+                    .frame(width: 60, height: geometry.size.height) // Ensure height matches the row
+                    .offset(x: offset + 60)
                 }
-                .onChange(of: localValue) { newValue in
-                    value = newValue.isEmpty ? nil : newValue
-                }
-                .onSubmit(onCommit)
-            Button(action: {
-                localValue = ""
-                value = nil
-                onCommit()
-            }) {
-                Image(systemName: "xmark.circle.fill")
-                    .foregroundColor(.red)
+                .frame(height: geometry.size.height, alignment: .center) // Align center vertically
             }
+            
+            HStack {
+                Image(linkType.iconName)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 24, height: 24)
+                CustomTextField(title: linkType.displayName, text: $localValue)
+                    .onAppear {
+                        localValue = value ?? ""
+                    }
+                    .onChange(of: localValue) { newValue in
+                        value = newValue.isEmpty ? nil : newValue
+                    }
+                    .onSubmit(onCommit)
+            }
+            .padding(.vertical, 8)
+            .background(Color.clear)
+            .offset(x: offset)
+            .gesture(
+                DragGesture()
+                    .onChanged { gesture in
+                        offset = min(0, gesture.translation.width)
+                    }
+                    .onEnded { _ in
+                        withAnimation {
+                            if offset < -30 {
+                                offset = -60
+                            } else {
+                                offset = 0
+                            }
+                        }
+                    }
+            )
         }
     }
 }
