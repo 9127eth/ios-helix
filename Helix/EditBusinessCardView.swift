@@ -52,7 +52,11 @@ struct EditBusinessCardView: View {
                             }
                         }
                         
-                        deleteButton
+                        Divider()
+                            .background(Color.gray)
+                            .padding(.vertical)
+                        
+                        dangerSection
                     }
                     .padding()
                 }
@@ -105,25 +109,25 @@ struct EditBusinessCardView: View {
         }
     }
     
-    private var deleteButton: some View {
-        HStack {
-            Spacer()
+    private var dangerSection: some View {
+        VStack(alignment: .center, spacing: 8) {
+            Text("Danger!")
+                .font(.subheadline)
+                .foregroundColor(.gray)
+            
             Button(action: {
                 showingDeleteConfirmation = true
             }) {
-                HStack {
-                    Image(systemName: "trash")
-                    Text("Delete")
-                }
-                .foregroundColor(.white)
-                .padding(.vertical, 6)  // Reduced vertical padding
-                .padding(.horizontal, 12)  // Reduced horizontal padding
-                .background(Color.red)
-                .cornerRadius(6)  // Reduced corner radius
-                .font(.system(size: 14))  // Reduced font size
+                Text("Delete Card")
+                    .foregroundColor(.white)
+                    .padding(.vertical, 6)
+                    .padding(.horizontal, 12)
+                    .background(Color.red)
+                    .cornerRadius(6)
+                    .font(.system(size: 14))
             }
         }
-        .padding(.top, 16)  // Reduced top padding
+        .frame(maxWidth: .infinity)
     }
     
     func sectionContent(for section: String, card: Binding<BusinessCard>) -> some View {
