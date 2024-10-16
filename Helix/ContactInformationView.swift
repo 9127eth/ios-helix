@@ -78,6 +78,7 @@ struct PhoneNumberTextField: View {
     @Binding var isValid: Bool
     @State private var selectedCountry: CountryInfo
     @State private var localPhoneNumber: String = ""
+    @Environment(\.colorScheme) var colorScheme
     
     private static let phoneUtil = NBPhoneNumberUtil.sharedInstance()
     private static let countriesData = initializeCountries()
@@ -121,11 +122,11 @@ struct PhoneNumberTextField: View {
                 } label: {
                     Text(selectedCountry.flag)
                         .frame(width: 40, height: 40)
-                        .background(Color(UIColor.systemBackground))
+                        .background(AppColors.inputFieldBackground)
                         .cornerRadius(8)
                         .overlay(
                             RoundedRectangle(cornerRadius: 8)
-                                .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+                                .stroke(colorScheme == .dark ? Color.gray.opacity(0.3) : Color.clear, lineWidth: 1)
                         )
                 }
 
@@ -133,11 +134,11 @@ struct PhoneNumberTextField: View {
                     .keyboardType(.phonePad)
                     .padding(.horizontal, 12)
                     .frame(height: 40)
-                    .background(Color(UIColor.systemBackground))
+                    .background(AppColors.inputFieldBackground)
                     .cornerRadius(8)
                     .overlay(
                         RoundedRectangle(cornerRadius: 8)
-                            .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+                            .stroke(colorScheme == .dark ? Color.gray.opacity(0.3) : Color.clear, lineWidth: 1)
                     )
                     .onChange(of: localPhoneNumber) { _ in
                         validatePhoneNumber()

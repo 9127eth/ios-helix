@@ -37,14 +37,12 @@ struct DocumentView: View {
             }
             
             Button(action: { isDocumentPickerPresented = true }) {
-                HStack {
-                    Image(systemName: "doc.badge.plus")
-                    Text(businessCard.cvUrl == nil ? "Upload Document" : "Replace Document")
-                }
-                .foregroundColor(.white)
-                .padding()
-                .background(AppColors.primary)
-                .cornerRadius(8)
+                Text(businessCard.cvUrl == nil ? "Upload Document" : "Replace Document")
+                    .foregroundColor(AppColors.buttonText)
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 10)
+                    .background(AppColors.buttonBackground)
+                    .cornerRadius(20)
             }
             .disabled(isUploading)
             

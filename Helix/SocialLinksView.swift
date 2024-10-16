@@ -61,14 +61,15 @@ struct SocialLinksView: View {
             Button(action: {
                 showingAddLinkPopup = true
             }) {
-                HStack {
-                    Image(systemName: "plus.circle.fill")
-                    Text("Add Social Link")
-                }
+                Text("Add Social Link")
+                    .foregroundColor(AppColors.buttonText)
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 10)
+                    .background(AppColors.buttonBackground)
+                    .cornerRadius(20)
             }
+            .frame(maxWidth: .infinity, alignment: .leading)
             .padding()
-            .background(Color.blue.opacity(0.1))
-            .cornerRadius(8)
         }
         .padding(.top, showHeader ? 0 : 16)
         .sheet(isPresented: $showingAddLinkPopup) {

@@ -11,6 +11,7 @@ struct CustomTextField: View {
     let title: String
     @Binding var text: String
     var onCommit: (() -> Void)?
+    @Environment(\.colorScheme) var colorScheme
     
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
@@ -24,6 +25,10 @@ struct CustomTextField: View {
             .padding(.horizontal, 12)
             .background(AppColors.inputFieldBackground)
             .cornerRadius(8)
+            .overlay(
+                RoundedRectangle(cornerRadius: 8)
+                    .stroke(colorScheme == .dark ? Color.gray.opacity(0.3) : Color.clear, lineWidth: 1)
+            )
             .shadow(color: Color.black.opacity(0.05), radius: 3, x: 0, y: 1)
         }
     }
@@ -32,7 +37,8 @@ struct CustomTextField: View {
 struct CustomTextEditor: View {
     let title: String
     @Binding var text: String
-    
+    @Environment(\.colorScheme) var colorScheme
+
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text(title)
@@ -41,9 +47,16 @@ struct CustomTextEditor: View {
             TextEditor(text: $text)
                 .frame(height: 100)
                 .padding(8)
+                .scrollContentBackground(.hidden) // Hide the default background
                 .background(AppColors.inputFieldBackground)
-                .cornerRadius(10)
-                .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
+                .cornerRadius(8)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 8)
+                        .stroke(
+                            colorScheme == .dark ? Color.gray.opacity(0.3) : Color.clear,
+                            lineWidth: 1
+                        )
+                )
         }
     }
 }
