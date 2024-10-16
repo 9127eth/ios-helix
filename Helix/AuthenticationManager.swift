@@ -22,7 +22,8 @@ class AuthenticationManager: NSObject, ObservableObject {
     
     private var appleSignInCompletion: ((Result<User, Error>) -> Void)?
     private var currentNonce: String?
-
+    private var appleSignInDelegate: AppleSignInDelegate?
+    
     override init() {
         super.init()
         setupFirebaseAuthStateListener()
@@ -82,6 +83,7 @@ class AuthenticationManager: NSObject, ObservableObject {
     }
     
     func signInWithApple() async throws -> User {
+        print("Sign in with Apple button tapped")
         let nonce = randomNonceString()
         currentNonce = nonce
         let appleIDProvider = ASAuthorizationAppleIDProvider()
@@ -89,13 +91,18 @@ class AuthenticationManager: NSObject, ObservableObject {
         request.requestedScopes = [.fullName, .email]
         request.nonce = sha256(nonce)
         
-        let result = try await withCheckedThrowingContinuation { continuation in
+        let result = try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<ASAuthorization, Error>) in
             let authorizationController = ASAuthorizationController(authorizationRequests: [request])
-            authorizationController.delegate = AppleSignInDelegate(continuation: continuation)
+            let delegate = AppleSignInDelegate(continuation: continuation)
+            authorizationController.delegate = delegate
+            authorizationController.presentationContextProvider = self
             authorizationController.performRequests()
+            
+            // Store the delegate to prevent it from being deallocated
+            self.appleSignInDelegate = delegate
         }
         
-        guard let appleIDCredential = result as? ASAuthorizationAppleIDCredential,
+        guard let appleIDCredential = result.credential as? ASAuthorizationAppleIDCredential,
               let appleIDToken = appleIDCredential.identityToken,
               let idTokenString = String(data: appleIDToken, encoding: .utf8) else {
             throw NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "Unable to fetch identity token"])
@@ -304,34 +311,29 @@ extension AuthenticationManager: ASAuthorizationControllerDelegate {
                                                       idToken: idTokenString,
                                                       rawNonce: nonce)
             
-            Auth.auth().signIn(with: credential) { [weak self] authResult, error in
-                if let user = authResult?.user {
-                    Task {
-                        do {
-                            try await self?.createUserDocument(for: user)
-                            self?.appleSignInCompletion?(.success(user))
-                        } catch {
-                            self?.appleSignInCompletion?(.failure(error))
-                        }
-                    }
-                } else if let error = error {
-                    self?.appleSignInCompletion?(.failure(error))
+            Auth.auth().signIn(with: credential) { (authResult, error) in
+                if let error = error {
+                    print(error.localizedDescription)
+                    return
                 }
-                self?.appleSignInCompletion = nil
+                // User is signed in to Firebase with Apple.
+                // ...
             }
         }
     }
     
     func authorizationController(controller: ASAuthorizationController, didCompleteWithError error: Error) {
         print("Sign in with Apple errored: \(error)")
-        self.appleSignInCompletion?(.failure(error))
-        self.appleSignInCompletion = nil
     }
 }
 
 extension AuthenticationManager: ASAuthorizationControllerPresentationContextProviding {
     func presentationAnchor(for controller: ASAuthorizationController) -> ASPresentationAnchor {
-        return UIApplication.shared.windows.first!
+        guard let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+              let window = scene.windows.first else {
+            fatalError("Unable to find a valid window scene")
+        }
+        return window
     }
 }
 

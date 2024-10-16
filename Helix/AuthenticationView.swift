@@ -232,3 +232,11 @@ struct AuthenticationView: View {
         }
     }
 }
+extension AuthenticationManager {
+    static func mock() -> AuthenticationManager {
+        let manager = AuthenticationManager()
+        // Set up any necessary mock data here
+        return manager
+    }
+}
+
