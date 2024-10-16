@@ -52,6 +52,9 @@ struct ContentView: View {
         .onReceive(NotificationCenter.default.publisher(for: .cardDeleted)) { _ in
             fetchBusinessCards()
         }
+        .onAppear {
+            selectedTab = 0
+        }
     }
     
     private var businessCardTab: some View {
