@@ -59,10 +59,10 @@ struct ProfileImageView: View {
                     uploadError = nil
                 }) {
                     Text(isUploading ? "Uploading..." : "Select Image")
-                        .foregroundColor(.white)
+                        .foregroundColor(AppColors.buttonText)
                         .padding(.horizontal, 20)
                         .padding(.vertical, 10)
-                        .background(isUploading ? Color.gray : AppColors.primary)
+                        .background(AppColors.buttonBackground)
                         .cornerRadius(20)
                 }
                 .disabled(isUploading)

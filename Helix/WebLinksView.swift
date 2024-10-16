@@ -62,10 +62,10 @@ struct WebLinksView: View {
             
             Button(action: addNewLinkInput) {
                 Text("Add Another Link")
-                    .foregroundColor(.white)
+                    .foregroundColor(AppColors.buttonText)
                     .padding(.horizontal, 20)
                     .padding(.vertical, 10)
-                    .background(AppColors.primary)
+                    .background(AppColors.buttonBackground)
                     .cornerRadius(20)
             }
         }
