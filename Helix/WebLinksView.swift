@@ -12,7 +12,8 @@ struct WebLinksView: View {
     @State private var linkInputs: [WebLink] = []
     @FocusState private var focusedField: Field?
     var showHeader: Bool
-    
+    @State private var offsets: [CGFloat] = []
+
     init(businessCard: Binding<BusinessCard>, showHeader: Bool = true) {
         self._businessCard = businessCard
         self.showHeader = showHeader
@@ -32,28 +33,56 @@ struct WebLinksView: View {
             }
             
             ForEach(linkInputs.indices, id: \.self) { index in
-                HStack(alignment: .top) {
-                    VStack(spacing: 10) {
-                        CustomTextField(title: "Link", text: $linkInputs[index].url, onCommit: { focusedField = .displayText(index) })
-                            .focused($focusedField, equals: .url(index))
-                            .animation(.none, value: linkInputs[index].url)
-                        CustomTextField(title: "Display Text (optional)", text: $linkInputs[index].displayText, onCommit: {
-                            if index < linkInputs.count - 1 {
-                                focusedField = .url(index + 1)
-                            } else {
-                                focusedField = nil
+                ZStack {
+                    GeometryReader { geometry in
+                        HStack(spacing: 0) {
+                            Spacer()
+                            Button(action: { removeLink(at: index) }) {
+                                Image(systemName: "trash")
+                                    .foregroundColor(.red)
+                                    .font(.system(size: 20))
                             }
-                        })
-                        .focused($focusedField, equals: .displayText(index))
-                        .animation(.none, value: linkInputs[index].displayText)
+                            .frame(width: 60, height: geometry.size.height)
+                            .offset(x: offsets[index] + 60)
+                        }
+                        .frame(height: geometry.size.height, alignment: .center)
                     }
-                    .layoutPriority(1)
                     
-                    Button(action: { removeLink(at: index) }) {
-                        Image(systemName: "xmark.circle.fill")
-                            .foregroundColor(.gray)
-                            .padding(.top, 15)
+                    HStack(alignment: .top) {
+                        VStack(spacing: 10) {
+                            CustomTextField(title: "Link", text: $linkInputs[index].url, onCommit: { focusedField = .displayText(index) })
+                                .focused($focusedField, equals: .url(index))
+                                .animation(.none, value: linkInputs[index].url)
+                            CustomTextField(title: "Display Text (optional)", text: $linkInputs[index].displayText, onCommit: {
+                                if index < linkInputs.count - 1 {
+                                    focusedField = .url(index + 1)
+                                } else {
+                                    focusedField = nil
+                                }
+                            })
+                            .focused($focusedField, equals: .displayText(index))
+                            .animation(.none, value: linkInputs[index].displayText)
+                        }
+                        .layoutPriority(1)
                     }
+                    .padding(.vertical, 8)
+                    .background(Color.clear)
+                    .offset(x: offsets[index])
+                    .gesture(
+                        DragGesture()
+                            .onChanged { gesture in
+                                offsets[index] = min(0, gesture.translation.width)
+                            }
+                            .onEnded { _ in
+                                withAnimation {
+                                    if offsets[index] < -30 {
+                                        offsets[index] = -60
+                                    } else {
+                                        offsets[index] = 0
+                                    }
+                                }
+                            }
+                    )
                 }
                 
                 Divider()
@@ -75,6 +104,7 @@ struct WebLinksView: View {
         .onAppear(perform: loadExistingLinks)
         .onChange(of: linkInputs) { _ in
             updateBusinessCard()
+            updateOffsets()
         }
     }
     
@@ -83,16 +113,28 @@ struct WebLinksView: View {
         if linkInputs.isEmpty {
             linkInputs.append(WebLink(url: "", displayText: ""))
         }
+        updateOffsets()
     }
     
     private func addNewLinkInput() {
         linkInputs.append(WebLink(url: "", displayText: ""))
+        offsets.append(0)
         focusedField = .url(linkInputs.count - 1)
     }
     
     private func removeLink(at index: Int) {
         linkInputs.remove(at: index)
+        offsets.remove(at: index)
         updateBusinessCard()
+    }
+    
+    private func updateOffsets() {
+        while offsets.count < linkInputs.count {
+            offsets.append(0)
+        }
+        while offsets.count > linkInputs.count {
+            offsets.removeLast()
+        }
     }
     
     private func updateBusinessCard() {

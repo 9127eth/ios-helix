@@ -39,10 +39,11 @@ struct DocumentView: View {
             Button(action: { isDocumentPickerPresented = true }) {
                 Text(businessCard.cvUrl == nil ? "Upload Document" : "Replace Document")
                     .foregroundColor(AppColors.buttonText)
-                    .padding(.horizontal, 20)
-                    .padding(.vertical, 10)
+                    .font(.system(size: UIFont.labelFontSize * 0.8)) // 20% smaller font
+                    .padding(.horizontal, 16) // 20% smaller horizontal padding
+                    .padding(.vertical, 8) // 20% smaller vertical padding
                     .background(AppColors.buttonBackground)
-                    .cornerRadius(20)
+                    .cornerRadius(16) // 20% smaller corner radius
             }
             .disabled(isUploading)
             
