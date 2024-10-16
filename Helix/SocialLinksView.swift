@@ -63,10 +63,11 @@ struct SocialLinksView: View {
             }) {
                 Text("Add Social Link")
                     .foregroundColor(AppColors.buttonText)
-                    .padding(.horizontal, 20)
-                    .padding(.vertical, 10)
+                    .font(.system(size: 14))
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 8)
                     .background(AppColors.buttonBackground)
-                    .cornerRadius(20)
+                    .cornerRadius(16)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding()

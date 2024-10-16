@@ -116,13 +116,14 @@ struct EditBusinessCardView: View {
                     Text("Delete")
                 }
                 .foregroundColor(.white)
-                .padding(.vertical, 8)  // Reduced vertical padding
-                .padding(.horizontal, 16)
+                .padding(.vertical, 6)  // Reduced vertical padding
+                .padding(.horizontal, 12)  // Reduced horizontal padding
                 .background(Color.red)
-                .cornerRadius(8)
+                .cornerRadius(6)  // Reduced corner radius
+                .font(.system(size: 14))  // Reduced font size
             }
         }
-        .padding(.top, 20)
+        .padding(.top, 16)  // Reduced top padding
     }
     
     func sectionContent(for section: String, card: Binding<BusinessCard>) -> some View {
