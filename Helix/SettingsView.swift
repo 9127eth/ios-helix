@@ -37,7 +37,10 @@ struct SettingsView: View {
                 }
             }
             .navigationTitle("Settings")
+            .background(AppColors.background)
+            .scrollContentBackground(.hidden)
         }
+        .background(AppColors.background)
         .alert(isPresented: $showDeleteConfirmation) {
             Alert(
                 title: Text("Delete Account"),
