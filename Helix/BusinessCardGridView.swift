@@ -10,6 +10,7 @@ import SwiftUI
 struct BusinessCardGridView: View {
     @Binding var businessCards: [BusinessCard]
     @Binding var showCreateCard: Bool
+    let username: String  // Add this line to receive the username
     
     @Environment(\.horizontalSizeClass) var sizeClass
     
@@ -22,7 +23,7 @@ struct BusinessCardGridView: View {
                 
                 LazyVStack(spacing: 16) {
                     ForEach($businessCards) { $card in
-                        BusinessCardItemView(card: $card)
+                        BusinessCardItemView(card: $card, username: username)  // Pass the username here
                     }
                     AddCardButton(action: { showCreateCard = true })
                 }

@@ -63,6 +63,6 @@ struct BasicInformationView: View {
 
 struct BasicInformationView_Previews: PreviewProvider {
     static var previews: some View {
-        BasicInformationView(businessCard: .constant(BusinessCard(cardSlug: "", userId: "", isPrimary: false, username: "", firstName: "")))
+        BasicInformationView(businessCard: .constant(BusinessCard(cardSlug: "", firstName: "")))
     }
 }

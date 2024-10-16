@@ -9,6 +9,7 @@ import Photos
 
 struct ShareView: View {
     let card: BusinessCard
+    let username: String
     @Binding var isPresented: Bool
     @State private var qrCode: UIImage?
     @State private var selectedFormat: ImageFormat = .png
@@ -60,13 +61,13 @@ struct ShareView: View {
                                 .cornerRadius(10)
                         }
                         
-                        Text(card.getCardURL())
+                        Text(card.getCardURL(username: username))
                             .font(.caption)
                         
                         // Buttons with adjusted width, standardized height, and increased spacing
                         VStack(spacing: 15) {
                             Button(action: {
-                                UIPasteboard.general.string = card.getCardURL()
+                                UIPasteboard.general.string = card.getCardURL(username: username)
                                 withAnimation {
                                     showCopiedCheckmark = true
                                 }
@@ -89,7 +90,7 @@ struct ShareView: View {
                             .frame(width: 320)
                             
                             Button(action: {
-                                let url = card.getCardURL()
+                                let url = card.getCardURL(username: username)
                                 let activityViewController = UIActivityViewController(activityItems: [url], applicationActivities: nil)
                                 
                                 if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
@@ -165,7 +166,7 @@ struct ShareView: View {
     }
     
     func generateQRCode() {
-        let data = card.getCardURL().data(using: .ascii)
+        let data = card.getCardURL(username: username).data(using: .ascii)
         if let filter = CIFilter(name: "CIQRCodeGenerator") {
             filter.setValue(data, forKey: "inputMessage")
             if let outputImage = filter.outputImage {
@@ -227,7 +228,7 @@ struct ShareView: View {
             }
         }
         
-        let activityViewController = UIActivityViewController(activityItems: [imageToShare], applicationActivities: nil)
+        let activityViewController = UIActivityViewController(activityItems: [imageToShare, card.getCardURL(username: username)], applicationActivities: nil)
         
         if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
            let window = windowScene.windows.first,

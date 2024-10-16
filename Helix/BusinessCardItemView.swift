@@ -8,6 +8,7 @@ import SwiftUI
 
 struct BusinessCardItemView: View {
     @Binding var card: BusinessCard
+    let username: String
     @State private var showPreview = false
     @State private var showShare = false
     @State private var showingEditView = false
@@ -104,13 +105,13 @@ struct BusinessCardItemView: View {
         .cornerRadius(8)
         .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
         .sheet(isPresented: $showPreview) {
-            PreviewView(card: card, isPresented: $showPreview)
+            PreviewView(card: card, username: username, isPresented: $showPreview)
         }
         .sheet(isPresented: $showShare) {
-            ShareView(card: card, isPresented: $showShare)
+            ShareView(card: card, username: username, isPresented: $showShare)
         }
         .sheet(isPresented: $showingEditView) {
-            EditBusinessCardView(businessCard: $card)
+            EditBusinessCardView(businessCard: $card, username: username)
         }
         .alert("Confirm Deletion", isPresented: $showingDeleteConfirmation) {
             Button("Cancel", role: .cancel) {}

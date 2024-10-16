@@ -12,16 +12,14 @@ import FirebaseAuth
 struct BusinessCard: Identifiable, Codable {
     @DocumentID var id: String?
     var cardSlug: String
-    var userId: String?  // Make this optional
     var isPrimary: Bool
-    var username: String
     var firstName: String
     var middleName: String?
     var lastName: String?
     var prefix: String?
     var credentials: String?
     var pronouns: String?
-    var description: String // This is the card description
+    var description: String = "" // This is the card description
     var jobTitle: String?
     var company: String?
     var phoneNumber: String?
@@ -47,15 +45,25 @@ struct BusinessCard: Identifiable, Codable {
     var cvDescription: String?
     var cvDisplayText: String?
     var imageUrl: String?
-    var isActive: Bool
-    var createdAt: Date
-    var updatedAt: Date
+    var isActive: Bool = true
+    var createdAt: Date = Date()
+    var updatedAt: Date = Date()
     var customSlug: String?
     var isPro: Bool?
     var socialLinks: [SocialLinkType: String] = [:]
 
+    init(cardSlug: String, firstName: String) {
+        self.cardSlug = cardSlug
+        self.firstName = firstName
+        self.isPrimary = false
+        self.description = ""
+        self.isActive = true
+        self.createdAt = Date()
+        self.updatedAt = Date()
+    }
+
     enum CodingKeys: String, CodingKey {
-        case id, cardSlug, userId, isPrimary, username, firstName, middleName, lastName, prefix, credentials, pronouns, description, jobTitle, company, phoneNumber, email, aboutMe, customMessage, customMessageHeader, linkedIn, twitter, facebookUrl, instagramUrl, tiktokUrl, youtubeUrl, discordUrl, twitchUrl, snapchatUrl, telegramUrl, whatsappUrl, threadsUrl, webLinks, cvUrl, cvHeader, cvDescription, cvDisplayText, imageUrl, isActive, createdAt, updatedAt, customSlug, isPro
+        case id, cardSlug, isPrimary, firstName, middleName, lastName, prefix, credentials, pronouns, description, jobTitle, company, phoneNumber, email, aboutMe, customMessage, customMessageHeader, linkedIn, twitter, facebookUrl, instagramUrl, tiktokUrl, youtubeUrl, discordUrl, twitchUrl, snapchatUrl, telegramUrl, whatsappUrl, threadsUrl, webLinks, cvUrl, cvHeader, cvDescription, cvDisplayText, imageUrl, isActive, createdAt, updatedAt, customSlug, isPro
     }
 
     var name: String {
@@ -63,7 +71,7 @@ struct BusinessCard: Identifiable, Codable {
         return fullName.trimmingCharacters(in: .whitespacesAndNewlines)
     }
     
-    func getCardURL() -> String {
+    func getCardURL(username: String) -> String {
         let baseURL = "https://www.helixcard.app/c"
         if isPrimary {
             return "\(baseURL)/\(username)"
@@ -72,101 +80,55 @@ struct BusinessCard: Identifiable, Codable {
         }
     }
     
-    init(
-        id: String? = nil,
-        cardSlug: String = UUID().uuidString,
-        userId: String? = nil,
-        isPrimary: Bool = false,
-        username: String = "",
-        firstName: String = "",
-        middleName: String? = nil,
-        lastName: String? = nil,
-        prefix: String? = nil,
-        credentials: String? = nil,
-        pronouns: String? = nil,
-        description: String = "",
-        jobTitle: String? = nil,
-        company: String? = nil,
-        phoneNumber: String? = nil,
-        email: String? = nil,
-        aboutMe: String? = nil,
-        customMessage: String? = nil,
-        customMessageHeader: String? = nil,
-        linkedIn: String? = nil,
-        twitter: String? = nil,
-        facebookUrl: String? = nil,
-        instagramUrl: String? = nil,
-        tiktokUrl: String? = nil,
-        youtubeUrl: String? = nil,
-        discordUrl: String? = nil,
-        twitchUrl: String? = nil,
-        snapchatUrl: String? = nil,
-        telegramUrl: String? = nil,
-        whatsappUrl: String? = nil,
-        threadsUrl: String? = nil,
-        webLinks: [WebLink]? = nil,
-        cvUrl: String? = nil,
-        cvHeader: String? = nil,
-        cvDescription: String? = nil,
-        cvDisplayText: String? = nil,
-        imageUrl: String? = nil,
-        isActive: Bool = true,
-        createdAt: Date = Date(),
-        updatedAt: Date = Date(),
-        customSlug: String? = nil,
-        isPro: Bool? = false
-    ) {
-        self.id = id
-        self.cardSlug = cardSlug
-        self.userId = userId
-        self.isPrimary = isPrimary
-        self.username = username
-        self.firstName = firstName
-        self.middleName = middleName
-        self.lastName = lastName
-        self.prefix = prefix
-        self.credentials = credentials
-        self.pronouns = pronouns
-        self.description = description
-        self.jobTitle = jobTitle
-        self.company = company
-        self.phoneNumber = phoneNumber
-        self.email = email
-        self.aboutMe = aboutMe
-        self.customMessage = customMessage
-        self.customMessageHeader = customMessageHeader
-        self.linkedIn = linkedIn
-        self.twitter = twitter
-        self.facebookUrl = facebookUrl
-        self.instagramUrl = instagramUrl
-        self.tiktokUrl = tiktokUrl
-        self.youtubeUrl = youtubeUrl
-        self.discordUrl = discordUrl
-        self.twitchUrl = twitchUrl
-        self.snapchatUrl = snapchatUrl
-        self.telegramUrl = telegramUrl
-        self.whatsappUrl = whatsappUrl
-        self.threadsUrl = threadsUrl
-        self.webLinks = webLinks
-        self.cvUrl = cvUrl
-        self.cvHeader = cvHeader
-        self.cvDescription = cvDescription
-        self.cvDisplayText = cvDisplayText
-        self.imageUrl = imageUrl
-        self.isActive = isActive
-        self.createdAt = createdAt
-        self.updatedAt = updatedAt
-        self.customSlug = customSlug
-        self.isPro = isPro
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decodeIfPresent(String.self, forKey: .id)
+        cardSlug = try container.decode(String.self, forKey: .cardSlug)
+        isPrimary = try container.decode(Bool.self, forKey: .isPrimary)
+        firstName = try container.decode(String.self, forKey: .firstName)
+        middleName = try container.decodeIfPresent(String.self, forKey: .middleName)
+        lastName = try container.decodeIfPresent(String.self, forKey: .lastName)
+        prefix = try container.decodeIfPresent(String.self, forKey: .prefix)
+        credentials = try container.decodeIfPresent(String.self, forKey: .credentials)
+        pronouns = try container.decodeIfPresent(String.self, forKey: .pronouns)
+        description = try container.decode(String.self, forKey: .description)
+        jobTitle = try container.decodeIfPresent(String.self, forKey: .jobTitle)
+        company = try container.decodeIfPresent(String.self, forKey: .company)
+        phoneNumber = try container.decodeIfPresent(String.self, forKey: .phoneNumber)
+        email = try container.decodeIfPresent(String.self, forKey: .email)
+        aboutMe = try container.decodeIfPresent(String.self, forKey: .aboutMe)
+        customMessage = try container.decodeIfPresent(String.self, forKey: .customMessage)
+        customMessageHeader = try container.decodeIfPresent(String.self, forKey: .customMessageHeader)
+        linkedIn = try container.decodeIfPresent(String.self, forKey: .linkedIn)
+        twitter = try container.decodeIfPresent(String.self, forKey: .twitter)
+        facebookUrl = try container.decodeIfPresent(String.self, forKey: .facebookUrl)
+        instagramUrl = try container.decodeIfPresent(String.self, forKey: .instagramUrl)
+        tiktokUrl = try container.decodeIfPresent(String.self, forKey: .tiktokUrl)
+        youtubeUrl = try container.decodeIfPresent(String.self, forKey: .youtubeUrl)
+        discordUrl = try container.decodeIfPresent(String.self, forKey: .discordUrl)
+        twitchUrl = try container.decodeIfPresent(String.self, forKey: .twitchUrl)
+        snapchatUrl = try container.decodeIfPresent(String.self, forKey: .snapchatUrl)
+        telegramUrl = try container.decodeIfPresent(String.self, forKey: .telegramUrl)
+        whatsappUrl = try container.decodeIfPresent(String.self, forKey: .whatsappUrl)
+        threadsUrl = try container.decodeIfPresent(String.self, forKey: .threadsUrl)
+        webLinks = try container.decodeIfPresent([WebLink].self, forKey: .webLinks)
+        cvUrl = try container.decodeIfPresent(String.self, forKey: .cvUrl)
+        cvHeader = try container.decodeIfPresent(String.self, forKey: .cvHeader)
+        cvDescription = try container.decodeIfPresent(String.self, forKey: .cvDescription)
+        cvDisplayText = try container.decodeIfPresent(String.self, forKey: .cvDisplayText)
+        imageUrl = try container.decodeIfPresent(String.self, forKey: .imageUrl)
+        isActive = try container.decode(Bool.self, forKey: .isActive)
+        createdAt = try container.decode(Date.self, forKey: .createdAt)
+        updatedAt = try container.decode(Date.self, forKey: .updatedAt)
+        customSlug = try container.decodeIfPresent(String.self, forKey: .customSlug)
+        isPro = try container.decodeIfPresent(Bool.self, forKey: .isPro)
     }
-    
+
     func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encodeIfPresent(id, forKey: .id)
         try container.encode(cardSlug, forKey: .cardSlug)
-        try container.encode(userId, forKey: .userId)
         try container.encode(isPrimary, forKey: .isPrimary)
-        try container.encode(username, forKey: .username)
         try container.encode(firstName, forKey: .firstName)
         try container.encodeIfPresent(middleName, forKey: .middleName)
         try container.encodeIfPresent(lastName, forKey: .lastName)
@@ -224,12 +186,16 @@ struct BusinessCard: Identifiable, Codable {
     }
 
     func saveChanges() async throws {
-        guard let userId = self.userId, let id = self.id else {
-            throw NSError(domain: "com.yourapp.error", code: 1001, userInfo: [NSLocalizedDescriptionKey: "Invalid user or card ID"])
+        guard let id = self.id else {
+            throw NSError(domain: "com.yourapp.error", code: 1001, userInfo: [NSLocalizedDescriptionKey: "Invalid card ID"])
+        }
+        
+        guard let currentUser = Auth.auth().currentUser else {
+            throw NSError(domain: "com.yourapp.error", code: 1002, userInfo: [NSLocalizedDescriptionKey: "No authenticated user found"])
         }
         
         let db = Firestore.firestore()
-        let cardRef = db.collection("users").document(userId).collection("businessCards").document(id)
+        let cardRef = db.collection("users").document(currentUser.uid).collection("businessCards").document(id)
         
         do {
             try await cardRef.setData(self.asDictionary(), merge: true)
@@ -245,12 +211,16 @@ struct BusinessCard: Identifiable, Codable {
             throw NSError(domain: "com.yourapp.error", code: 1001, userInfo: [NSLocalizedDescriptionKey: "No authenticated user found"])
         }
         
+        guard let id = card.id else {
+            throw NSError(domain: "com.yourapp.error", code: 1002, userInfo: [NSLocalizedDescriptionKey: "Invalid card ID"])
+        }
+        
         let db = Firestore.firestore()
-        let cardRef = db.collection("users").document(currentUser.uid).collection("businessCards").document(card.cardSlug)
+        let cardRef = db.collection("users").document(currentUser.uid).collection("businessCards").document(id)
         
         do {
             try await cardRef.setData(card.asDictionary(), merge: true)
-            print("Successfully saved changes for card: \(card.cardSlug)")
+            print("Successfully saved changes for card: \(id)")
         } catch {
             print("Error saving changes: \(error.localizedDescription)")
             throw error

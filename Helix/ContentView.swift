@@ -8,6 +8,7 @@
 import SwiftUI
 import SwiftData
 import FirebaseFirestore
+import FirebaseAuth
 
 struct ContentView: View {
     @StateObject private var authManager = AuthenticationManager()
@@ -17,6 +18,7 @@ struct ContentView: View {
     @State private var selectedTab = 0
     @State private var hasAppeared = false
     @State private var showCreateCard = false
+    @State private var username: String = ""
     
     var body: some View {
         Group {
@@ -48,7 +50,7 @@ struct ContentView: View {
     }
     
     private var businessCardTab: some View {
-        BusinessCardGridView(businessCards: $businessCards, showCreateCard: $showCreateCard)
+        BusinessCardGridView(businessCards: $businessCards, showCreateCard: $showCreateCard, username: username)
             .tabItem {
                 Image(systemName: "rectangle.on.rectangle")
                 Text("Cards")
@@ -79,39 +81,45 @@ struct ContentView: View {
     }
     
     private func fetchBusinessCards() {
-        guard let userId = authManager.currentUser?.uid else {
+        guard let userId = Auth.auth().currentUser?.uid else {
             print("Error: No authenticated user found")
             errorMessage = "User not authenticated"
             return
         }
-        
-        print("Fetching business cards for user: \(userId)")
         isLoading = true
+        print("Fetching business cards for user: \(userId)")
         errorMessage = nil
         
         let db = Firestore.firestore()
-        db.collection("users").document(userId).collection("businessCards").getDocuments { (querySnapshot, error) in
-            isLoading = false
-            
-            if let error = error {
-                print("Error getting documents: \(error)")
-                errorMessage = "Failed to fetch business cards: \(error.localizedDescription)"
-            } else {
-                print("Query successful. Number of documents: \(querySnapshot?.documents.count ?? 0)")
+        let userRef = db.collection("users").document(userId)
+        
+        Task {
+            do {
+                let userDocument = try await userRef.getDocument()
+                guard let userData = userDocument.data(),
+                      let fetchedUsername = userData["username"] as? String else {
+                    throw NSError(domain: "com.yourapp.error", code: 1002, userInfo: [NSLocalizedDescriptionKey: "Failed to fetch user data"])
+                }
                 
-                self.businessCards = querySnapshot?.documents.compactMap { document in
+                self.username = fetchedUsername
+                
+                let querySnapshot = try await userRef.collection("businessCards").getDocuments()
+                self.businessCards = querySnapshot.documents.compactMap { document in
                     do {
                         var card = try document.data(as: BusinessCard.self)
                         card.id = document.documentID
-                        print("Successfully decoded card: \(card.id ?? "Unknown ID")")
                         return card
                     } catch {
                         print("Error decoding document \(document.documentID): \(error)")
                         return nil
                     }
-                } ?? []
+                }
                 
-                print("Fetched \(self.businessCards.count) business cards")
+                isLoading = false
+            } catch {
+                print("Error fetching business cards: \(error)")
+                errorMessage = "Failed to fetch business cards: \(error.localizedDescription)"
+                isLoading = false
             }
         }
     }

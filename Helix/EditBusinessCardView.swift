@@ -10,6 +10,7 @@ import FirebaseFirestore
 
 struct EditBusinessCardView: View {
     @Binding var businessCard: BusinessCard
+    let username: String  // Add this line
     @State private var editedCard: BusinessCard
     @Environment(\.presentationMode) var presentationMode
     @State private var showingCancelConfirmation = false
@@ -94,7 +95,7 @@ struct EditBusinessCardView: View {
             Text("Are you sure you want to delete this business card? This action is irreversible.")
         }
         .sheet(isPresented: $showPreview) {
-            PreviewView(card: editedCard, isPresented: $showPreview)
+            PreviewView(card: editedCard, username: username, isPresented: $showPreview)
         }
     }
     
@@ -168,8 +169,9 @@ struct EditBusinessCardView: View {
         }
     }
     
-    init(businessCard: Binding<BusinessCard>) {
+    init(businessCard: Binding<BusinessCard>, username: String) {
         self._businessCard = businessCard
         self._editedCard = State(initialValue: businessCard.wrappedValue)
+        self.username = username
     }
 }
