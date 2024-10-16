@@ -36,22 +36,22 @@ struct ProfileImageView: View {
                         image
                             .resizable()
                             .scaledToFill()
-                            .frame(width: 200, height: 200)
+                            .frame(width: 100, height: 100)
                             .clipShape(Circle())
-                            .overlay(Circle().stroke(AppColors.primary, lineWidth: 4))
-                            .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5)
+                            .overlay(Circle().stroke(AppColors.primary, lineWidth: 2))
+                            .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
                     } placeholder: {
                         ProgressView()
-                            .frame(width: 200, height: 200)
+                            .frame(width: 100, height: 100)
                     }
                 } else {
                     Image(systemName: "person.circle.fill")
                         .resizable()
                         .scaledToFit()
-                        .frame(width: 200, height: 200)
+                        .frame(width: 100, height: 100)
                         .foregroundColor(.gray)
-                        .overlay(Circle().stroke(AppColors.primary, lineWidth: 4))
-                        .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5)
+                        .overlay(Circle().stroke(AppColors.primary, lineWidth: 2))
+                        .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
                 }
                 
                 Button(action: { 
@@ -60,10 +60,11 @@ struct ProfileImageView: View {
                 }) {
                     Text(isUploading ? "Uploading..." : "Select Image")
                         .foregroundColor(AppColors.buttonText)
-                        .padding(.horizontal, 20)
-                        .padding(.vertical, 10)
+                        .font(.system(size: 14))
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 8)
                         .background(AppColors.buttonBackground)
-                        .cornerRadius(20)
+                        .cornerRadius(16)
                 }
                 .disabled(isUploading)
                 
