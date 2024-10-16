@@ -7,15 +7,15 @@
 import SwiftUI
 
 struct AppColors {
-    static let background = Color(hex: 0xEFEFEF)
-    static let foreground = Color.black
-    static let primary = Color(hex: 0x93DBD6)
-    static let primaryText = Color.black
-    static let cardGridBackground = Color.white
-    static let bodyPrimaryText = Color(hex: 0x333333)
-    static let barMenuBackground = Color(hex: 0xF5FDFD)
+    static let background = Color("backgroundColor")
+    static let foreground = Color("foregroundColor")
+    static let primary = Color("primaryColor")
+    static let primaryText = Color("primaryTextColor")
+    static let cardGridBackground = Color("cardGridBackgroundColor")
+    static let bodyPrimaryText = Color("bodyPrimaryTextColor")
+    static let barMenuBackground = Color("barMenuBackgroundColor")
+    static let inputFieldBackground = Color("inputFieldBackgroundColor")
     
-    // Helper initializer to create colors from hex values
     private init() {}
 }
 
