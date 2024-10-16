@@ -5,6 +5,9 @@
 //  Created by Richard Waithe on 10/11/24.
 //
 import SwiftUI
+import FirebaseFirestore
+import FirebaseAuth
+import NotificationCenter
 
 struct BusinessCardItemView: View {
     @Binding var card: BusinessCard
@@ -127,9 +130,11 @@ struct BusinessCardItemView: View {
         Task {
             do {
                 try await BusinessCard.delete(card)
-                // Here you would typically update your app's state to remove the card from the list
-                // This might involve notifying a parent view or using an environment object
                 print("Card deleted successfully")
+                // Notify the parent view that a card was deleted
+                DispatchQueue.main.async {
+                    NotificationCenter.default.post(name: .cardDeleted, object: nil)
+                }
             } catch {
                 print("Error deleting card: \(error.localizedDescription)")
                 // Here you might want to show an error alert to the user

@@ -47,6 +47,9 @@ struct ContentView: View {
             }
         }
         .overlay(loadingOverlay)
+        .onReceive(NotificationCenter.default.publisher(for: .cardDeleted)) { _ in
+            fetchBusinessCards()
+        }
     }
     
     private var businessCardTab: some View {

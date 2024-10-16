@@ -7,6 +7,8 @@
 
 import SwiftUI
 import FirebaseFirestore
+import FirebaseAuth
+import NotificationCenter
 
 struct EditBusinessCardView: View {
     @Binding var businessCard: BusinessCard
@@ -161,10 +163,15 @@ struct EditBusinessCardView: View {
         Task {
             do {
                 try await BusinessCard.delete(editedCard)
-                presentationMode.wrappedValue.dismiss()
+                print("Card deleted successfully")
+                // Notify that a card was deleted
+                DispatchQueue.main.async {
+                    NotificationCenter.default.post(name: .cardDeleted, object: nil)
+                    self.presentationMode.wrappedValue.dismiss()
+                }
             } catch {
-                saveErrorMessage = "Failed to delete business card: \(error.localizedDescription)"
-                showingSaveError = true
+                print("Error deleting card: \(error.localizedDescription)")
+                // Here you might want to show an error alert to the user
             }
         }
     }
