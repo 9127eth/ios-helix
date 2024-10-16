@@ -40,13 +40,17 @@ struct AuthenticationView: View {
         .alert(isPresented: $showingAlert) {
             Alert(title: Text("Error"), message: Text(alertMessage), dismissButton: .default(Text("OK")))
         }
+        .dismissKeyboardOnTap()  // Move this to the outermost view
+        .contentShape(Rectangle())  // Add this line
     }
     
     private var headerView: some View {
-        VStack(spacing: 10) {
-            Text("Helix.")
-                .font(.system(size: 40, weight: .bold))
-                .foregroundColor(AppColors.bodyPrimaryText)
+        VStack(spacing: 20) {
+            Image("helix_logo")
+                .resizable()
+                .scaledToFit()
+                .frame(height: 100)  // Adjust this value to fit your logo size
+                .padding(.bottom, 15)  // Added padding below the logo
             
             Text("Helping people create memorable connections.")
                 .font(.title2)
@@ -239,4 +243,3 @@ extension AuthenticationManager {
         return manager
     }
 }
-
