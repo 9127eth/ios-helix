@@ -11,9 +11,7 @@ import FirebaseAuth
 struct CreateBusinessCardView: View {
     @Binding var showCreateCard: Bool
     @State private var currentStep = 0
-    @State private var businessCard = BusinessCard(
-        // Initialize your businessCard properties here
-    )
+    @State private var businessCard = BusinessCard(cardSlug: "", firstName: "")
     @Environment(\.presentationMode) var presentationMode
     @EnvironmentObject var authManager: AuthenticationManager
     @State private var showCancelConfirmation = false
@@ -134,7 +132,6 @@ struct CreateBusinessCardView: View {
                     let primaryCardPlaceholder = userData["primaryCardPlaceholder"] as? Bool ?? true
                     
                     var cardData = self.businessCard
-                    cardData.username = username
                     cardData.isPrimary = primaryCardPlaceholder
                     cardData.isActive = isPro || primaryCardPlaceholder
                     

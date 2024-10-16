@@ -10,10 +10,11 @@ import SafariServices
 
 struct PreviewView: View {
     let card: BusinessCard
+    let username: String
     @Binding var isPresented: Bool
     
     var body: some View {
-        SafariView(url: URL(string: card.getCardURL())!)
+        SafariView(url: URL(string: card.getCardURL(username: username))!)
             .edgesIgnoringSafeArea(.all)
     }
 }
