@@ -26,32 +26,36 @@ struct EditBusinessCardView: View {
     
     var body: some View {
         NavigationView {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 20) {
-                    ForEach(sections, id: \.self) { section in
-                        DisclosureGroup(
-                            isExpanded: Binding(
-                                get: { expandedSections.contains(section) },
-                                set: { isExpanded in
-                                    if isExpanded {
-                                        expandedSections.insert(section)
-                                    } else {
-                                        expandedSections.remove(section)
+            ZStack {
+                AppColors.editSheetBackground.edgesIgnoringSafeArea(.all)
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 20) {
+                        ForEach(sections, id: \.self) { section in
+                            DisclosureGroup(
+                                isExpanded: Binding(
+                                    get: { expandedSections.contains(section) },
+                                    set: { isExpanded in
+                                        if isExpanded {
+                                            expandedSections.insert(section)
+                                        } else {
+                                            expandedSections.remove(section)
+                                        }
                                     }
-                                }
-                            )
-                        ) {
-                            sectionContent(for: section, card: $editedCard)
-                                .padding(.top, 16)
-                        } label: {
-                            Text(section)
-                                .font(.headline)
+                                )
+                            ) {
+                                sectionContent(for: section, card: $editedCard)
+                                    .padding(.top, 16)
+                            } label: {
+                                Text(section)
+                                    .font(.headline)
+                                    .foregroundColor(AppColors.primaryText) // Add this line
+                            }
                         }
+                        
+                        deleteButton
                     }
-                    
-                    deleteButton
+                    .padding()
                 }
-                .padding()
             }
             .navigationTitle("Edit")
             .navigationBarTitleDisplayMode(.large)

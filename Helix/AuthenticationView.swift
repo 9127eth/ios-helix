@@ -26,19 +26,13 @@ struct AuthenticationView: View {
             Color(AppColors.background)
                 .edgesIgnoringSafeArea(.all)
 
-            VStack(spacing: 30) {
+            VStack(spacing: 20) {
                 headerView
+                
+                authButtonsView
                 
                 if showEmailAuth {
                     emailAuthView
-                } else {
-                    authButtonsView
-                    orSeparator
-                    Button(action: { showEmailAuth = true }) {
-                        Text("Sign up with email")
-                            .foregroundColor(AppColors.primary)
-                            .underline()
-                    }
                 }
             }
             .padding()
@@ -127,8 +121,8 @@ struct AuthenticationView: View {
             Button(action: handleEmailAuth) {
                 Text(isLogin ? "Log In" : "Sign Up")
                     .frame(width: 160, height: 40)
-                    .background(isLogin || agreeToTerms ? AppColors.primary : Color.gray.opacity(0.3))
-                    .foregroundColor(isLogin || agreeToTerms ? AppColors.primaryText : Color.gray)
+                    .background(isLogin || agreeToTerms ? AppColors.buttonBackground : Color.gray.opacity(0.3))
+                    .foregroundColor(isLogin || agreeToTerms ? AppColors.buttonText : Color.gray)
                     .cornerRadius(20)
                     .font(.system(size: 16, weight: .medium))
             }

@@ -22,7 +22,7 @@ struct CustomTextField: View {
             })
             .padding(.vertical, 8)
             .padding(.horizontal, 12)
-            .background(Color.white)
+            .background(AppColors.inputFieldBackground)
             .cornerRadius(8)
             .shadow(color: Color.black.opacity(0.05), radius: 3, x: 0, y: 1)
         }
@@ -41,7 +41,7 @@ struct CustomTextEditor: View {
             TextEditor(text: $text)
                 .frame(height: 100)
                 .padding(8)
-                .background(Color.white)
+                .background(AppColors.inputFieldBackground)
                 .cornerRadius(10)
                 .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
         }
