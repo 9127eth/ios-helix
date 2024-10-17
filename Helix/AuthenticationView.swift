@@ -20,52 +20,80 @@ struct AuthenticationView: View {
     @State private var isLogin = false
     @State private var username = ""
     @State private var agreeToTerms = false
+    @State private var scrollOffset: CGFloat = 0
     
     var body: some View {
-        ZStack {
-            Color(AppColors.background)
-                .edgesIgnoringSafeArea(.all)
-
-            VStack(spacing: 20) {
-                headerView
+        GeometryReader { geometry in
+            ZStack {
+                Color(AppColors.background)
+                    .edgesIgnoringSafeArea(.all)
                 
-                authButtonsView
-                
-                if showEmailAuth {
-                    emailAuthView
+                ScrollView {
+                    VStack(spacing: 20) {
+                        headerView(geometry: geometry)
+                        
+                        // Authentication buttons
+                        authButtonsView
+                        
+                        // Show email authentication view if needed
+                        if showEmailAuth {
+                            emailAuthView
+                        }
+                    }
+                    .padding()
+                    .padding(.top, geometry.safeAreaInsets.top + 40)
+                    .background(GeometryReader { proxy -> Color in
+                        DispatchQueue.main.async {
+                            scrollOffset = -proxy.frame(in: .named("scroll")).origin.y
+                        }
+                        return Color.clear
+                    })
                 }
+                .coordinateSpace(name: "scroll")
             }
-            .padding()
         }
         .alert(isPresented: $showingAlert) {
             Alert(title: Text("Error"), message: Text(alertMessage), dismissButton: .default(Text("OK")))
         }
-        .dismissKeyboardOnTap()  // Move this to the outermost view
-        .contentShape(Rectangle())  // Add this line
+        .dismissKeyboardOnTap()
+        .contentShape(Rectangle())
     }
     
-    private var headerView: some View {
+    private func headerView(geometry: GeometryProxy) -> some View {
         VStack(spacing: 20) {
             Image("helix_logo")
                 .resizable()
                 .scaledToFit()
-                .frame(height: 100)  // Adjust this value to fit your logo size
-                .padding(.bottom, 15)  // Added padding below the logo
+                .frame(height: 100)
+                .padding(.bottom, 15)
+                .opacity(opacity(for: 0, geometry: geometry))
             
             Text("Helping people create memorable connections.")
                 .font(.title2)
                 .foregroundColor(AppColors.bodyPrimaryText)
+                .opacity(opacity(for: 120, geometry: geometry))
             
             Text("Empower your personal brand with customizable digital business cards.")
                 .font(.subheadline)
                 .foregroundColor(AppColors.bodyPrimaryText)
                 .multilineTextAlignment(.center)
+                .opacity(opacity(for: 170, geometry: geometry))
             
             Text("Try it free, no credit card required.")
                 .font(.caption)
                 .foregroundColor(AppColors.bodyPrimaryText)
                 .padding(.top, 5)
+                .opacity(opacity(for: 220, geometry: geometry))
         }
+    }
+    
+    private func opacity(for offset: CGFloat, geometry: GeometryProxy) -> Double {
+        let fadeStart: CGFloat = geometry.safeAreaInsets.top + 50 // Adjust this value as needed
+        let fadeDistance: CGFloat = 50 // Adjust this value to control how quickly it fades
+        
+        let elementPosition = scrollOffset - offset
+        let opacity = 1.0 - (max(0, elementPosition - fadeStart) / fadeDistance)
+        return max(0, min(1, opacity))
     }
     
     private var authButtonsView: some View {
