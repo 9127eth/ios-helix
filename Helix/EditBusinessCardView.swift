@@ -134,9 +134,9 @@ struct EditBusinessCardView: View {
     func sectionContent(for section: String, card: Binding<BusinessCard>) -> some View {
         switch section {
         case "Description":
-            return AnyView(DescriptionView(businessCard: card, showHeader: false))
+            return AnyView(DescriptionView(businessCard: card, showHeader: false, showDescriptionError: .constant(false)))
         case "Basic Information":
-            return AnyView(BasicInformationView(businessCard: card, showHeader: false))
+            return AnyView(BasicInformationView(businessCard: card, showHeader: false, showFirstNameError: .constant(false)))
         case "Professional Information":
             return AnyView(ProfessionalInformationView(businessCard: card, showHeader: false))
         case "Contact Information":

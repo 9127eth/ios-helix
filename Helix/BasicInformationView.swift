@@ -10,10 +10,12 @@ struct BasicInformationView: View {
     @Binding var businessCard: BusinessCard
     @FocusState private var focusedField: Field?
     var showHeader: Bool
+    @Binding var showFirstNameError: Bool
     
-    init(businessCard: Binding<BusinessCard>, showHeader: Bool = true) {
+    init(businessCard: Binding<BusinessCard>, showHeader: Bool = true, showFirstNameError: Binding<Bool>) {
         self._businessCard = businessCard
         self.showHeader = showHeader
+        self._showFirstNameError = showFirstNameError
     }
     
     enum Field: Hashable {
@@ -28,7 +30,7 @@ struct BasicInformationView: View {
                     .padding(.bottom, 16)
             }
             
-            CustomTextField(title: "First Name*", text: $businessCard.firstName, onCommit: { focusedField = .middleName })
+            ErrorTextField(title: "First Name*", text: $businessCard.firstName, showError: $showFirstNameError, onCommit: { focusedField = .middleName })
                 .focused($focusedField, equals: .firstName)
             
             CustomTextField(title: "Middle Name", text: Binding(
@@ -63,6 +65,9 @@ struct BasicInformationView: View {
 
 struct BasicInformationView_Previews: PreviewProvider {
     static var previews: some View {
-        BasicInformationView(businessCard: .constant(BusinessCard(cardSlug: "", firstName: "")))
+        BasicInformationView(
+            businessCard: .constant(BusinessCard(cardSlug: "", firstName: "")),
+            showFirstNameError: .constant(false)
+        )
     }
 }

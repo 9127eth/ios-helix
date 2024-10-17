@@ -53,6 +53,7 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
+				Untitled.swift,
 			);
 			target = 02F4644E2CB4E6130034711F /* Helix */;
 		};

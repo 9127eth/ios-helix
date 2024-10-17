@@ -15,6 +15,8 @@ struct CreateBusinessCardView: View {
     @Environment(\.presentationMode) var presentationMode
     @EnvironmentObject var authManager: AuthenticationManager
     @State private var showCancelConfirmation = false
+    @State private var showFirstNameError = false
+    @State private var showDescriptionError = false
 
     let steps = ["Basic Information", "Professional Information", "Description", "Contact Information", "Social Links", "Web Links", "Profile Image"]
 
@@ -51,11 +53,11 @@ struct CreateBusinessCardView: View {
                     VStack(spacing: 20) {
                         switch currentStep {
                         case 0:
-                            BasicInformationView(businessCard: $businessCard)
+                            BasicInformationView(businessCard: $businessCard, showFirstNameError: $showFirstNameError)
                         case 1:
                             ProfessionalInformationView(businessCard: $businessCard)
                         case 2:
-                            DescriptionView(businessCard: $businessCard)
+                            DescriptionView(businessCard: $businessCard, showDescriptionError: $showDescriptionError)
                         case 3:
                             ContactInformationView(businessCard: $businessCard)
                         case 4:
@@ -80,12 +82,12 @@ struct CreateBusinessCardView: View {
                             Image(systemName: "chevron.left")
                             Text("Previous")
                         }
-                        .foregroundColor(AppColors.primary)
+                        .foregroundColor(AppColors.bodyPrimaryText)
                     }
                 }
                 Spacer()
                 if currentStep < steps.count - 1 {
-                    Button(action: { currentStep += 1 }) {
+                    Button(action: handleNextButton) {
                         HStack {
                             Text("Next")
                             Image(systemName: "chevron.right")
@@ -94,9 +96,8 @@ struct CreateBusinessCardView: View {
                     }
                     .padding(.horizontal, 20)
                     .padding(.vertical, 10)
-                    .background(currentStep == 0 && businessCard.firstName.isEmpty ? Color.gray : AppColors.buttonBackground)
+                    .background(AppColors.buttonBackground)
                     .cornerRadius(20)
-                    .disabled(currentStep == 0 && businessCard.firstName.isEmpty)
                 }
             }
             .padding()
@@ -192,5 +193,26 @@ struct CreateBusinessCardView: View {
         }
         
         throw NSError(domain: "com.helix.error", code: 1002, userInfo: [NSLocalizedDescriptionKey: "Failed to generate a unique slug after \(maxAttempts) attempts"])
+    }
+
+    private func handleNextButton() {
+        switch currentStep {
+        case 0:
+            if businessCard.firstName.isEmpty {
+                showFirstNameError = true
+            } else {
+                currentStep += 1
+                showFirstNameError = false
+            }
+        case 2:
+            if businessCard.description.isEmpty {
+                showDescriptionError = true
+            } else {
+                currentStep += 1
+                showDescriptionError = false
+            }
+        default:
+            currentStep += 1
+        }
     }
 }
