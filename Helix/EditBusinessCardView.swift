@@ -59,6 +59,7 @@ struct EditBusinessCardView: View {
                         dangerSection
                     }
                     .padding()
+                    .dismissKeyboardOnTap() // Add this line
                 }
             }
             .navigationTitle("Edit")
