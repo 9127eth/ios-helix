@@ -35,7 +35,7 @@ struct CreateBusinessCardView: View {
                     .font(.headline)
                     .foregroundColor(AppColors.bodyPrimaryText)
                 Spacer()
-                Button(action: { saveBusinessCard() }) {
+                Button(action: saveBusinessCard) {
                     Text("Done")
                         .foregroundColor(AppColors.primary)
                         .font(.system(size: 16, weight: .medium))
@@ -125,6 +125,13 @@ struct CreateBusinessCardView: View {
     }
 
     private func saveBusinessCard() {
+        let missingFields = validateRequiredFields()
+        if !missingFields.isEmpty {
+            showAlert = true
+            alertMessage = "Please fill out the following required field(s): \(missingFields.joined(separator: ", "))"
+            return
+        }
+
         Task {
             do {
                 guard let userId = authManager.currentUser?.uid else {
@@ -176,7 +183,8 @@ struct CreateBusinessCardView: View {
                     print("Error fetching user document")
                 }
             } catch {
-                print("Error saving business card: \(error.localizedDescription)")
+                showAlert = true
+                alertMessage = "Error saving business card: \(error.localizedDescription)"
             }
         }
     }
@@ -225,5 +233,16 @@ struct CreateBusinessCardView: View {
         default:
             currentStep += 1
         }
+    }
+
+    private func validateRequiredFields() -> [String] {
+        var missingFields: [String] = []
+        if businessCard.firstName.isEmpty {
+            missingFields.append("First Name")
+        }
+        if businessCard.description.isEmpty {
+            missingFields.append("Card Label")
+        }
+        return missingFields
     }
 }

@@ -22,7 +22,7 @@ struct DescriptionView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             if showHeader {
-                Text("Card Name*")
+                Text("Card Label*")
                     .font(.headline)
                     .padding(.bottom, 16)
             }
