@@ -77,32 +77,37 @@ struct CreateBusinessCardView: View {
             }
             
             // Navigation buttons
-            HStack {
-                if currentStep > 0 {
-                    Button(action: { currentStep -= 1 }) {
-                        HStack {
-                            Image(systemName: "chevron.left")
-                            Text("Previous")
+            VStack {
+                Spacer() // This pushes the content to the bottom
+                HStack {
+                    if currentStep > 0 {
+                        Button(action: { currentStep -= 1 }) {
+                            HStack {
+                                Image(systemName: "chevron.left")
+                                Text("Previous")
+                            }
+                            .foregroundColor(AppColors.bodyPrimaryText)
                         }
-                        .foregroundColor(AppColors.bodyPrimaryText)
+                    }
+                    Spacer()
+                    if currentStep < steps.count - 1 {
+                        Button(action: handleNextButton) {
+                            HStack {
+                                Text("Next")
+                                Image(systemName: "chevron.right")
+                            }
+                            .foregroundColor(AppColors.buttonText)
+                        }
+                        .padding(.horizontal, 20)
+                        .padding(.vertical, 10)
+                        .background(AppColors.buttonBackground)
+                        .cornerRadius(20)
                     }
                 }
-                Spacer()
-                if currentStep < steps.count - 1 {
-                    Button(action: handleNextButton) {
-                        HStack {
-                            Text("Next")
-                            Image(systemName: "chevron.right")
-                        }
-                        .foregroundColor(AppColors.buttonText)
-                    }
-                    .padding(.horizontal, 20)
-                    .padding(.vertical, 10)
-                    .background(AppColors.buttonBackground)
-                    .cornerRadius(20)
-                }
+                .padding(.horizontal, 20)
+                .padding(.bottom, 20) // Add more bottom padding
             }
-            .padding()
+            .padding(.bottom, 30) // Add extra bottom padding to lift from screen edge
         }
         .background(AppColors.background)
         .edgesIgnoringSafeArea(.bottom)
