@@ -56,7 +56,8 @@ struct ShareView: View {
                                 .interpolation(.none)
                                 .resizable()
                                 .scaledToFit()
-                                .frame(width: 180, height: 180)
+                                .frame(width: 160, height: 160) // Slightly reduced size to accommodate padding
+                                .padding(10) // Add padding around the QR code
                                 .background(Color.white)
                                 .cornerRadius(10)
                         }
@@ -153,6 +154,7 @@ struct ShareView: View {
                 }
                 .padding()
             }
+            .background(AppColors.background)
             .navigationBarItems(trailing: Button(action: {
                 isPresented = false
             }) {
@@ -160,6 +162,9 @@ struct ShareView: View {
                     .foregroundColor(.gray)
                     .font(.system(size: 20, weight: .bold))
             })
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(AppColors.background, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
         }
         .background(AppColors.background.edgesIgnoringSafeArea(.all))
         .onAppear(perform: generateQRCode)

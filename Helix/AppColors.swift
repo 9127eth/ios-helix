@@ -13,12 +13,13 @@ struct AppColors {
     static let primaryText = Color("primaryTextColor")
     static let cardGridBackground = Color("cardGridBackgroundColor")
     static let bodyPrimaryText = Color("bodyPrimaryTextColor")
-    static let barMenuBackground = Color("barMenuBackgroundColor")
+    static let barMenuBackground = Color("barMenuBackground")
     static let inputFieldBackground = Color("inputFieldBackgroundColor")
     static let buttonBackground = Color("buttonBackgroundColor")
     static let buttonText = Color("buttonTextColor")
     static let divider = Color("dividerColor")
     static let editSheetBackground = Color("editSheetBackgroundColor")
+    static let sheetHeaderBackground = Color("sheetHeaderBackgroundColor")
     
     private init() {}
 }
