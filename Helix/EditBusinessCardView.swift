@@ -12,7 +12,7 @@ import NotificationCenter
 
 struct EditBusinessCardView: View {
     @Binding var businessCard: BusinessCard
-    let username: String  // Add this line
+    let username: String
     @State private var editedCard: BusinessCard
     @Environment(\.presentationMode) var presentationMode
     @State private var showingCancelConfirmation = false
@@ -21,6 +21,8 @@ struct EditBusinessCardView: View {
     @State private var expandedSections: Set<String> = []
     @State private var showingDeleteConfirmation = false
     @State private var showPreview = false
+    @State private var showFirstNameError = false
+    @State private var showDescriptionError = false
     
     let sections = ["Card Label", "Basic Information", "Professional Information", "Contact Information", "Social Links", "Web Links", "Profile Image", "Custom Header/Message", "Document"]
     
@@ -48,7 +50,7 @@ struct EditBusinessCardView: View {
                             } label: {
                                 Text(section)
                                     .font(.headline)
-                                    .foregroundColor(AppColors.primaryText) // Add this line
+                                    .foregroundColor(AppColors.primaryText)
                             }
                         }
                         
@@ -59,7 +61,7 @@ struct EditBusinessCardView: View {
                         dangerSection
                     }
                     .padding()
-                    .dismissKeyboardOnTap() // Add this line
+                    .dismissKeyboardOnTap()
                 }
             }
             .navigationTitle("Edit")
@@ -110,33 +112,12 @@ struct EditBusinessCardView: View {
         }
     }
     
-    private var dangerSection: some View {
-        VStack(alignment: .center, spacing: 8) {
-            Text("Danger!")
-                .font(.subheadline)
-                .foregroundColor(.gray)
-            
-            Button(action: {
-                showingDeleteConfirmation = true
-            }) {
-                Text("Delete Card")
-                    .foregroundColor(.white)
-                    .padding(.vertical, 6)
-                    .padding(.horizontal, 12)
-                    .background(Color.red)
-                    .cornerRadius(6)
-                    .font(.system(size: 14))
-            }
-        }
-        .frame(maxWidth: .infinity)
-    }
-    
     func sectionContent(for section: String, card: Binding<BusinessCard>) -> some View {
         switch section {
         case "Card Label":
-            return AnyView(DescriptionView(businessCard: card, showHeader: false, showDescriptionError: .constant(false)))
+            return AnyView(DescriptionView(businessCard: card, showHeader: false, showDescriptionError: $showDescriptionError))
         case "Basic Information":
-            return AnyView(BasicInformationView(businessCard: card, showHeader: false, showFirstNameError: .constant(false)))
+            return AnyView(BasicInformationView(businessCard: card, showHeader: false, showFirstNameError: $showFirstNameError))
         case "Professional Information":
             return AnyView(ProfessionalInformationView(businessCard: card, showHeader: false))
         case "Contact Information":
@@ -157,6 +138,24 @@ struct EditBusinessCardView: View {
     }
     
     func saveChanges() {
+        showFirstNameError = editedCard.firstName.isEmpty
+        showDescriptionError = editedCard.description.isEmpty
+        
+        var missingFields: [String] = []
+        if showFirstNameError {
+            missingFields.append("First Name")
+        }
+        if showDescriptionError {
+            missingFields.append("Card Label")
+        }
+        
+        if !missingFields.isEmpty {
+            let fieldList = missingFields.joined(separator: " and ")
+            saveErrorMessage = "Please fill out the following required field\(missingFields.count > 1 ? "s" : ""): \(fieldList)."
+            showingSaveError = true
+            return
+        }
+        
         Task {
             do {
                 try await BusinessCard.saveChanges(editedCard)
@@ -167,6 +166,27 @@ struct EditBusinessCardView: View {
                 showingSaveError = true
             }
         }
+    }
+    
+    private var dangerSection: some View {
+        VStack(alignment: .center, spacing: 8) {
+            Text("Danger!")
+                .font(.subheadline)
+                .foregroundColor(.gray)
+            
+            Button(action: {
+                showingDeleteConfirmation = true
+            }) {
+                Text("Delete Card")
+                    .foregroundColor(.white)
+                    .padding(.vertical, 6)
+                    .padding(.horizontal, 12)
+                    .background(Color.red)
+                    .cornerRadius(6)
+                    .font(.system(size: 14))
+            }
+        }
+        .frame(maxWidth: .infinity)
     }
     
     private func deleteBusinessCard() {
