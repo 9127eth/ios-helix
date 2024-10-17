@@ -143,8 +143,8 @@ struct ShareView: View {
                                 }
                                 .frame(maxWidth: .infinity)
                                 .frame(height: 44)
-                                .background(AppColors.primary)
-                                .foregroundColor(AppColors.primaryText)
+                                .background(AppColors.buttonBackground)
+                                .foregroundColor(AppColors.buttonText)
                                 .cornerRadius(20)
                             }
                             .frame(width: 320)
