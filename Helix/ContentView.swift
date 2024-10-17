@@ -21,6 +21,33 @@ struct ContentView: View {
     @State private var username: String = ""
     @AppStorage("isDarkMode") private var isDarkMode = false
     
+    init() {
+        setupNavigationBarAppearance()
+        setupTabBarAppearance()
+    }
+    
+    private func setupNavigationBarAppearance() {
+        let appearance = UINavigationBarAppearance()
+        appearance.configureWithOpaqueBackground()
+        appearance.backgroundColor = UIColor(AppColors.barMenuBackground)
+        appearance.titleTextAttributes = [.foregroundColor: UIColor(AppColors.bodyPrimaryText)]
+        appearance.largeTitleTextAttributes = [.foregroundColor: UIColor(AppColors.bodyPrimaryText)]
+        
+        UINavigationBar.appearance().standardAppearance = appearance
+        UINavigationBar.appearance().scrollEdgeAppearance = appearance
+    }
+    
+    private func setupTabBarAppearance() {
+        let appearance = UITabBarAppearance()
+        appearance.configureWithOpaqueBackground()
+        appearance.backgroundColor = UIColor(AppColors.barMenuBackground)
+        
+        UITabBar.appearance().standardAppearance = appearance
+        if #available(iOS 15.0, *) {
+            UITabBar.appearance().scrollEdgeAppearance = appearance
+        }
+    }
+    
     var body: some View {
         Group {
             if authManager.isAuthenticated {
@@ -38,6 +65,10 @@ struct ContentView: View {
         TabView(selection: $selectedTab) {
             businessCardTab
             settingsTab
+        }
+        .accentColor(AppColors.primary) // This sets the selected tab color
+        .onAppear {
+            UITabBar.appearance().unselectedItemTintColor = UIColor(AppColors.bodyPrimaryText)
         }
         .fullScreenCover(isPresented: $showCreateCard) {
             CreateBusinessCardView(showCreateCard: $showCreateCard)
