@@ -21,6 +21,8 @@ struct AppColors {
     static let editSheetBackground = Color("editSheetBackgroundColor")
     static let sheetHeaderBackground = Color("sheetHeaderBackgroundColor")
     
+    static let bottomNavIcon = Color("bottomNavIcon")
+    
     private init() {}
 }
 

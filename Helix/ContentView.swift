@@ -66,7 +66,10 @@ struct ContentView: View {
             businessCardTab
             settingsTab
         }
-        .accentColor(AppColors.primary) // This sets the selected tab color
+        .onAppear {
+            configureTabBarAppearance()
+        }
+        .accentColor(AppColors.bottomNavIcon) // This sets the selected tab color
         .onAppear {
             UITabBar.appearance().unselectedItemTintColor = UIColor(AppColors.bodyPrimaryText)
         }
@@ -83,6 +86,10 @@ struct ContentView: View {
         .onReceive(NotificationCenter.default.publisher(for: .cardDeleted)) { _ in
             fetchBusinessCards()
         }
+        .onReceive(NotificationCenter.default.publisher(for: .userDidLogout)) { _ in
+            self.businessCards = []
+            self.username = ""
+        }
         .onAppear {
             selectedTab = 0
         }
@@ -91,10 +98,10 @@ struct ContentView: View {
     private var businessCardTab: some View {
         BusinessCardGridView(businessCards: $businessCards, showCreateCard: $showCreateCard, username: username)
             .tabItem {
-                VStack {
-                    Image(systemName: "rectangle.on.rectangle")
-                        .padding(.top, 8)
+                Label {
                     Text("Cards")
+                } icon: {
+                    Image(systemName: "rectangle.stack")
                 }
             }
             .tag(0)
@@ -103,10 +110,10 @@ struct ContentView: View {
     private var settingsTab: some View {
         SettingsView(isAuthenticated: $authManager.isAuthenticated)
             .tabItem {
-                VStack {
-                    Image(systemName: "gear")
-                        .padding(.top, 8)
+                Label {
                     Text("Settings")
+                } icon: {
+                    Image(systemName: "gearshape")
                 }
             }
             .tag(1)
@@ -128,7 +135,6 @@ struct ContentView: View {
     private func fetchBusinessCards() {
         guard let userId = Auth.auth().currentUser?.uid else {
             print("Error: No authenticated user found")
-            errorMessage = "User not authenticated"
             return
         }
         isLoading = true
@@ -143,7 +149,11 @@ struct ContentView: View {
                 let userDocument = try await userRef.getDocument()
                 guard let userData = userDocument.data(),
                       let fetchedUsername = userData["username"] as? String else {
-                    throw NSError(domain: "com.yourapp.error", code: 1002, userInfo: [NSLocalizedDescriptionKey: "Failed to fetch user data"])
+                    // New user without any data yet
+                    self.username = ""
+                    self.businessCards = []
+                    isLoading = false
+                    return
                 }
                 
                 self.username = fetchedUsername
@@ -163,7 +173,7 @@ struct ContentView: View {
                 isLoading = false
             } catch {
                 print("Error fetching business cards: \(error)")
-                errorMessage = "Failed to fetch business cards: \(error.localizedDescription)"
+                self.businessCards = []
                 isLoading = false
             }
         }
@@ -174,10 +184,13 @@ struct ContentView: View {
         appearance.configureWithOpaqueBackground()
         appearance.backgroundColor = UIColor(AppColors.barMenuBackground)
         
-        appearance.stackedLayoutAppearance.normal.iconColor = UIColor(AppColors.bodyPrimaryText.opacity(0.6))
+        // Configure colors for unselected items
+        appearance.stackedLayoutAppearance.normal.iconColor = UIColor(AppColors.bottomNavIcon.opacity(0.6))
         appearance.stackedLayoutAppearance.normal.titleTextAttributes = [.foregroundColor: UIColor(AppColors.bodyPrimaryText.opacity(0.6))]
-        appearance.stackedLayoutAppearance.selected.iconColor = UIColor(AppColors.primary)
-        appearance.stackedLayoutAppearance.selected.titleTextAttributes = [.foregroundColor: UIColor(AppColors.primary)]
+        
+        // Configure colors for selected items
+        appearance.stackedLayoutAppearance.selected.iconColor = UIColor(AppColors.bottomNavIcon)
+        appearance.stackedLayoutAppearance.selected.titleTextAttributes = [.foregroundColor: UIColor(AppColors.bodyPrimaryText)]
 
         UITabBar.appearance().standardAppearance = appearance
         if #available(iOS 15.0, *) {
