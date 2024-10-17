@@ -27,9 +27,15 @@ struct DescriptionView: View {
                     .padding(.bottom, 16)
             }
             
-            ErrorTextField(title: "", text: $businessCard.description, showError: $showDescriptionError, onCommit: { isFocused = false })
-                .focused($isFocused)
-                .padding(.bottom, 16)
+            ErrorTextField(
+                title: "",
+                text: $businessCard.description,
+                showError: $showDescriptionError,
+                placeholder: "Work, Personal, Side Biz, etc...",
+                onCommit: { isFocused = false }
+            )
+            .focused($isFocused)
+            .padding(.bottom, 16)
             
             Text("This is for your reference only and will not be visible on your digital business card. Examples of card names are Work, Personal, etc.")
                 .font(.caption)
