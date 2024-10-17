@@ -22,7 +22,7 @@ struct EditBusinessCardView: View {
     @State private var showingDeleteConfirmation = false
     @State private var showPreview = false
     
-    let sections = ["Description", "Basic Information", "Professional Information", "Contact Information", "Social Links", "Web Links", "Profile Image", "Custom Header/Message", "Document"]
+    let sections = ["Card Label", "Basic Information", "Professional Information", "Contact Information", "Social Links", "Web Links", "Profile Image", "Custom Header/Message", "Document"]
     
     var body: some View {
         NavigationView {
@@ -133,7 +133,7 @@ struct EditBusinessCardView: View {
     
     func sectionContent(for section: String, card: Binding<BusinessCard>) -> some View {
         switch section {
-        case "Description":
+        case "Card Label":
             return AnyView(DescriptionView(businessCard: card, showHeader: false, showDescriptionError: .constant(false)))
         case "Basic Information":
             return AnyView(BasicInformationView(businessCard: card, showHeader: false, showFirstNameError: .constant(false)))
