@@ -233,10 +233,27 @@ struct BusinessCard: Identifiable, Codable {
         }
         
         let db = Firestore.firestore()
-        let cardRef = db.collection("users").document(currentUser.uid).collection("businessCards").document(cardId)
+        let userRef = db.collection("users").document(currentUser.uid)
+        let cardRef = userRef.collection("businessCards").document(cardId)
         
         do {
-            try await cardRef.delete()
+            // Start a batch write
+            let batch = db.batch()
+            
+            // Delete the card
+            batch.deleteDocument(cardRef)
+            
+            // If the card being deleted is the primary card, update the user document
+            if card.isPrimary {
+                batch.updateData([
+                    "primaryCardPlaceholder": true,
+                    "primaryCardId": FieldValue.delete()
+                ], forDocument: userRef)
+            }
+            
+            // Commit the batch
+            try await batch.commit()
+            
             print("Successfully deleted card: \(cardId)")
         } catch {
             print("Error deleting card: \(error.localizedDescription)")

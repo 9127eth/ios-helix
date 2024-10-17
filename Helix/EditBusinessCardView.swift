@@ -172,6 +172,18 @@ struct EditBusinessCardView: View {
     private func deleteBusinessCard() {
         Task {
             do {
+                let db = Firestore.firestore()
+                let userRef = db.collection("users").document(Auth.auth().currentUser!.uid)
+                
+                // Check if the card being deleted is the primary card
+                if editedCard.isPrimary {
+                    // Update the user document to set primaryCardPlaceholder to true
+                    try await userRef.updateData([
+                        "primaryCardPlaceholder": true,
+                        "primaryCardId": FieldValue.delete()
+                    ])
+                }
+                
                 try await BusinessCard.delete(editedCard)
                 print("Card deleted successfully")
                 // Notify that a card was deleted
@@ -188,7 +200,8 @@ struct EditBusinessCardView: View {
     
     init(businessCard: Binding<BusinessCard>, username: String) {
         self._businessCard = businessCard
-        self._editedCard = State(initialValue: businessCard.wrappedValue)
+        var initialCard = businessCard.wrappedValue
+        self._editedCard = State(initialValue: initialCard)
         self.username = username
     }
 }

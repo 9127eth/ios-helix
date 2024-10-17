@@ -17,6 +17,8 @@ struct CreateBusinessCardView: View {
     @State private var showCancelConfirmation = false
     @State private var showFirstNameError = false
     @State private var showDescriptionError = false
+    @State private var showAlert = false
+    @State private var alertMessage = ""
 
     let steps = ["Basic Information", "Professional Information", "Description", "Contact Information", "Social Links", "Web Links", "Profile Image"]
 
@@ -112,6 +114,9 @@ struct CreateBusinessCardView: View {
         } message: {
             Text("Your progress will be lost if you cancel now.")
         }
+        .alert(isPresented: $showAlert) {
+            Alert(title: Text("Error"), message: Text(alertMessage), dismissButton: .default(Text("OK")))
+        }
     }
 
     private func saveBusinessCard() {
@@ -125,7 +130,8 @@ struct CreateBusinessCardView: View {
                 let db = Firestore.firestore()
                 let userRef = db.collection("users").document(userId)
                 
-                let document = try await userRef.getDocument()
+                // Force fetch the latest user data from the server
+                let document = try await userRef.getDocument(source: .server)
                 
                 if let userData = document.data() {
                     let isPro = userData["isPro"] as? Bool ?? false
