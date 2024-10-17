@@ -11,6 +11,7 @@ struct CustomTextField: View {
     let title: String
     @Binding var text: String
     var placeholder: String = ""
+    var isSecure: Bool = false
     var onCommit: (() -> Void)?
     @Environment(\.colorScheme) var colorScheme
     
@@ -25,11 +26,19 @@ struct CustomTextField: View {
                         .foregroundColor(.gray.opacity(0.5))
                         .padding(.leading, 12)
                 }
-                TextField("", text: $text, onCommit: {
-                    onCommit?()
-                })
-                .padding(.vertical, 8)
-                .padding(.horizontal, 12)
+                if isSecure {
+                    SecureField("", text: $text, onCommit: {
+                        onCommit?()
+                    })
+                    .padding(.vertical, 8)
+                    .padding(.horizontal, 12)
+                } else {
+                    TextField("", text: $text, onCommit: {
+                        onCommit?()
+                    })
+                    .padding(.vertical, 8)
+                    .padding(.horizontal, 12)
+                }
             }
             .background(AppColors.inputFieldBackground)
             .cornerRadius(8)
