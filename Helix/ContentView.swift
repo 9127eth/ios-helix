@@ -146,7 +146,8 @@ struct ContentView: View {
         
         Task {
             do {
-                let userDocument = try await userRef.getDocument()
+                // Force fetch the latest user data from the server
+                let userDocument = try await userRef.getDocument(source: .server)
                 guard let userData = userDocument.data(),
                       let fetchedUsername = userData["username"] as? String else {
                     // New user without any data yet
