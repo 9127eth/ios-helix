@@ -17,8 +17,86 @@ struct BusinessCardItemView: View {
     @State private var showingEditView = false
     @State private var showingDeleteConfirmation = false
     @Environment(\.colorScheme) var colorScheme
+    @State private var offset: CGFloat = 0
+    @State private var showingActionButtons = false
     
     var body: some View {
+        ZStack {
+            actionButtons
+            
+            cardContent
+                .offset(x: offset)
+                .padding(.trailing, showingActionButtons ? 20 : 0) // Add padding when action buttons are shown
+                .gesture(
+                    DragGesture()
+                        .onChanged { gesture in
+                            if gesture.translation.width < 0 && abs(gesture.translation.width) > abs(gesture.translation.height) {
+                                offset = gesture.translation.width
+                            }
+                        }
+                        .onEnded { gesture in
+                            withAnimation {
+                                if gesture.translation.width < -50 {
+                                    offset = -220 // Increased offset to push card further left
+                                    showingActionButtons = true
+                                } else {
+                                    offset = 0
+                                    showingActionButtons = false
+                                }
+                            }
+                        }
+                )
+        }
+        .sheet(isPresented: $showPreview) {
+            PreviewView(card: card, username: username, isPresented: $showPreview)
+        }
+        .sheet(isPresented: $showShare) {
+            ShareView(card: card, username: username, isPresented: $showShare)
+        }
+        .sheet(isPresented: $showingEditView) {
+            EditBusinessCardView(businessCard: $card, username: username)
+        }
+        .alert("Confirm Deletion", isPresented: $showingDeleteConfirmation) {
+            Button("Cancel", role: .cancel) {}
+            Button("Delete", role: .destructive) {
+                deleteCard()
+            }
+        } message: {
+            Text("Are you sure you want to delete this business card? This action cannot be undone.")
+        }
+    }
+    
+    private var actionButtons: some View {
+        HStack {
+            Spacer()
+            VStack(spacing: 20) { // Increased spacing between button rows
+                HStack(spacing: 20) { // Increased spacing between buttons
+                    actionButton(title: "Share", action: { showShare = true })
+                    actionButton(title: "Preview", action: { showPreview = true })
+                }
+                HStack(spacing: 20) { // Increased spacing between buttons
+                    actionButton(title: "Edit", action: { showingEditView = true })
+                    actionButton(title: "Delete", action: { showingDeleteConfirmation = true })
+                }
+            }
+            .frame(width: 220) // Increased width to accommodate larger buttons and spacing
+            .opacity(showingActionButtons ? 1 : 0)
+            .padding(.leading, 20) // Added padding to separate buttons from card
+        }
+    }
+    
+    private func actionButton(title: String, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Text(title)
+                .font(.system(size: 16, weight: .medium))
+                .foregroundColor(AppColors.buttonText)
+                .frame(width: 100, height: 44) // Slightly increased button size
+                .background(AppColors.buttonBackground)
+                .cornerRadius(8)
+        }
+    }
+    
+    private var cardContent: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack(alignment: .top) {
                 Text(card.description)
@@ -113,23 +191,6 @@ struct BusinessCardItemView: View {
         .background(AppColors.cardGridBackground)
         .cornerRadius(8)
         .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
-        .sheet(isPresented: $showPreview) {
-            PreviewView(card: card, username: username, isPresented: $showPreview)
-        }
-        .sheet(isPresented: $showShare) {
-            ShareView(card: card, username: username, isPresented: $showShare)
-        }
-        .sheet(isPresented: $showingEditView) {
-            EditBusinessCardView(businessCard: $card, username: username)
-        }
-        .alert("Confirm Deletion", isPresented: $showingDeleteConfirmation) {
-            Button("Cancel", role: .cancel) {}
-            Button("Delete", role: .destructive) {
-                deleteCard()
-            }
-        } message: {
-            Text("Are you sure you want to delete this business card? This action cannot be undone.")
-        }
     }
     
     private func deleteCard() {
