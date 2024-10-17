@@ -77,7 +77,7 @@ struct BusinessCardGridView: View {
                 .font(.largeTitle)
                 .fontWeight(.bold)
             
-            Text("You must be the change you wish to see in the world. -Mahatma Gandhi")
+            Text("“All our dreams can come true, if we have the courage to pursue them. - Walt Disney”")
                 .font(.subheadline)
                 .foregroundColor(.gray)
         }
