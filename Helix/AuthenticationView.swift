@@ -67,6 +67,11 @@ struct AuthenticationView: View {
         }
         .dismissKeyboardOnTap()
         .contentShape(Rectangle())
+        .onAppear {
+            // Clear any stored credentials
+            email = ""
+            password = ""
+        }
     }
     
     private func headerView(geometry: GeometryProxy) -> some View {

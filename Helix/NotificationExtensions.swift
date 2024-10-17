@@ -9,4 +9,5 @@ import Foundation
 
 extension Notification.Name {
     static let cardDeleted = Notification.Name("cardDeleted")
+    static let userDidLogout = Notification.Name("userDidLogout")
 }

@@ -126,8 +126,14 @@ class AuthenticationManager: NSObject, ObservableObject {
     func signOut() {
         do {
             try Auth.auth().signOut()
-        } catch let signOutError as NSError {
-            print("Error signing out: %@", signOutError)
+            self.user = nil
+            self.isAuthenticated = false
+            // Clear any cached data
+            UserDefaults.standard.removeObject(forKey: "lastLoggedInUser")
+            // Post a notification that the user has logged out
+            NotificationCenter.default.post(name: .userDidLogout, object: nil)
+        } catch {
+            print("Error signing out: \(error.localizedDescription)")
         }
     }
     
