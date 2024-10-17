@@ -27,6 +27,11 @@ struct BusinessCardItemView: View {
                     .lineLimit(1)  // Limit to one line
                     .truncationMode(.tail)  // Add ellipsis at the end
                     .foregroundColor(AppColors.bodyPrimaryText)
+                    .onTapGesture {
+                        if card.isActive {
+                            showShare = true
+                        }
+                    }
                 
                 Spacer()
                 
