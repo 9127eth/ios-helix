@@ -29,11 +29,16 @@ struct ProfessionalInformationView: View {
                     .padding(.bottom, 16)
             }
             
-            CustomTextField(title: "Credentials", text: Binding(
-                get: { businessCard.credentials ?? "" },
-                set: { businessCard.credentials = $0.isEmpty ? nil : $0 }
-            ), onCommit: { focusedField = .jobTitle })
-                .focused($focusedField, equals: .credentials)
+            CustomTextField(
+                title: "Credentials",
+                text: Binding(
+                    get: { businessCard.credentials ?? "" },
+                    set: { businessCard.credentials = $0.isEmpty ? nil : $0 }
+                ),
+                placeholder: "PharmD, BSN, JD, MD, etc...",
+                onCommit: { focusedField = .jobTitle }
+            )
+            .focused($focusedField, equals: .credentials)
             
             CustomTextField(title: "Job Title", text: Binding(
                 get: { businessCard.jobTitle ?? "" },

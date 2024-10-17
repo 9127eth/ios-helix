@@ -16,6 +16,9 @@ struct ErrorTextField: View {
     var body: some View {
         VStack(alignment: .leading) {
             CustomTextField(title: title, text: $text, onCommit: onCommit)
+                .onChange(of: text) { _ in
+                    showError = false
+                }
             if showError {
                 Text("This field is required")
                     .font(.caption)
