@@ -36,6 +36,11 @@ struct DocumentView: View {
                     .padding(.bottom, 16)
             }
             
+            Text("Upload your CV/resume, a study, a menu, schedule, or any other document to your business card. It must be a PDF and max file size is 5MB.")
+                .font(.caption)
+                .foregroundColor(.gray)
+                .padding(.bottom, 8)
+            
             Button(action: { isDocumentPickerPresented = true }) {
                 Text(businessCard.cvUrl == nil ? "Upload Document" : "Replace Document")
                     .foregroundColor(AppColors.buttonText)
@@ -65,7 +70,7 @@ struct DocumentView: View {
             ), onCommit: { focusedField = .cvDisplayText })
                 .focused($focusedField, equals: .cvDescription)
             
-            CustomTextField(title: "Display Text", text: Binding(
+            CustomTextField(title: "File Name Display Text (Optional)", text: Binding(
                 get: { businessCard.cvDisplayText ?? "" },
                 set: { businessCard.cvDisplayText = $0.isEmpty ? nil : $0 }
             ), onCommit: { focusedField = nil })
