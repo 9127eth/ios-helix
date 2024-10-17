@@ -22,10 +22,10 @@ struct BusinessCardItemView: View {
         VStack(alignment: .leading, spacing: 8) {
             HStack(alignment: .top) {
                 Text(card.description)
-                    .font(.system(size: 38))
+                    .font(.system(size: 30))  // Fixed font size
                     .fontWeight(.bold)
-                    .lineLimit(2)
-                    .minimumScaleFactor(0.5)
+                    .lineLimit(1)  // Limit to one line
+                    .truncationMode(.tail)  // Add ellipsis at the end
                     .foregroundColor(AppColors.bodyPrimaryText)
                 
                 Spacer()
