@@ -39,9 +39,19 @@ struct AuthenticationView: View {
                         if showEmailAuth {
                             emailAuthView
                         }
+                        
+                        Spacer(minLength: 10)
+                        
+                        // Terms and conditions text
+                        Text("By continuing, you agree to our [Terms of Service](https://www.helixcard.app/terms-of-service) and [Privacy Policy](https://www.helixcard.app/privacy-policy)")
+                            .font(.caption)
+                            .foregroundColor(AppColors.bodyPrimaryText)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal)
+                            .padding(.bottom, 10)
                     }
-                    .padding()
-                    .padding(.top, geometry.safeAreaInsets.top + 40)
+                    .padding(.horizontal)
+                    .padding(.top, geometry.safeAreaInsets.top + 20)
                     .background(GeometryReader { proxy -> Color in
                         DispatchQueue.main.async {
                             scrollOffset = -proxy.frame(in: .named("scroll")).origin.y
@@ -138,23 +148,14 @@ struct AuthenticationView: View {
             SecureField("Password", text: $password)
                 .textFieldStyle(RoundedBorderTextFieldStyle())
             
-            if !isLogin {
-                Toggle(isOn: $agreeToTerms) {
-                    Text("I agree to the Terms of Service and Privacy Policy")
-                        .font(.caption)
-                        .foregroundColor(AppColors.bodyPrimaryText)
-                }
-            }
-            
             Button(action: handleEmailAuth) {
                 Text(isLogin ? "Log In" : "Sign Up")
                     .frame(width: 160, height: 40)
-                    .background(isLogin || agreeToTerms ? AppColors.buttonBackground : Color.gray.opacity(0.3))
-                    .foregroundColor(isLogin || agreeToTerms ? AppColors.buttonText : Color.gray)
+                    .background(AppColors.buttonBackground)
+                    .foregroundColor(AppColors.buttonText)
                     .cornerRadius(20)
                     .font(.system(size: 16, weight: .medium))
             }
-            .disabled(!isLogin && !agreeToTerms)
             .padding(.top, 10)
             
             if isLogin {
@@ -179,6 +180,8 @@ struct AuthenticationView: View {
                 }
                 .padding(.top, 5)
             }
+            
+            Spacer()
         }
         .padding()
     }
