@@ -21,9 +21,8 @@ struct BusinessCardGridView: View {
             ScrollView {
                 VStack(spacing: 20) {
                     headerView
-                        .opacity(headerOpacity)
+                        .opacity(opacityForOffset(0)) // Changed back to 0 for earlier fade
                     
-                    // Reduce the Spacer height by 50%
                     Spacer(minLength: UIScreen.main.bounds.height * 0.035)
                     
                     HStack {
@@ -40,17 +39,20 @@ struct BusinessCardGridView: View {
                     }
                     .padding(.horizontal)
                     .padding(.bottom, 8)
+                    .opacity(opacityForOffset(UIScreen.main.bounds.height * 0.2))
                     
                     LazyVStack(spacing: 16) {
-                        ForEach($businessCards) { $card in
+                        ForEach(Array($businessCards.enumerated()), id: \.element.id) { index, $card in
                             BusinessCardItemView(card: $card, username: username)
                                 .overlay(
                                     RoundedRectangle(cornerRadius: 8)
                                         .stroke(Color(hex: 0xe5e6ed), lineWidth: 1)
                                         .opacity(colorScheme == .dark ? 1 : 0)
                                 )
+                                .opacity(opacityForOffset(UIScreen.main.bounds.height * 0.3 + CGFloat(index) * 150))
                         }
                         AddCardButton(action: { showCreateCard = true })
+                            .opacity(opacityForOffset(UIScreen.main.bounds.height * 0.3 + CGFloat(businessCards.count) * 150))
                     }
                 }
                 .padding()
@@ -81,8 +83,8 @@ struct BusinessCardGridView: View {
         .padding(.bottom, 20)
     }
     
-    private var headerOpacity: Double {
-        let opacity = 1.0 - Double(scrollOffset) / 100.0
+    private func opacityForOffset(_ offset: CGFloat) -> Double {
+        let opacity = 1.0 - Double(max(0, scrollOffset - offset)) / 150.0
         return max(0, min(1, opacity))
     }
 }
