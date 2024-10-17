@@ -21,25 +21,28 @@ struct BusinessCardGridView: View {
             ScrollView {
                 VStack(spacing: 20) {
                     headerView
-                        .opacity(opacityForOffset(0)) // Changed back to 0 for earlier fade
+                        .opacity(opacityForOffset(0))
                     
                     Spacer(minLength: UIScreen.main.bounds.height * 0.035)
                     
-                    HStack {
-                        Spacer()
-                        Button(action: { showCreateCard = true }) {
-                            Label("Create New", systemImage: "plus")
-                                .font(.footnote)
-                                .foregroundColor(AppColors.buttonText)
-                                .padding(.vertical, 8)
-                                .padding(.horizontal, 12)
-                                .background(AppColors.buttonBackground)
-                                .cornerRadius(16)
+                    // Only show the "Create New" button if there are cards
+                    if !businessCards.isEmpty {
+                        HStack {
+                            Spacer()
+                            Button(action: { showCreateCard = true }) {
+                                Label("Create New", systemImage: "plus")
+                                    .font(.footnote)
+                                    .foregroundColor(AppColors.buttonText)
+                                    .padding(.vertical, 8)
+                                    .padding(.horizontal, 12)
+                                    .background(AppColors.buttonBackground)
+                                    .cornerRadius(16)
+                            }
                         }
+                        .padding(.horizontal)
+                        .padding(.bottom, 8)
+                        .opacity(opacityForOffset(UIScreen.main.bounds.height * 0.2))
                     }
-                    .padding(.horizontal)
-                    .padding(.bottom, 8)
-                    .opacity(opacityForOffset(UIScreen.main.bounds.height * 0.2))
                     
                     LazyVStack(spacing: 16) {
                         ForEach(Array($businessCards.enumerated()), id: \.element.id) { index, $card in
