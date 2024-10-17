@@ -69,13 +69,15 @@ struct WebLinksView: View {
                     .background(Color.clear)
                     .offset(x: offsets[index])
                     .gesture(
-                        DragGesture()
+                        DragGesture(minimumDistance: 20, coordinateSpace: .local)
                             .onChanged { gesture in
-                                offsets[index] = min(0, gesture.translation.width)
+                                if abs(gesture.translation.width) > abs(gesture.translation.height) {
+                                    offsets[index] = min(0, gesture.translation.width)
+                                }
                             }
-                            .onEnded { _ in
+                            .onEnded { gesture in
                                 withAnimation {
-                                    if offsets[index] < -30 {
+                                    if gesture.translation.width < -50 && abs(gesture.translation.width) > abs(gesture.translation.height) {
                                         offsets[index] = -60
                                     } else {
                                         offsets[index] = 0
