@@ -145,13 +145,11 @@ struct AuthenticationView: View {
                 .foregroundColor(AppColors.bodyPrimaryText)
                 .padding(.bottom, 10)
             
-            TextField("Email", text: $email)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
+            CustomTextField(title: "Email", text: $email, placeholder: "Enter your email")
                 .autocapitalization(.none)
                 .keyboardType(.emailAddress)
             
-            SecureField("Password", text: $password)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
+            CustomTextField(title: "Password", text: $password, placeholder: "Enter your password", isSecure: true)
             
             Button(action: handleEmailAuth) {
                 Text(isLogin ? "Log In" : "Sign Up")
