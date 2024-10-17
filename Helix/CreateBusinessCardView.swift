@@ -70,6 +70,7 @@ struct CreateBusinessCardView: View {
                     }
                     .padding()
                 }
+                .dismissKeyboardOnTap()
             }
             
             // Navigation buttons

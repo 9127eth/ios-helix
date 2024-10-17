@@ -20,6 +20,7 @@ struct KeyboardAvoidingView<Content: View>: View {
             content
                 .padding(.bottom, max(keyboardHeight - geometry.safeAreaInsets.bottom, 0))
                 .animation(.easeOut(duration: 0.16))
+                .dismissKeyboardOnTap()
                 .onAppear {
                     setupKeyboardObservers(geometry: geometry)
                 }
