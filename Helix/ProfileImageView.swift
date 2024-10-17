@@ -23,11 +23,12 @@ struct ProfileImageView: View {
     }
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 20) {
+        VStack(alignment: .center, spacing: 20) {
             if showHeader {
                 Text("Add an Image")
                     .font(.headline)
                     .padding(.bottom, 4)
+                    .frame(maxWidth: .infinity, alignment: .leading)
             }
             
             VStack(spacing: 20) {
@@ -38,7 +39,7 @@ struct ProfileImageView: View {
                             .scaledToFill()
                             .frame(width: 100, height: 100)
                             .clipShape(Circle())
-                            .overlay(Circle().stroke(AppColors.primary, lineWidth: 2))
+                            .overlay(Circle().stroke(AppColors.divider, lineWidth: 2))
                             .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
                     } placeholder: {
                         ProgressView()
@@ -50,8 +51,6 @@ struct ProfileImageView: View {
                         .scaledToFit()
                         .frame(width: 100, height: 100)
                         .foregroundColor(.gray)
-                        .overlay(Circle().stroke(AppColors.primary, lineWidth: 2))
-                        .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
                 }
                 
                 Button(action: { 
@@ -74,6 +73,7 @@ struct ProfileImageView: View {
                         .font(.caption)
                 }
             }
+            .frame(maxWidth: .infinity)
         }
         .padding()
         .sheet(isPresented: $showImagePicker) {
