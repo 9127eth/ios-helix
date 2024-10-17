@@ -23,7 +23,23 @@ struct BusinessCardGridView: View {
                     headerView
                         .opacity(headerOpacity)
                     
-                    Spacer(minLength: UIScreen.main.bounds.height * 0.07)
+                    // Reduce the Spacer height by 50%
+                    Spacer(minLength: UIScreen.main.bounds.height * 0.035)
+                    
+                    HStack {
+                        Spacer()
+                        Button(action: { showCreateCard = true }) {
+                            Label("Create New", systemImage: "plus")
+                                .font(.footnote)
+                                .foregroundColor(AppColors.buttonText)
+                                .padding(.vertical, 8)
+                                .padding(.horizontal, 12)
+                                .background(AppColors.buttonBackground)
+                                .cornerRadius(16)
+                        }
+                    }
+                    .padding(.horizontal)
+                    .padding(.bottom, 8)
                     
                     LazyVStack(spacing: 16) {
                         ForEach($businessCards) { $card in

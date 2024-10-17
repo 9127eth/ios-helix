@@ -91,8 +91,11 @@ struct ContentView: View {
     private var businessCardTab: some View {
         BusinessCardGridView(businessCards: $businessCards, showCreateCard: $showCreateCard, username: username)
             .tabItem {
-                Image(systemName: "rectangle.on.rectangle")
-                Text("Cards")
+                VStack {
+                    Image(systemName: "rectangle.on.rectangle")
+                        .padding(.top, 8)
+                    Text("Cards")
+                }
             }
             .tag(0)
     }
@@ -100,8 +103,11 @@ struct ContentView: View {
     private var settingsTab: some View {
         SettingsView(isAuthenticated: $authManager.isAuthenticated)
             .tabItem {
-                Image(systemName: "gear")
-                Text("Settings")
+                VStack {
+                    Image(systemName: "gear")
+                        .padding(.top, 8)
+                    Text("Settings")
+                }
             }
             .tag(1)
     }
@@ -160,6 +166,22 @@ struct ContentView: View {
                 errorMessage = "Failed to fetch business cards: \(error.localizedDescription)"
                 isLoading = false
             }
+        }
+    }
+    
+    private func configureTabBarAppearance() {
+        let appearance = UITabBarAppearance()
+        appearance.configureWithOpaqueBackground()
+        appearance.backgroundColor = UIColor(AppColors.barMenuBackground)
+        
+        appearance.stackedLayoutAppearance.normal.iconColor = UIColor(AppColors.bodyPrimaryText.opacity(0.6))
+        appearance.stackedLayoutAppearance.normal.titleTextAttributes = [.foregroundColor: UIColor(AppColors.bodyPrimaryText.opacity(0.6))]
+        appearance.stackedLayoutAppearance.selected.iconColor = UIColor(AppColors.primary)
+        appearance.stackedLayoutAppearance.selected.titleTextAttributes = [.foregroundColor: UIColor(AppColors.primary)]
+
+        UITabBar.appearance().standardAppearance = appearance
+        if #available(iOS 15.0, *) {
+            UITabBar.appearance().scrollEdgeAppearance = appearance
         }
     }
 }
