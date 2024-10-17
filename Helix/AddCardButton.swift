@@ -25,6 +25,11 @@ struct AddCardButton: View {
         .frame(maxWidth: .infinity)
         .background(AppColors.cardGridBackground)
         .cornerRadius(8)
+        .overlay(
+            RoundedRectangle(cornerRadius: 8)
+                .stroke(Color(hex: 0xe5e6ed), lineWidth: 1)
+                .opacity(colorScheme == .dark ? 1 : 0)
+        )
         .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
     }
     
