@@ -150,13 +150,15 @@ struct SocialLinkRow: View {
             .background(Color.clear)
             .offset(x: offset)
             .gesture(
-                DragGesture()
+                DragGesture(minimumDistance: 20, coordinateSpace: .local)
                     .onChanged { gesture in
-                        offset = min(0, gesture.translation.width)
+                        if abs(gesture.translation.width) > abs(gesture.translation.height) {
+                            offset = min(0, gesture.translation.width)
+                        }
                     }
-                    .onEnded { _ in
+                    .onEnded { gesture in
                         withAnimation {
-                            if offset < -30 {
+                            if gesture.translation.width < -50 && abs(gesture.translation.width) > abs(gesture.translation.height) {
                                 offset = -60
                             } else {
                                 offset = 0
