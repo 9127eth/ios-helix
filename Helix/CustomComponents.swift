@@ -10,6 +10,7 @@ import SwiftUI
 struct CustomTextField: View {
     let title: String
     @Binding var text: String
+    var placeholder: String = ""
     var onCommit: (() -> Void)?
     @Environment(\.colorScheme) var colorScheme
     
@@ -18,11 +19,18 @@ struct CustomTextField: View {
             Text(title)
                 .font(.system(size: 14, weight: .medium))
                 .foregroundColor(.gray)
-            TextField("", text: $text, onCommit: {
-                onCommit?()
-            })
-            .padding(.vertical, 8)
-            .padding(.horizontal, 12)
+            ZStack(alignment: .leading) {
+                if text.isEmpty {
+                    Text(placeholder)
+                        .foregroundColor(.gray.opacity(0.5))
+                        .padding(.leading, 12)
+                }
+                TextField("", text: $text, onCommit: {
+                    onCommit?()
+                })
+                .padding(.vertical, 8)
+                .padding(.horizontal, 12)
+            }
             .background(AppColors.inputFieldBackground)
             .cornerRadius(8)
             .overlay(
