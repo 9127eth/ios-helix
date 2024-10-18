@@ -20,6 +20,7 @@ struct ContentView: View {
     @State private var showCreateCard = false
     @State private var username: String = ""
     @AppStorage("isDarkMode") private var isDarkMode = false
+    @StateObject private var subscriptionManager = SubscriptionManager()
     
     init() {
         setupNavigationBarAppearance()
