@@ -22,6 +22,7 @@ struct AppColors {
     static let sheetHeaderBackground = Color("sheetHeaderBackgroundColor")
     
     static let bottomNavIcon = Color("bottomNavIcon")
+    static let helixPro = Color("helixPro")
     
     private init() {}
 }

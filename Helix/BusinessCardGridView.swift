@@ -6,11 +6,16 @@
 //
 
 import SwiftUI
+import Firebase
+import FirebaseFirestore
+import FirebaseAuth  // Add this line
 
 struct BusinessCardGridView: View {
     @Binding var businessCards: [BusinessCard]
     @Binding var showCreateCard: Bool
     let username: String
+    @State private var isPro: Bool = false
+    @State private var showSubscriptionView = false
     
     @Environment(\.horizontalSizeClass) var sizeClass
     @Environment(\.colorScheme) var colorScheme
@@ -63,16 +68,31 @@ struct BusinessCardGridView: View {
             }
             .coordinateSpace(name: "scroll")
             .background(AppColors.background)
+            .sheet(isPresented: $showSubscriptionView) {
+                SubscriptionView(isPro: $isPro)
+            }
+            .onAppear {
+                fetchUserProStatus()
+            }
         }
     }
     
     private var headerView: some View {
         VStack(alignment: .leading, spacing: 10) {
+            Button(action: {
+                showSubscriptionView = true
+            }) {
+                Text("Get Helix Pro")
+                    .font(.subheadline)
+                    .foregroundColor(AppColors.helixPro)
+            }
+            .padding(.bottom, 5)
+            
             Text("Business Cards")
                 .font(.largeTitle)
                 .fontWeight(.bold)
             
-            Text("“All our dreams can come true, if we have the courage to pursue them. - Walt Disney”")
+            Text("All our dreams can come true, if we have the courage to pursue them. - Walt Disney")
                 .font(.subheadline)
                 .foregroundColor(.gray)
         }
@@ -84,5 +104,15 @@ struct BusinessCardGridView: View {
     private func opacityForOffset(_ offset: CGFloat) -> Double {
         let opacity = 1.0 - Double(max(0, scrollOffset - offset)) / 150.0
         return max(0, min(1, opacity))
+    }
+    
+    private func fetchUserProStatus() {
+        guard let userId = Auth.auth().currentUser?.uid else { return }
+        let db = Firestore.firestore()
+        db.collection("users").document(userId).getDocument { (document, error) in
+            if let document = document, document.exists {
+                self.isPro = document.data()?["isPro"] as? Bool ?? false
+            }
+        }
     }
 }
