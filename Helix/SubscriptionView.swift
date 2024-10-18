@@ -21,7 +21,7 @@ struct SubscriptionView: View {
             VStack(spacing: 20) {
                 // Pro Plan
                 PlanCard(
-                    title: "Pro",
+                    title: "Helix Pro",
                     price: selectedPlan == .monthly ? "$3/month" : "$12/year",
                     features: [
                         "Up to 10 business cards",
@@ -52,7 +52,7 @@ struct SubscriptionView: View {
                 
                 // Free Plan
                 PlanCard(
-                    title: "Free",
+                    title: "Free Plan",
                     price: "$0/year",
                     features: [
                         "1 free business card",
