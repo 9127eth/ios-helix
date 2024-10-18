@@ -9,16 +9,28 @@ import SwiftUI
 
 struct SubscriptionView: View {
     @Binding var isPro: Bool
-    @State private var selectedPlan: PlanType = .monthly
+    @State private var selectedPlan: PlanType = .yearly
     @Environment(\.presentationMode) var presentationMode
     
     enum PlanType {
-        case monthly, yearly
+        case yearly, monthly
     }
     
     var body: some View {
         ScrollView {
             VStack(spacing: 20) {
+                // Close button
+                HStack {
+                    Spacer()
+                    Button(action: {
+                        presentationMode.wrappedValue.dismiss()
+                    }) {
+                        Image(systemName: "xmark")
+                            .foregroundColor(.primary)
+                            .padding()
+                    }
+                }
+                
                 // Pro Plan
                 PlanCard(
                     title: "Helix Pro",
@@ -43,8 +55,8 @@ struct SubscriptionView: View {
                 // Plan Toggle
                 if !isPro {
                     Picker("Plan", selection: $selectedPlan) {
-                        Text("Monthly").tag(PlanType.monthly)
                         Text("Yearly").tag(PlanType.yearly)
+                        Text("Monthly").tag(PlanType.monthly)
                     }
                     .pickerStyle(SegmentedPickerStyle())
                     .padding(.horizontal)
@@ -76,7 +88,7 @@ struct SubscriptionView: View {
             .padding()
         }
         .navigationTitle("Helix Pro")
-        .background(AppColors.background.edgesIgnoringSafeArea(.all))
+        .background(AppColors.mainSubBackground.edgesIgnoringSafeArea(.all))
     }
 }
 
@@ -116,17 +128,37 @@ struct PlanCard: View {
             }
             
             Button(action: action) {
-                Text(isPro ? "Current Plan" : (title == "Pro" ? "Upgrade" : "Downgrade"))
+                Text(buttonText)
                     .frame(maxWidth: .infinity)
                     .padding()
-                    .background(isPro ? Color.gray.opacity(0.2) : AppColors.buttonBackground)
-                    .foregroundColor(isPro ? .primary : AppColors.buttonText)
+                    .background(buttonBackground)
+                    .foregroundColor(buttonForeground)
                     .cornerRadius(10)
             }
-            .disabled(isPro)
+            .disabled(isButtonDisabled)
         }
         .padding()
-        .background(Color(UIColor.secondarySystemBackground))
+        .background(Color(UIColor.cardSubBackground))
         .cornerRadius(16)
+    }
+    
+    private var buttonText: String {
+        if isPro {
+            return title == "Helix Pro" ? "Current Plan" : "Free"
+        } else {
+            return title == "Helix Pro" ? "Upgrade" : "Curent Plan"
+        }
+    }
+    
+    private var isButtonDisabled: Bool {
+        isPro
+    }
+    
+    private var buttonBackground: Color {
+        isPro ? Color.gray.opacity(0.2) : AppColors.buttonBackground
+    }
+    
+    private var buttonForeground: Color {
+        isPro ? .primary : AppColors.buttonText
     }
 }

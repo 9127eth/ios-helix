@@ -24,6 +24,9 @@ struct AppColors {
     static let bottomNavIcon = Color("bottomNavIcon")
     static let helixPro = Color("helixPro")
     
+    static let mainSubBackground = Color("mainSubBackground")
+    static let cardSubBackground = Color("cardSubBackground")
+    
     private init() {}
 }
 
