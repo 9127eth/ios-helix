@@ -187,11 +187,11 @@ struct ContentView: View {
         
         // Configure colors for unselected items
         appearance.stackedLayoutAppearance.normal.iconColor = UIColor(AppColors.bottomNavIcon.opacity(0.6))
-        appearance.stackedLayoutAppearance.normal.titleTextAttributes = [.foregroundColor: UIColor(AppColors.bodyPrimaryText.opacity(0.6))]
+        appearance.stackedLayoutAppearance.normal.titleTextAttributes = [.foregroundColor: UIColor(AppColors.bottomNavIcon.opacity(0.6))]
         
         // Configure colors for selected items
         appearance.stackedLayoutAppearance.selected.iconColor = UIColor(AppColors.bottomNavIcon)
-        appearance.stackedLayoutAppearance.selected.titleTextAttributes = [.foregroundColor: UIColor(AppColors.bodyPrimaryText)]
+        appearance.stackedLayoutAppearance.selected.titleTextAttributes = [.foregroundColor: UIColor(AppColors.bottomNavIcon)]
 
         UITabBar.appearance().standardAppearance = appearance
         if #available(iOS 15.0, *) {

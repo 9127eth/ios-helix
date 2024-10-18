@@ -19,29 +19,42 @@ struct BusinessCardItemView: View {
     @Environment(\.colorScheme) var colorScheme
     @State private var offset: CGFloat = 0
     @State private var showingActionButtons = false
+    @State private var actionButtonsOpacity: Double = 0 // Add this line
     
     var body: some View {
         ZStack {
-            actionButtons
+            GeometryReader { geometry in
+                HStack(spacing: 0) {
+                    Spacer()
+                    actionButtons
+                        .frame(width: 220, height: geometry.size.height)
+                        .offset(x: offset + 220)
+                        .opacity(actionButtonsOpacity) // Add this line
+                }
+                .frame(height: geometry.size.height, alignment: .center)
+            }
             
             cardContent
                 .offset(x: offset)
-                .padding(.trailing, showingActionButtons ? 20 : 0) // Add padding when action buttons are shown
                 .gesture(
-                    DragGesture()
+                    DragGesture(minimumDistance: 20, coordinateSpace: .local)
                         .onChanged { gesture in
-                            if gesture.translation.width < 0 && abs(gesture.translation.width) > abs(gesture.translation.height) {
-                                offset = gesture.translation.width
+                            if abs(gesture.translation.width) > abs(gesture.translation.height) {
+                                offset = min(0, gesture.translation.width)
+                                // Gradually increase opacity as user swipes
+                                actionButtonsOpacity = Double(-offset / 220)
                             }
                         }
                         .onEnded { gesture in
                             withAnimation {
-                                if gesture.translation.width < -50 {
-                                    offset = -220 // Increased offset to push card further left
+                                if gesture.translation.width < -50 && abs(gesture.translation.width) > abs(gesture.translation.height) {
+                                    offset = -220
                                     showingActionButtons = true
+                                    actionButtonsOpacity = 1 // Fully visible
                                 } else {
                                     offset = 0
                                     showingActionButtons = false
+                                    actionButtonsOpacity = 0 // Fully hidden
                                 }
                             }
                         }
@@ -67,32 +80,26 @@ struct BusinessCardItemView: View {
     }
     
     private var actionButtons: some View {
-        HStack {
-            Spacer()
-            VStack(spacing: 20) { // Increased spacing between button rows
-                HStack(spacing: 20) { // Increased spacing between buttons
-                    actionButton(title: "Share", action: { showShare = true })
-                    actionButton(title: "Preview", action: { showPreview = true })
-                }
-                HStack(spacing: 20) { // Increased spacing between buttons
-                    actionButton(title: "Edit", action: { showingEditView = true })
-                    actionButton(title: "Delete", action: { showingDeleteConfirmation = true })
-                }
+        VStack(spacing: 20) {
+            HStack(spacing: 20) {
+                actionButton(title: "Share", action: { showShare = true })
+                actionButton(title: "Preview", action: { showPreview = true })
             }
-            .frame(width: 220) // Increased width to accommodate larger buttons and spacing
-            .opacity(showingActionButtons ? 1 : 0)
-            .padding(.leading, 20) // Added padding to separate buttons from card
+            HStack(spacing: 20) {
+                actionButton(title: "Edit", action: { showingEditView = true })
+                actionButton(title: "Delete", action: { showingDeleteConfirmation = true })
+            }
         }
     }
     
     private func actionButton(title: String, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             Text(title)
-                .font(.system(size: 16, weight: .medium))
+                .font(.system(size: 15, weight: .medium))
                 .foregroundColor(AppColors.buttonText)
-                .frame(width: 100, height: 44) // Slightly increased button size
+                .frame(width: 90, height: 40)
                 .background(AppColors.buttonBackground)
-                .cornerRadius(8)
+                .cornerRadius(12)
         }
     }
     
