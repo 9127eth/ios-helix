@@ -50,30 +50,28 @@ struct CreateBusinessCardView: View {
                 .padding()
             
             // Content wrapped in KeyboardAvoidingView
-            KeyboardAvoidingView {
-                ScrollView {
-                    VStack(spacing: 20) {
-                        switch currentStep {
-                        case 0:
-                            BasicInformationView(businessCard: $businessCard, showFirstNameError: $showFirstNameError)
-                        case 1:
-                            ProfessionalInformationView(businessCard: $businessCard)
-                        case 2:
-                            DescriptionView(businessCard: $businessCard, showDescriptionError: $showDescriptionError)
-                        case 3:
-                            ContactInformationView(businessCard: $businessCard)
-                        case 4:
-                            SocialLinksView(businessCard: $businessCard)
-                        case 5:
-                            WebLinksView(businessCard: $businessCard)
-                        case 6:
-                            ProfileImageView(businessCard: $businessCard)
-                        default:
-                            EmptyView()
-                        }
+            ScrollView {
+                VStack(spacing: 20) {
+                    switch currentStep {
+                    case 0:
+                        BasicInformationView(businessCard: $businessCard, showFirstNameError: $showFirstNameError)
+                    case 1:
+                        ProfessionalInformationView(businessCard: $businessCard)
+                    case 2:
+                        DescriptionView(businessCard: $businessCard, showDescriptionError: $showDescriptionError)
+                    case 3:
+                        ContactInformationView(businessCard: $businessCard)
+                    case 4:
+                        SocialLinksView(businessCard: $businessCard)
+                    case 5:
+                        WebLinksView(businessCard: $businessCard)
+                    case 6:
+                        ProfileImageView(businessCard: $businessCard)
+                    default:
+                        EmptyView()
                     }
-                    .padding()
                 }
+                .padding()
             }
             
             // Navigation buttons
@@ -122,6 +120,7 @@ struct CreateBusinessCardView: View {
         .alert(isPresented: $showAlert) {
             Alert(title: Text("Error"), message: Text(alertMessage), dismissButton: .default(Text("OK")))
         }
+        .dismissKeyboardOnTap()
     }
 
     private func saveBusinessCard() {
