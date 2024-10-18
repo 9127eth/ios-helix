@@ -47,11 +47,6 @@ struct BusinessCardGridView: View {
                     LazyVStack(spacing: 16) {
                         ForEach(Array($businessCards.enumerated()), id: \.element.id) { index, $card in
                             BusinessCardItemView(card: $card, username: username)
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 8)
-                                        .stroke(Color(hex: 0xe5e6ed), lineWidth: 1)
-                                        .opacity(colorScheme == .dark ? 1 : 0)
-                                )
                                 .opacity(opacityForOffset(UIScreen.main.bounds.height * 0.3 + CGFloat(index) * 150))
                         }
                         AddCardButton(action: { showCreateCard = true })
