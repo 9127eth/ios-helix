@@ -6,11 +6,13 @@
 //
 
 import SwiftUI
+import StoreKit
 
 struct SubscriptionView: View {
     @Binding var isPro: Bool
     @State private var selectedPlan: PlanType = .yearly
     @Environment(\.presentationMode) var presentationMode
+    @StateObject private var subscriptionManager = SubscriptionManager()
     
     enum PlanType {
         case yearly, monthly
@@ -34,20 +36,17 @@ struct SubscriptionView: View {
                 // Pro Plan
                 PlanCard(
                     title: "Helix Pro",
-                    price: selectedPlan == .monthly ? "$3/month" : "$12/year",
+                    price: selectedPlan == .monthly ? "$2.99/month" : "$12.99/year",
                     features: [
                         "Up to 10 business cards",
-                        "Image Upload",
-                        "Unlimited sharing",
-                        "Custom Card Colors",
-                        "CV/Resume Upload"
+                        "CV/Resume Upload",
+                        "Link to physical card via NFC",
+                        "Image Upload"
                     ],
                     isPro: isPro,
                     action: {
                         if !isPro {
-                            // Handle subscription action
-                            // This is where you'd implement the actual subscription process
-                            print("Subscribing to Pro plan")
+                            purchaseSubscription()
                         }
                     }
                 )
@@ -68,11 +67,11 @@ struct SubscriptionView: View {
                     price: "$0/year",
                     features: [
                         "1 free business card",
-                        "Image Upload",
-                        "Unlimited sharing"
+                        "Link to physical card via NFC",
+                        "Image Upload"
                     ],
                     disabledFeatures: [
-                        "Custom Card Colors",
+                        "Up to 10 business cards",
                         "CV/Resume Upload"
                     ],
                     isPro: !isPro,
@@ -89,6 +88,25 @@ struct SubscriptionView: View {
         }
         .navigationTitle("Helix Pro")
         .background(AppColors.mainSubBackground.edgesIgnoringSafeArea(.all))
+        .onAppear {
+            Task {
+                await subscriptionManager.loadProducts()
+            }
+        }
+    }
+    
+    private func purchaseSubscription() {
+        Task {
+            do {
+                if let product = subscriptionManager.products.first {
+                    try await subscriptionManager.purchase(product)
+                    isPro = true
+                }
+            } catch {
+                print("Failed to purchase subscription: \(error)")
+                // Handle the error (e.g., show an alert to the user)
+            }
+        }
     }
 }
 

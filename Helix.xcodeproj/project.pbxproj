@@ -10,6 +10,7 @@
 		0252AE802CBB58740076FAE0 /* libPhoneNumber in Frameworks */ = {isa = PBXBuildFile; productRef = 0252AE7F2CBB58740076FAE0 /* libPhoneNumber */; };
 		02B87DA22CC06CFE00C8C644 /* FontAwesome in Frameworks */ = {isa = PBXBuildFile; productRef = 02B87DA12CC06CFE00C8C644 /* FontAwesome */; };
 		02B87DA42CC06CFE00C8C644 /* tools in Frameworks */ = {isa = PBXBuildFile; productRef = 02B87DA32CC06CFE00C8C644 /* tools */; };
+		02B87DB82CC2F37D00C8C644 /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 02B87DB72CC2F37C00C8C644 /* StoreKit.framework */; };
 		02F464802CB4EDA40034711F /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = 02F4647F2CB4EDA40034711F /* FirebaseAnalytics */; };
 		02F464822CB4EDA40034711F /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 02F464812CB4EDA40034711F /* FirebaseAuth */; };
 		02F464842CB4EDA40034711F /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 02F464832CB4EDA40034711F /* FirebaseFirestore */; };
@@ -41,6 +42,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		02B87DB72CC2F37C00C8C644 /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
 		02F4644F2CB4E6130034711F /* Helix.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Helix.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		02F464612CB4E6150034711F /* HelixTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = HelixTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		02F4646B2CB4E6150034711F /* HelixUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = HelixUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -53,7 +55,6 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
-				Untitled.swift,
 			);
 			target = 02F4644E2CB4E6130034711F /* Helix */;
 		};
@@ -61,6 +62,7 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				"GoogleService-Info.plist",
+				Subscriptions.storekit,
 			);
 			target = 02F464602CB4E6150034711F /* HelixTests */;
 		};
@@ -68,6 +70,7 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				"GoogleService-Info.plist",
+				Subscriptions.storekit,
 			);
 			target = 02F4646A2CB4E6150034711F /* HelixUITests */;
 		};
@@ -112,6 +115,7 @@
 				02F464842CB4EDA40034711F /* FirebaseFirestore in Frameworks */,
 				02F464882CB4EDA40034711F /* FirebaseStorage in Frameworks */,
 				02F464862CB4EDA40034711F /* FirebaseFunctions in Frameworks */,
+				02B87DB82CC2F37D00C8C644 /* StoreKit.framework in Frameworks */,
 				02F464AB2CB788300034711F /* GoogleSignIn in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -159,6 +163,7 @@
 		02F465062CB8F7C20034711F /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				02B87DB72CC2F37C00C8C644 /* StoreKit.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
