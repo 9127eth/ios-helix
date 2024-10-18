@@ -15,6 +15,7 @@ import CryptoKit
 class AuthenticationManager: NSObject, ObservableObject {
     @Published var user: User?
     @Published var isAuthenticated = false
+    @Published var isPro = false  // Add this line
     
     var currentUser: User? {
         return Auth.auth().currentUser
@@ -27,6 +28,7 @@ class AuthenticationManager: NSObject, ObservableObject {
     override init() {
         super.init()
         setupFirebaseAuthStateListener()
+        listenForUserChanges()
     }
     
     private func setupFirebaseAuthStateListener() {
@@ -295,6 +297,22 @@ class AuthenticationManager: NSObject, ObservableObject {
     func resetAuthState() {
         self.user = nil
         self.isAuthenticated = false
+    }
+
+    func listenForUserChanges() {
+        guard let userId = Auth.auth().currentUser?.uid else { return }
+        let db = Firestore.firestore()
+        db.collection("users").document(userId)
+            .addSnapshotListener { documentSnapshot, error in
+                guard let document = documentSnapshot else {
+                    print("Error fetching document: \(error!)")
+                    return
+                }
+                let isPro = document.data()?["isPro"] as? Bool ?? false
+                DispatchQueue.main.async {
+                    self.isPro = isPro
+                }
+            }
     }
 }
 

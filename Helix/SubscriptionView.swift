@@ -46,7 +46,7 @@ struct SubscriptionView: View {
                     isPro: isPro,
                     action: {
                         if !isPro {
-                            purchaseSubscription()
+                            purchaseSubscription(for: selectedPlan)
                         }
                     }
                 )
@@ -95,10 +95,11 @@ struct SubscriptionView: View {
         }
     }
     
-    private func purchaseSubscription() {
+    private func purchaseSubscription(for planType: PlanType) {
         Task {
             do {
-                if let product = subscriptionManager.products.first {
+                let productId = planType == .yearly ? "001" : "002"
+                if let product = subscriptionManager.products.first(where: { $0.id == productId }) {
                     try await subscriptionManager.purchase(product)
                     isPro = true
                 }
