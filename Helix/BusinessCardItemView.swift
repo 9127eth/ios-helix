@@ -194,11 +194,11 @@ struct BusinessCardItemView: View {
             }
         }
         .padding()
-        .frame(height: 180)
+        .frame(height: 200)
         .background(AppColors.cardGridBackground)
-        .cornerRadius(8)
+        .cornerRadius(20) // Increased from 8 to 20
         .overlay(
-            RoundedRectangle(cornerRadius: 8)
+            RoundedRectangle(cornerRadius: 20) // Increased from 8 to 20
                 .stroke(Color(hex: 0xe5e6ed), lineWidth: 1)
                 .opacity(colorScheme == .dark ? 1 : 0)
         )
