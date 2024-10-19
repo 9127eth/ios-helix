@@ -12,7 +12,7 @@ import FirebaseAuth
 class SubscriptionManager: ObservableObject {
     @Published var products: [Product] = []
     @Published var purchasedSubscriptions: [Product] = []
-    private var productIds = ["6737138361", "6737138834"]
+    private var productIds = ["001", "002"] // Updated product IDs
     
     init() {
         Task {

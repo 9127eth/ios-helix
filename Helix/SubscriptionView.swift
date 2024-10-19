@@ -122,7 +122,7 @@ struct SubscriptionView: View {
     private func purchaseSubscription(for planType: PlanType) {
         Task {
             do {
-                let productId = planType == .yearly ? "6737138361" : "6737138834"
+                let productId = planType == .yearly ? "001" : "002" // Updated product IDs
                 if let product = subscriptionManager.products.first(where: { $0.id == productId }) {
                     try await subscriptionManager.purchase(product)
                     isPro = true
