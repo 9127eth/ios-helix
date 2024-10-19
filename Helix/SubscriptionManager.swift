@@ -79,6 +79,24 @@ class SubscriptionManager: ObservableObject {
             print("Error updating pro status in Firebase: \(error)")
         }
     }
+    
+    @MainActor
+    func restorePurchases() async throws {
+        for await result in Transaction.currentEntitlements {
+            guard case .verified(let transaction) = result else {
+                continue
+            }
+            
+            if let product = products.first(where: { $0.id == transaction.productID }) {
+                purchasedSubscriptions.append(product)
+            }
+        }
+        
+        // Update Firebase status
+        if !purchasedSubscriptions.isEmpty {
+            await updateFirebaseProStatus(true)
+        }
+    }
 }
 
 enum SubscriptionError: Error {

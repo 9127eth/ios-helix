@@ -15,6 +15,9 @@ struct SettingsView: View {
     @AppStorage("isDarkMode") private var isDarkMode = false
     @State private var scrollOffset: CGFloat = 0  // Track scroll offset
     @State private var isPro: Bool = false
+    @StateObject private var subscriptionManager = SubscriptionManager()
+    @State private var isRestoringPurchases = false
+    @State private var restoreError: String?
 
     var body: some View {
         ScrollView {
@@ -66,6 +69,30 @@ struct SettingsView: View {
                         }
 
                         Button(action: {
+                            Task {
+                                await restorePurchases()
+                            }
+                        }) {
+                            HStack {
+                                Text("Restore Purchases")
+                                if isRestoringPurchases {
+                                    ProgressView()
+                                        .tint(AppColors.buttonText)
+                                }
+                            }
+                            .frame(minWidth: 200)
+                            .padding(.vertical, 12)
+                            .padding(.horizontal, 20)
+                            .background(AppColors.buttonBackground)
+                            .foregroundColor(AppColors.buttonText)
+                            .cornerRadius(20)
+                        }
+                        .padding(.vertical, 8)
+                        .padding(.horizontal, 16)
+
+                        Divider()
+
+                        Button(action: {
                             authManager.signOut()
                         }) {
                             Text("Sign Out")
@@ -75,8 +102,6 @@ struct SettingsView: View {
                                 .padding(.horizontal, 16)
                                 .background(AppColors.inputFieldBackground)
                         }
-
-                        Divider()
 
                         Button(action: {
                             showDeleteConfirmation = true
@@ -117,6 +142,12 @@ struct SettingsView: View {
             )
         }
         .onAppear(perform: fetchUserProStatus)
+        .alert(item: Binding<RestoreError?>(
+            get: { restoreError.map { RestoreError(message: $0) } },
+            set: { restoreError = $0?.message }
+        )) { error in
+            Alert(title: Text("Restore Failed"), message: Text(error.message), dismissButton: .default(Text("OK")))
+        }
     }
 
     private var headerView: some View {
@@ -148,10 +179,27 @@ struct SettingsView: View {
             }
         }
     }
+
+    private func restorePurchases() async {
+        isRestoringPurchases = true
+        restoreError = nil
+        do {
+            try await subscriptionManager.restorePurchases()
+            isPro = !subscriptionManager.purchasedSubscriptions.isEmpty
+        } catch {
+            restoreError = error.localizedDescription
+        }
+        isRestoringPurchases = false
+    }
 }
 
 // Helper to track scroll offset
 struct ScrollOffsetKey: PreferenceKey {
     static var defaultValue: CGFloat = 0
     static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {}
+}
+
+struct RestoreError: Identifiable {
+    let id = UUID()
+    let message: String
 }
