@@ -6,6 +6,7 @@
 //
 import SwiftUI
 import Firebase
+import FirebaseAuth
 
 struct SettingsView: View {
     @EnvironmentObject var authManager: AuthenticationManager
@@ -13,6 +14,7 @@ struct SettingsView: View {
     @Binding var isAuthenticated: Bool
     @AppStorage("isDarkMode") private var isDarkMode = false
     @State private var scrollOffset: CGFloat = 0  // Track scroll offset
+    @State private var isPro: Bool = false
 
     var body: some View {
         ScrollView {
@@ -48,6 +50,21 @@ struct SettingsView: View {
                         .frame(maxWidth: .infinity, alignment: .leading)
 
                     VStack(spacing: 0) {
+                        Button(action: {
+                            // Action to open subscription view (to be implemented)
+                        }) {
+                            HStack {
+                                Text("Subscription")
+                                Spacer()
+                                Text(isPro ? "Helix Pro" : "Free Plan")
+                                    .foregroundColor(.gray)
+                            }
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(.vertical, 8)
+                            .padding(.horizontal, 16)
+                            .background(AppColors.inputFieldBackground)
+                        }
+
                         Button(action: {
                             authManager.signOut()
                         }) {
@@ -99,6 +116,7 @@ struct SettingsView: View {
                 secondaryButton: .cancel()
             )
         }
+        .onAppear(perform: fetchUserProStatus)
     }
 
     private var headerView: some View {
@@ -119,6 +137,16 @@ struct SettingsView: View {
 
     private func deleteAccount() {
         // Implement account deletion logic here
+    }
+
+    private func fetchUserProStatus() {
+        guard let userId = Auth.auth().currentUser?.uid else { return }
+        let db = Firestore.firestore()
+        db.collection("users").document(userId).getDocument { (document, error) in
+            if let document = document, document.exists {
+                self.isPro = document.data()?["isPro"] as? Bool ?? false
+            }
+        }
     }
 }
 

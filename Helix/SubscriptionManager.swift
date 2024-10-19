@@ -12,7 +12,7 @@ import FirebaseAuth
 class SubscriptionManager: ObservableObject {
     @Published var products: [Product] = []
     @Published var purchasedSubscriptions: [Product] = []
-    private var productIds = ["001", "002"]
+    private var productIds = ["6737138361", "6737138834"]
     
     init() {
         Task {
@@ -26,6 +26,7 @@ class SubscriptionManager: ObservableObject {
         do {
             let storeProducts = try await Product.products(for: productIds)
             products = storeProducts
+            print("Loaded products: \(products.map { $0.id })")
         } catch {
             print("Failed to load products: \(error)")
         }
