@@ -8,6 +8,7 @@ import SwiftUI
 import FirebaseFirestore
 import FirebaseAuth
 import NotificationCenter
+import CoreNFC
 
 struct BusinessCardItemView: View {
     @Binding var card: BusinessCard
@@ -20,6 +21,7 @@ struct BusinessCardItemView: View {
     @State private var offset: CGFloat = 0
     @State private var showingActionButtons = false
     @State private var actionButtonsOpacity: Double = 0 // Add this line
+    @StateObject private var nfcWriter = NFCWriter()
     
     var body: some View {
         ZStack {
@@ -124,6 +126,9 @@ struct BusinessCardItemView: View {
                     Button("Preview") { showPreview = true }
                     Button("Share") { showShare = true }
                     Button("Edit") { showingEditView = true }
+                    Button("Add to NFC") {
+                        addToNFC()
+                    }
                     Button("Delete", role: .destructive) {
                         showingDeleteConfirmation = true
                     }
@@ -218,6 +223,95 @@ struct BusinessCardItemView: View {
                 print("Error deleting card: \(error.localizedDescription)")
                 // Here you might want to show an error alert to the user
             }
+        }
+    }
+    
+    private func addToNFC() {
+        guard let url = URL(string: card.getCardURL(username: username)) else {
+            print("Error: Invalid URL for NFC tag")
+            return
+        }
+        
+        DispatchQueue.main.async {
+            self.nfcWriter.writeToNFC(url: url)
+        }
+    }
+}
+
+class NFCWriter: NSObject, NFCNDEFReaderSessionDelegate, ObservableObject {
+    @Published var isWriting: Bool = false
+    @Published var lastWriteResult: String?
+
+    var session: NFCNDEFReaderSession?
+    var urlToWrite: URL?
+
+    func writeToNFC(url: URL) {
+        print("writeToNFC called with URL: \(url)")
+        self.urlToWrite = url
+        self.isWriting = true
+        session = NFCNDEFReaderSession(delegate: self, queue: nil, invalidateAfterFirstRead: false)
+        session?.alertMessage = "Hold your iPhone near the NFC tag to write your business card URL."
+        session?.begin()
+    }
+
+    func readerSession(_ session: NFCNDEFReaderSession, didDetectNDEFs messages: [NFCNDEFMessage]) {
+        // Not used for writing
+    }
+
+    func readerSession(_ session: NFCNDEFReaderSession, didDetect tags: [NFCNDEFTag]) {
+        print("didDetect tags called")
+        guard let tag = tags.first, let url = urlToWrite else { 
+            session.invalidate()
+            return 
+        }
+        
+        session.connect(to: tag) { error in
+            if let error = error {
+                session.invalidate()
+                return
+            }
+
+            tag.queryNDEFStatus { status, _, _ in
+                switch status {
+                case .notSupported, .readOnly:
+                    session.invalidate()
+                case .readWrite:
+                    let payload = NFCNDEFPayload.wellKnownTypeURIPayload(url: url)!
+                    let message = NFCNDEFMessage(records: [payload])
+                    tag.writeNDEF(message) { error in
+                        if error != nil {
+                            self.updateWriteResult("Write failed: \(error!.localizedDescription)")
+                            session.invalidate()
+                        } else {
+                            self.updateWriteResult("Success")
+                            session.alertMessage = "Success"
+                            session.invalidate()
+                        }
+                    }
+                @unknown default:
+                    session.invalidate()
+                }
+            }
+        }
+    }
+
+    func readerSessionDidBecomeActive(_ session: NFCNDEFReaderSession) {
+        // Not needed for writing
+    }
+
+    func readerSession(_ session: NFCNDEFReaderSession, didInvalidateWithError error: Error) {
+        print("Session invalidated with error: \(error.localizedDescription)")
+        DispatchQueue.main.async {
+            self.isWriting = false
+            self.lastWriteResult = error.localizedDescription
+        }
+    }
+
+    // Add this method to update the write result
+    private func updateWriteResult(_ result: String) {
+        DispatchQueue.main.async {
+            self.isWriting = false
+            self.lastWriteResult = result
         }
     }
 }
