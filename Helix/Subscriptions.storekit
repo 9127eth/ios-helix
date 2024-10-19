@@ -14,7 +14,16 @@
 
   ],
   "products" : [
-
+    {
+      "productID" : "001",
+      "displayName" : "Yearly Subscription",
+      "type" : "RecurringSubscription"
+    },
+    {
+      "productID" : "002",
+      "displayName" : "Monthly Subscription",
+      "type" : "RecurringSubscription"
+    }
   ],
   "settings" : {
     "_applicationInternalID" : "6736955244",
@@ -92,7 +101,7 @@
               "locale" : "en_US"
             }
           ],
-          "productID" : "6737138361",
+          "productID" : "001",
           "recurringSubscriptionPeriod" : "P1Y",
           "referenceName" : "Yearly Subscription",
           "subscriptionGroupID" : "...",
@@ -117,7 +126,7 @@
               "locale" : "en_US"
             }
           ],
-          "productID" : "6737138834",
+          "productID" : "002",
           "recurringSubscriptionPeriod" : "P1M",
           "referenceName" : "Monthly Subscription",
           "subscriptionGroupID" : "...",
