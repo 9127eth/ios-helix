@@ -13,99 +13,127 @@ struct SubscriptionView: View {
     @State private var selectedPlan: PlanType = .yearly
     @Environment(\.presentationMode) var presentationMode
     @StateObject private var subscriptionManager = SubscriptionManager()
+    @State private var isLoading = true
+    @State private var errorMessage: String?
     
     enum PlanType {
         case yearly, monthly
     }
     
     var body: some View {
-        ScrollView {
-            VStack(spacing: 20) {
-                // Close button
-                HStack {
-                    Spacer()
-                    Button(action: {
-                        presentationMode.wrappedValue.dismiss()
-                    }) {
-                        Image(systemName: "xmark")
-                            .foregroundColor(.primary)
-                            .padding()
-                    }
-                }
-                
-                // Pro Plan
-                PlanCard(
-                    title: "Helix Pro",
-                    price: selectedPlan == .monthly ? "$2.99/month" : "$12.99/year",
-                    features: [
-                        "Up to 10 business cards",
-                        "CV/Resume Upload",
-                        "Link to physical card via NFC",
-                        "Image Upload"
-                    ],
-                    isPro: isPro,
-                    action: {
+        VStack {
+            if isLoading {
+                ProgressView("Loading products...")
+            } else if let error = errorMessage {
+                Text(error)
+                    .foregroundColor(.red)
+            } else {
+                ScrollView {
+                    VStack(spacing: 20) {
+                        // Close button
+                        HStack {
+                            Spacer()
+                            Button(action: {
+                                presentationMode.wrappedValue.dismiss()
+                            }) {
+                                Image(systemName: "xmark")
+                                    .foregroundColor(.primary)
+                                    .padding()
+                            }
+                        }
+                        
+                        // Pro Plan
+                        PlanCard(
+                            title: "Helix Pro",
+                            price: selectedPlan == .monthly ? "$2.99/month" : "$12.99/year",
+                            features: [
+                                "Up to 10 business cards",
+                                "CV/Resume Upload",
+                                "Link to physical card via NFC",
+                                "Image Upload"
+                            ],
+                            isPro: isPro,
+                            action: {
+                                if !isPro {
+                                    purchaseSubscription(for: selectedPlan)
+                                }
+                            }
+                        )
+                        
+                        // Plan Toggle
                         if !isPro {
-                            purchaseSubscription(for: selectedPlan)
+                            Picker("Plan", selection: $selectedPlan) {
+                                Text("Yearly").tag(PlanType.yearly)
+                                Text("Monthly").tag(PlanType.monthly)
+                            }
+                            .pickerStyle(SegmentedPickerStyle())
+                            .padding(.horizontal)
                         }
+                        
+                        // Free Plan
+                        PlanCard(
+                            title: "Free Plan",
+                            price: "$0/year",
+                            features: [
+                                "1 free business card",
+                                "Link to physical card via NFC",
+                                "Image Upload"
+                            ],
+                            disabledFeatures: [
+                                "Up to 10 business cards",
+                                "CV/Resume Upload"
+                            ],
+                            isPro: !isPro,
+                            action: {
+                                if isPro {
+                                    // Handle downgrade action
+                                    // This is where you'd implement the actual downgrade process
+                                    print("Downgrading to Free plan")
+                                }
+                            }
+                        )
                     }
-                )
-                
-                // Plan Toggle
-                if !isPro {
-                    Picker("Plan", selection: $selectedPlan) {
-                        Text("Yearly").tag(PlanType.yearly)
-                        Text("Monthly").tag(PlanType.monthly)
-                    }
-                    .pickerStyle(SegmentedPickerStyle())
-                    .padding(.horizontal)
+                    .padding()
                 }
-                
-                // Free Plan
-                PlanCard(
-                    title: "Free Plan",
-                    price: "$0/year",
-                    features: [
-                        "1 free business card",
-                        "Link to physical card via NFC",
-                        "Image Upload"
-                    ],
-                    disabledFeatures: [
-                        "Up to 10 business cards",
-                        "CV/Resume Upload"
-                    ],
-                    isPro: !isPro,
-                    action: {
-                        if isPro {
-                            // Handle downgrade action
-                            // This is where you'd implement the actual downgrade process
-                            print("Downgrading to Free plan")
-                        }
-                    }
-                )
+                .navigationTitle("Helix Pro")
+                .background(AppColors.mainSubBackground.edgesIgnoringSafeArea(.all))
             }
-            .padding()
         }
-        .navigationTitle("Helix Pro")
-        .background(AppColors.mainSubBackground.edgesIgnoringSafeArea(.all))
         .onAppear {
             Task {
-                await subscriptionManager.loadProducts()
+                await loadProducts()
             }
         }
     }
     
+    @MainActor
+    private func loadProducts() async {
+        isLoading = true
+        do {
+            try await subscriptionManager.loadProducts()
+            isLoading = false
+        } catch {
+            errorMessage = "Failed to load products: \(error.localizedDescription)"
+            isLoading = false
+        }
+    }
+    
+    @MainActor
     private func purchaseSubscription(for planType: PlanType) {
         Task {
             do {
-                let productId = planType == .yearly ? "001" : "002"
+                let productId = planType == .yearly ? "6737138361" : "6737138834"
                 if let product = subscriptionManager.products.first(where: { $0.id == productId }) {
                     try await subscriptionManager.purchase(product)
                     isPro = true
+                    presentationMode.wrappedValue.dismiss()
+                } else {
+                    print("Product not found: \(productId)")
+                    errorMessage = "Product not available for purchase."
                 }
             } catch {
                 print("Failed to purchase subscription: \(error)")
-                // Handle the error (e.g., show an alert to the user)
+                errorMessage = "Failed to purchase subscription: \(error.localizedDescription)"
             }
         }
     }

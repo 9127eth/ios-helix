@@ -9,7 +9,7 @@
       }
     ]
   },
-  "identifier" : "6535F94B",
+  "identifier" : "...",
   "nonRenewingSubscriptions" : [
 
   ],
@@ -70,10 +70,64 @@
     ]
   },
   "subscriptionGroups" : [
+    {
+      "id" : "...",
+      "subscriptions" : [
+        {
+          "adHocOffers" : [
 
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "12.99",
+          "familyShareable" : false,
+          "groupNumber" : 1,
+          "internalID" : "...",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "...",
+              "displayName" : "Yearly Subscription",
+              "locale" : "en_US"
+            }
+          ],
+          "productID" : "6737138361",
+          "recurringSubscriptionPeriod" : "P1Y",
+          "referenceName" : "Yearly Subscription",
+          "subscriptionGroupID" : "...",
+          "type" : "RecurringSubscription"
+        },
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "2.99",
+          "familyShareable" : false,
+          "groupNumber" : 2,
+          "internalID" : "...",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "...",
+              "displayName" : "Monthly Subscription",
+              "locale" : "en_US"
+            }
+          ],
+          "productID" : "6737138834",
+          "recurringSubscriptionPeriod" : "P1M",
+          "referenceName" : "Monthly Subscription",
+          "subscriptionGroupID" : "...",
+          "type" : "RecurringSubscription"
+        }
+      ]
+    }
   ],
   "version" : {
-    "major" : 4,
+    "major" : 2,
     "minor" : 0
   }
 }
