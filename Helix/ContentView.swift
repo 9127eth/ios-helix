@@ -21,6 +21,7 @@ struct ContentView: View {
     @State private var username: String = ""
     @AppStorage("isDarkMode") private var isDarkMode = false
     @StateObject private var subscriptionManager = SubscriptionManager()
+    @State private var isPro: Bool = false
     
     init() {
         setupNavigationBarAppearance()
@@ -69,6 +70,8 @@ struct ContentView: View {
         }
         .onAppear {
             configureTabBarAppearance()
+            fetchUserProStatus()
+            fetchBusinessCards()
         }
         .accentColor(AppColors.bottomNavIcon) // This sets the selected tab color
         .onAppear {
@@ -97,7 +100,7 @@ struct ContentView: View {
     }
     
     private var businessCardTab: some View {
-        BusinessCardGridView(businessCards: $businessCards, showCreateCard: $showCreateCard, username: username)
+        BusinessCardGridView(businessCards: $businessCards, showCreateCard: $showCreateCard, username: username, isPro: $isPro)
             .tabItem {
                 Label {
                     Text("Cards")
@@ -197,6 +200,19 @@ struct ContentView: View {
         UITabBar.appearance().standardAppearance = appearance
         if #available(iOS 15.0, *) {
             UITabBar.appearance().scrollEdgeAppearance = appearance
+        }
+    }
+    
+    private func fetchUserProStatus() {
+        guard let userId = Auth.auth().currentUser?.uid else { return }
+        let db = Firestore.firestore()
+        db.collection("users").document(userId).getDocument { (document, error) in
+            if let document = document, document.exists {
+                let fetchedIsPro = document.data()?["isPro"] as? Bool ?? false
+                DispatchQueue.main.async {
+                    self.isPro = fetchedIsPro
+                }
+            }
         }
     }
 }
