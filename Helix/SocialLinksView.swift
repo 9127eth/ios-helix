@@ -106,8 +106,28 @@ struct SocialLinkRow: View {
     let isFocused: Bool
     let onCommit: () -> Void
 
-    @State private var localValue: String = ""
+    @State private var localValue: String
     @State private var offset: CGFloat = 0
+    @FocusState private var isFieldFocused: Bool
+
+    init(
+        linkType: SocialLinkType,
+        value: Binding<String?>,
+        isFocused: Bool,
+        onCommit: @escaping () -> Void
+    ) {
+        self.linkType = linkType
+        self._value = value
+        self.isFocused = isFocused
+        self.onCommit = onCommit
+        
+        // Initialize localValue with the base URL if value is empty
+        if let existingValue = value.wrappedValue, !existingValue.isEmpty {
+            _localValue = State(initialValue: existingValue)
+        } else {
+            _localValue = State(initialValue: linkType.baseURL)
+        }
+    }
 
     var body: some View {
         ZStack {
@@ -119,17 +139,16 @@ struct SocialLinkRow: View {
                             localValue = ""
                             value = nil
                             onCommit()
-                            offset = 0
                         }
                     }) {
                         Image(systemName: "trash")
                             .foregroundColor(.red)
                             .font(.system(size: 20))
                     }
-                    .frame(width: 60, height: geometry.size.height) // Ensure height matches the row
+                    .frame(width: 60, height: geometry.size.height)
                     .offset(x: offset + 60)
                 }
-                .frame(height: geometry.size.height, alignment: .center) // Align center vertically
+                .frame(height: geometry.size.height, alignment: .center)
             }
             
             HStack {
@@ -137,20 +156,17 @@ struct SocialLinkRow: View {
                     .resizable()
                     .scaledToFit()
                     .frame(width: 24, height: 24)
-                CustomTextField(title: linkType.displayName, text: $localValue)
-                    .onAppear {
-                        localValue = value ?? ""
-                    }
-                    .onChange(of: localValue) { newValue in
-                        value = newValue.isEmpty ? nil : newValue
-                    }
-                    .onSubmit(onCommit)
+                TextField("Enter your \(linkType.displayName) URL", text: $localValue, onCommit: onCommit)
+                    .focused($isFieldFocused)
+                    .keyboardType(.URL)
+                    .autocapitalization(.none)
+                    .disableAutocorrection(true)
             }
             .padding(.vertical, 8)
-            .background(Color.clear)
+            .padding(.leading, 16)
             .offset(x: offset)
             .gesture(
-                DragGesture(minimumDistance: 20, coordinateSpace: .local)
+                DragGesture(minimumDistance: 20)
                     .onChanged { gesture in
                         if abs(gesture.translation.width) > abs(gesture.translation.height) {
                             offset = min(0, gesture.translation.width)
@@ -158,7 +174,7 @@ struct SocialLinkRow: View {
                     }
                     .onEnded { gesture in
                         withAnimation {
-                            if gesture.translation.width < -50 && abs(gesture.translation.width) > abs(gesture.translation.height) {
+                            if gesture.translation.width < -50 {
                                 offset = -60
                             } else {
                                 offset = 0
@@ -166,6 +182,12 @@ struct SocialLinkRow: View {
                         }
                     }
             )
+        }
+        .onChange(of: localValue) { newValue in
+            value = newValue
+        }
+        .onAppear {
+            isFieldFocused = isFocused
         }
     }
 }
