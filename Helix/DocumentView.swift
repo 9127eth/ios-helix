@@ -97,18 +97,24 @@ struct DocumentView: View {
                 set: { businessCard.cvHeader = $0.isEmpty ? nil : $0 }
             ), onCommit: { focusedField = .cvDescription })
                 .focused($focusedField, equals: .cvHeader)
+                .disabled(!isPro)
+                .opacity(isPro ? 1 : 0.6)
             
             CustomTextField(title: "Description", text: Binding(
                 get: { businessCard.cvDescription ?? "" },
                 set: { businessCard.cvDescription = $0.isEmpty ? nil : $0 }
             ), onCommit: { focusedField = .cvDisplayText })
                 .focused($focusedField, equals: .cvDescription)
+                .disabled(!isPro)
+                .opacity(isPro ? 1 : 0.6)
             
             CustomTextField(title: "File Name Display Text (Optional)", text: Binding(
                 get: { businessCard.cvDisplayText ?? "" },
                 set: { businessCard.cvDisplayText = $0.isEmpty ? nil : $0 }
             ), onCommit: { focusedField = nil })
                 .focused($focusedField, equals: .cvDisplayText)
+                .disabled(!isPro)
+                .opacity(isPro ? 1 : 0.6)
             
             if isUploading {
                 ProgressView(value: uploadProgress)
