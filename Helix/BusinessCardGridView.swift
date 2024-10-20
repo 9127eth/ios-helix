@@ -36,7 +36,13 @@ struct BusinessCardGridView: View {
                     if !businessCards.isEmpty {
                         HStack {
                             Spacer()
-                            Button(action: { showCreateCard = true }) {
+                            Button(action: {
+                                if businessCards.count >= 1 && !isPro {
+                                    showUpgradeModal = true
+                                } else {
+                                    showCreateCard = true
+                                }
+                            }) {
                                 Label("Create New", systemImage: "plus")
                                     .font(.footnote)
                                     .foregroundColor(AppColors.buttonText)
