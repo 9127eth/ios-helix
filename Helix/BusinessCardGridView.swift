@@ -17,6 +17,7 @@ struct BusinessCardGridView: View {
     @Binding var isPro: Bool
     @State private var showSubscriptionView = false
     @State private var showUpgradeModal = false
+    @State private var showMaxCardsAlert = false
 
     
     @Environment(\.horizontalSizeClass) var sizeClass
@@ -63,7 +64,9 @@ struct BusinessCardGridView: View {
                                 .opacity(opacityForOffset(UIScreen.main.bounds.height * 0.3 + CGFloat(index) * 150))
                         }
                         AddCardButton(action: {
-                            if businessCards.count >= 1 && !isPro {
+                            if businessCards.count >= 10 {
+                                showMaxCardsAlert = true
+                            } else if businessCards.count >= 1 && !isPro {
                                 showUpgradeModal = true
                             } else {
                                 showCreateCard = true
@@ -87,6 +90,13 @@ struct BusinessCardGridView: View {
             }
             .sheet(isPresented: $showUpgradeModal) {
                 UpgradeModalView(isPresented: $showUpgradeModal)
+            }
+            .alert(isPresented: $showMaxCardsAlert) {
+                Alert(
+                    title: Text("Maximum Cards Reached"),
+                    message: Text("You have reached the maximum limit of 10 cards. Please contact support to increase your limit."),
+                    dismissButton: .default(Text("OK"))
+                )
             }
             .onAppear {
                 fetchUserProStatus()
