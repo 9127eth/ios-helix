@@ -53,8 +53,7 @@ struct WebLinksView: View {
                             CustomTextField(title: "Link", text: Binding(
                                 get: { linkInputs[index].url },
                                 set: { newValue in
-                                    let processedUrl = addProtocolToUrl(newValue)
-                                    linkInputs[index].url = processedUrl
+                                    linkInputs[index].url = addProtocolToUrl(newValue)
                                 }
                             ), onCommit: { focusedField = .displayText(index) })
                                 .focused($focusedField, equals: .url(index))
@@ -148,6 +147,7 @@ struct WebLinksView: View {
     
     private func updateBusinessCard() {
         businessCard.webLinks = linkInputs.filter { !$0.url.isEmpty && $0.url != "http://" && $0.url != "https://" }
+            .map { WebLink(url: addProtocolToUrl($0.url), displayText: $0.displayText) }
     }
 
     private func addProtocolToUrl(_ url: String) -> String {
