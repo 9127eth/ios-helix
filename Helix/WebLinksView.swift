@@ -50,7 +50,13 @@ struct WebLinksView: View {
                     
                     HStack(alignment: .top) {
                         VStack(spacing: 10) {
-                            CustomTextField(title: "Link", text: $linkInputs[index].url, onCommit: { focusedField = .displayText(index) })
+                            CustomTextField(title: "Link", text: Binding(
+                                get: { linkInputs[index].url },
+                                set: { newValue in
+                                    let processedUrl = addProtocolToUrl(newValue)
+                                    linkInputs[index].url = processedUrl
+                                }
+                            ), onCommit: { focusedField = .displayText(index) })
                                 .focused($focusedField, equals: .url(index))
                                 .animation(.none, value: linkInputs[index].url)
                             CustomTextField(title: "Display Text (optional)", text: $linkInputs[index].displayText, onCommit: {
@@ -100,6 +106,7 @@ struct WebLinksView: View {
                     .background(AppColors.buttonBackground)
                     .cornerRadius(16)
             }
+
         }
         .padding(.top, showHeader ? 0 : 16)
         .animation(.none)
@@ -140,6 +147,16 @@ struct WebLinksView: View {
     }
     
     private func updateBusinessCard() {
-        businessCard.webLinks = linkInputs.filter { !$0.url.isEmpty }
+        businessCard.webLinks = linkInputs.filter { !$0.url.isEmpty && $0.url != "http://" && $0.url != "https://" }
+    }
+
+    private func addProtocolToUrl(_ url: String) -> String {
+        if url.isEmpty || url == "http://" || url == "https://" {
+            return ""
+        }
+        if url.hasPrefix("http://") || url.hasPrefix("https://") {
+            return url
+        }
+        return "https://" + url
     }
 }
