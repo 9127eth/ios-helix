@@ -121,7 +121,6 @@ struct SocialLinkRow: View {
         self.isFocused = isFocused
         self.onCommit = onCommit
         
-        // Initialize localValue with the base URL if value is empty
         if let existingValue = value.wrappedValue, !existingValue.isEmpty {
             _localValue = State(initialValue: existingValue)
         } else {
@@ -136,7 +135,7 @@ struct SocialLinkRow: View {
                     Spacer()
                     Button(action: {
                         withAnimation {
-                            localValue = ""
+                            localValue = linkType.baseURL
                             value = nil
                             onCommit()
                         }
@@ -151,19 +150,16 @@ struct SocialLinkRow: View {
                 .frame(height: geometry.size.height, alignment: .center)
             }
             
-            HStack {
-                Image(linkType.iconName)
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 24, height: 24)
-                TextField("Enter your \(linkType.displayName) URL", text: $localValue, onCommit: onCommit)
-                    .focused($isFieldFocused)
-                    .keyboardType(.URL)
-                    .autocapitalization(.none)
-                    .disableAutocorrection(true)
-            }
-            .padding(.vertical, 8)
-            .padding(.leading, 16)
+            CustomTextField(
+                title: linkType.displayName,
+                text: $localValue,
+                placeholder: "Enter your \(linkType.displayName) URL",
+                onCommit: onCommit
+            )
+            .focused($isFieldFocused)
+            .keyboardType(.URL)
+            .autocapitalization(.none)
+            .disableAutocorrection(true)
             .offset(x: offset)
             .gesture(
                 DragGesture(minimumDistance: 20)
