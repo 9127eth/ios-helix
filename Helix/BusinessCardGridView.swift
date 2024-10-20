@@ -14,8 +14,10 @@ struct BusinessCardGridView: View {
     @Binding var businessCards: [BusinessCard]
     @Binding var showCreateCard: Bool
     let username: String
-    @State private var isPro: Bool = false
+    @Binding var isPro: Bool
     @State private var showSubscriptionView = false
+    @State private var showUpgradeModal = false
+
     
     @Environment(\.horizontalSizeClass) var sizeClass
     @Environment(\.colorScheme) var colorScheme
@@ -54,7 +56,13 @@ struct BusinessCardGridView: View {
                             BusinessCardItemView(card: $card, username: username)
                                 .opacity(opacityForOffset(UIScreen.main.bounds.height * 0.3 + CGFloat(index) * 150))
                         }
-                        AddCardButton(action: { showCreateCard = true })
+                        AddCardButton(action: {
+                            if businessCards.count >= 1 && !isPro {
+                                showUpgradeModal = true
+                            } else {
+                                showCreateCard = true
+                            }
+                        })
                             .opacity(opacityForOffset(UIScreen.main.bounds.height * 0.3 + CGFloat(businessCards.count) * 150))
                     }
                 }
@@ -70,6 +78,9 @@ struct BusinessCardGridView: View {
             .background(AppColors.background)
             .sheet(isPresented: $showSubscriptionView) {
                 SubscriptionView(isPro: $isPro)
+            }
+            .sheet(isPresented: $showUpgradeModal) {
+                UpgradeModalView(isPresented: $showUpgradeModal)
             }
             .onAppear {
                 fetchUserProStatus()
