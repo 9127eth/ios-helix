@@ -5,9 +5,9 @@
 //  Created by Richard Waithe on 10/13/24.
 //
 
-enum SocialLinkType: CaseIterable {
+enum SocialLinkType: String, CaseIterable {
     case linkedIn, twitter, facebook, instagram, tiktok, youtube, discord, twitch, snapchat, telegram, whatsapp, threads
-
+    
     var displayName: String {
         switch self {
         case .linkedIn: return "LinkedIn"
@@ -24,21 +24,25 @@ enum SocialLinkType: CaseIterable {
         case .threads: return "Threads"
         }
     }
-
+    
     var iconName: String {
+        return rawValue
+    }
+    
+    var baseURL: String {
         switch self {
-        case .linkedIn: return "linkedin_icon"
-        case .twitter: return "twitter_icon"
-        case .facebook: return "facebook_icon"
-        case .instagram: return "instagram_icon"
-        case .tiktok: return "tiktok_icon"
-        case .youtube: return "youtube_icon"
-        case .discord: return "discord_icon"
-        case .twitch: return "twitch_icon"
-        case .snapchat: return "snapchat_icon"
-        case .telegram: return "telegram_icon"
-        case .whatsapp: return "whatsapp_icon"
-        case .threads: return "threads_icon"
+        case .linkedIn: return "https://www.linkedin.com/in/"
+        case .twitter: return "https://twitter.com/"
+        case .facebook: return "https://www.facebook.com/"
+        case .instagram: return "https://www.instagram.com/"
+        case .tiktok: return "https://www.tiktok.com/@"
+        case .youtube: return "https://www.youtube.com/channel/"
+        case .discord: return "https://discord.com/users/"
+        case .twitch: return "https://www.twitch.tv/"
+        case .snapchat: return "https://www.snapchat.com/add/"
+        case .telegram: return "https://t.me/"
+        case .whatsapp: return "https://wa.me/"
+        case .threads: return "https://www.threads.net/@"
         }
     }
 }
