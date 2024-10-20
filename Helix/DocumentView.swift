@@ -17,15 +17,18 @@ struct DocumentView: View {
     @State private var uploadProgress: Double = 0
     @State private var uploadError: String?
     @FocusState private var focusedField: Field?
+    @State private var showSubscriptionView = false
     var showHeader: Bool
+    var isPro: Bool
     
     enum Field: Hashable {
         case cvHeader, cvDescription, cvDisplayText
     }
     
-    init(businessCard: Binding<BusinessCard>, showHeader: Bool = true) {
+    init(businessCard: Binding<BusinessCard>, showHeader: Bool = true, isPro: Bool = false) {
         self._businessCard = businessCard
         self.showHeader = showHeader
+        self.isPro = isPro
     }
     
     var body: some View {
@@ -41,16 +44,47 @@ struct DocumentView: View {
                 .foregroundColor(.gray)
                 .padding(.bottom, 8)
             
-            Button(action: { isDocumentPickerPresented = true }) {
-                Text(businessCard.cvUrl == nil ? "Upload Document" : "Replace Document")
-                    .foregroundColor(AppColors.buttonText)
-                    .font(.system(size: UIFont.labelFontSize * 0.8)) // 20% smaller font
-                    .padding(.horizontal, 16) // 20% smaller horizontal padding
-                    .padding(.vertical, 8) // 20% smaller vertical padding
-                    .background(AppColors.buttonBackground)
-                    .cornerRadius(16) // 20% smaller corner radius
+            HStack {
+                Button(action: { 
+                    if isPro {
+                        isDocumentPickerPresented = true
+                    } else {
+                        showSubscriptionView = true
+                    }
+                }) {
+                    Text(isPro ? "Choose File" : "Upgrade")
+                        .foregroundColor(AppColors.buttonText)
+                        .font(.system(size: UIFont.labelFontSize * 0.8))
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 8)
+                        .frame(width: 120) // Set a fixed width
+                        .background(AppColors.buttonBackground)
+                        .cornerRadius(16)
+                }
+                .disabled(isUploading)
+                
+                if !isPro {
+                    Text("Get Helix Pro to add a document")
+                        .foregroundColor(.gray)
+                        .font(.system(size: UIFont.labelFontSize * 0.8))
+                        .padding(.leading, 8)
+                }
             }
-            .disabled(isUploading)
+            
+            if !isPro {
+                Button(action: {}) {
+                    Text(businessCard.cvUrl == nil ? "Choose File" : "Replace Document")
+                        .foregroundColor(.gray)
+                        .font(.system(size: UIFont.labelFontSize * 0.8))
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 8)
+                        .frame(width: 120) // Set the same fixed width
+                        .background(Color.gray.opacity(0.3))
+                        .cornerRadius(16)
+                }
+                .disabled(true)
+                .padding(.top, 2)
+            }
             
             if let cvUrl = businessCard.cvUrl {
                 Text("Document uploaded: \(cvUrl)")
@@ -102,6 +136,9 @@ struct DocumentView: View {
                 print("Error selecting document: \(error.localizedDescription)")
                 uploadError = "Error selecting document. Please try again."
             }
+        }
+        .sheet(isPresented: $showSubscriptionView) {
+            SubscriptionView(isPro: .constant(false))
         }
     }
     
