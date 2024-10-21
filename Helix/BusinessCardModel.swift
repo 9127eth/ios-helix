@@ -19,7 +19,7 @@ struct BusinessCard: Identifiable, Codable {
     var prefix: String?
     var credentials: String?
     var pronouns: String?
-    var description: String = "" // This is the card description
+    var description: String = ""
     var jobTitle: String?
     var company: String?
     var phoneNumber: String?
@@ -33,12 +33,12 @@ struct BusinessCard: Identifiable, Codable {
     var cvDisplayText: String?
     var imageUrl: String?
     var isActive: Bool = true
-    var createdAt: Date = Date()
-    var updatedAt: Date = Date()
+    var createdAt: Date
+    var updatedAt: Date
     var customSlug: String?
     var isPro: Bool?
     
-    // New social media link fields
+    // Social media link fields
     var linkedIn: String?
     var twitter: String?
     var facebookUrl: String?
@@ -67,36 +67,7 @@ struct BusinessCard: Identifiable, Codable {
     }
 
     enum CodingKeys: String, CodingKey {
-        case id
-        case cardSlug
-        case isPrimary
-        case firstName
-        case middleName
-        case lastName
-        case prefix
-        case credentials
-        case pronouns
-        case description
-        case jobTitle
-        case company
-        case phoneNumber
-        case email
-        case aboutMe
-        case customMessage
-        case customMessageHeader
-        case cvUrl
-        case cvHeader
-        case cvDescription
-        case cvDisplayText
-        case imageUrl
-        case isActive
-        case createdAt
-        case updatedAt
-        case customSlug
-        case isPro
-        case linkedIn, twitter, facebookUrl, instagramUrl, tiktokUrl, youtubeUrl
-        case discordUrl, twitchUrl, snapchatUrl, telegramUrl, whatsappUrl, threadsUrl
-        case webLinks
+        case id, cardSlug, isPrimary, firstName, middleName, lastName, prefix, credentials, pronouns, description, jobTitle, company, phoneNumber, email, aboutMe, customMessage, customMessageHeader, cvUrl, cvHeader, cvDescription, cvDisplayText, imageUrl, isActive, createdAt, updatedAt, customSlug, isPro, linkedIn, twitter, facebookUrl, instagramUrl, tiktokUrl, youtubeUrl, discordUrl, twitchUrl, snapchatUrl, telegramUrl, whatsappUrl, threadsUrl, webLinks
     }
 
     var name: String {
@@ -138,28 +109,6 @@ struct BusinessCard: Identifiable, Codable {
         cvDisplayText = try container.decodeIfPresent(String.self, forKey: .cvDisplayText)
         imageUrl = try container.decodeIfPresent(String.self, forKey: .imageUrl)
         isActive = try container.decode(Bool.self, forKey: .isActive)
-        // Updated decoding for createdAt
-        if let timestamp = try? container.decode(Timestamp.self, forKey: .createdAt) {
-            createdAt = timestamp.dateValue()
-        } else if let date = try? container.decode(Date.self, forKey: .createdAt) {
-            createdAt = date
-        } else if let timeInterval = try? container.decode(Double.self, forKey: .createdAt) {
-            // Assuming the timestamp is in milliseconds
-            createdAt = Date(timeIntervalSince1970: timeInterval / 1000)
-        } else {
-            createdAt = Date()
-        }
-        // Updated decoding for updatedAt
-        if let timestamp = try? container.decode(Timestamp.self, forKey: .updatedAt) {
-            updatedAt = timestamp.dateValue()
-        } else if let date = try? container.decode(Date.self, forKey: .updatedAt) {
-            updatedAt = date
-        } else if let timeInterval = try? container.decode(Double.self, forKey: .updatedAt) {
-            // Assuming the timestamp is in milliseconds
-            updatedAt = Date(timeIntervalSince1970: timeInterval / 1000)
-        } else {
-            updatedAt = Date()
-        }
         customSlug = try container.decodeIfPresent(String.self, forKey: .customSlug)
         isPro = try container.decodeIfPresent(Bool.self, forKey: .isPro)
         linkedIn = try container.decodeIfPresent(String.self, forKey: .linkedIn)
@@ -175,6 +124,32 @@ struct BusinessCard: Identifiable, Codable {
         whatsappUrl = try container.decodeIfPresent(String.self, forKey: .whatsappUrl)
         threadsUrl = try container.decodeIfPresent(String.self, forKey: .threadsUrl)
         webLinks = try container.decodeIfPresent([WebLink].self, forKey: .webLinks)
+
+        // Handle Timestamp, Date, Double, and Int values for createdAt
+        if let timestamp = try? container.decode(Timestamp.self, forKey: .createdAt) {
+            createdAt = timestamp.dateValue()
+        } else if let date = try? container.decode(Date.self, forKey: .createdAt) {
+            createdAt = date
+        } else if let timestampDouble = try? container.decode(Double.self, forKey: .createdAt) {
+            createdAt = Date(timeIntervalSince1970: timestampDouble)
+        } else if let timestampInt = try? container.decode(Int.self, forKey: .createdAt) {
+            createdAt = Date(timeIntervalSince1970: Double(timestampInt))
+        } else {
+            throw DecodingError.dataCorruptedError(forKey: .createdAt, in: container, debugDescription: "Invalid date format for createdAt")
+        }
+
+        // Handle Timestamp, Date, Double, and Int values for updatedAt
+        if let timestamp = try? container.decode(Timestamp.self, forKey: .updatedAt) {
+            updatedAt = timestamp.dateValue()
+        } else if let date = try? container.decode(Date.self, forKey: .updatedAt) {
+            updatedAt = date
+        } else if let timestampDouble = try? container.decode(Double.self, forKey: .updatedAt) {
+            updatedAt = Date(timeIntervalSince1970: timestampDouble)
+        } else if let timestampInt = try? container.decode(Int.self, forKey: .updatedAt) {
+            updatedAt = Date(timeIntervalSince1970: Double(timestampInt))
+        } else {
+            throw DecodingError.dataCorruptedError(forKey: .updatedAt, in: container, debugDescription: "Invalid date format for updatedAt")
+        }
     }
 
     func encode(to encoder: Encoder) throws {
@@ -202,8 +177,6 @@ struct BusinessCard: Identifiable, Codable {
         try container.encodeIfPresent(cvDisplayText, forKey: .cvDisplayText)
         try container.encodeIfPresent(imageUrl, forKey: .imageUrl)
         try container.encode(isActive, forKey: .isActive)
-        try container.encode(createdAt, forKey: .createdAt)
-        try container.encode(updatedAt, forKey: .updatedAt)
         try container.encodeIfPresent(customSlug, forKey: .customSlug)
         try container.encodeIfPresent(isPro, forKey: .isPro)
         try container.encodeIfPresent(linkedIn, forKey: .linkedIn)
@@ -219,6 +192,13 @@ struct BusinessCard: Identifiable, Codable {
         try container.encodeIfPresent(whatsappUrl, forKey: .whatsappUrl)
         try container.encodeIfPresent(threadsUrl, forKey: .threadsUrl)
         try container.encodeIfPresent(webLinks, forKey: .webLinks)
+        
+        // Encode createdAt and updatedAt as Firestore Timestamps
+        let timestampCreatedAt = Timestamp(date: createdAt)
+        try container.encode(timestampCreatedAt, forKey: .createdAt)
+        
+        let timestampUpdatedAt = Timestamp(date: updatedAt)
+        try container.encode(timestampUpdatedAt, forKey: .updatedAt)
     }
 
     mutating func updateSocialLink(type: SocialLinkType, value: String) {
@@ -302,19 +282,26 @@ struct BusinessCard: Identifiable, Codable {
     }
 
     static func saveChanges(_ card: BusinessCard) async throws {
-        guard let currentUser = Auth.auth().currentUser else {
-            throw NSError(domain: "com.yourapp.error", code: 1001, userInfo: [NSLocalizedDescriptionKey: "No authenticated user found"])
-        }
-        
-        guard let id = card.id else {
-            throw NSError(domain: "com.yourapp.error", code: 1002, userInfo: [NSLocalizedDescriptionKey: "Invalid card ID"])
+        guard let userId = Auth.auth().currentUser?.uid,
+              let id = card.id else {
+            throw NSError(domain: "com.yourapp.error", code: 1001, userInfo: [NSLocalizedDescriptionKey: "Invalid user or card ID"])
         }
         
         let db = Firestore.firestore()
-        let cardRef = db.collection("users").document(currentUser.uid).collection("businessCards").document(id)
+        let cardRef = db.collection("users").document(userId).collection("businessCards").document(id)
+        
+        var updatedData = try card.asDictionary()
+        
+        // Handle social links
+        for linkType in SocialLinkType.allCases {
+            let key = linkType.rawValue + "Url"
+            if card.socialLinkValue(for: linkType) == nil {
+                updatedData[key] = FieldValue.delete()
+            }
+        }
         
         do {
-            try await cardRef.setData(card.asDictionary(), merge: true)
+            try await cardRef.setData(updatedData, merge: true)
             print("Successfully saved changes for card: \(id)")
         } catch {
             print("Error saving changes: \(error.localizedDescription)")
@@ -366,3 +353,4 @@ struct WebLink: Identifiable, Codable, Equatable {
         return lhs.id == rhs.id && lhs.url == rhs.url && lhs.displayText == rhs.displayText
     }
 }
+

@@ -137,7 +137,7 @@ struct EditBusinessCardView: View {
         }
     }
     
-    func saveChanges() {
+    private func saveChanges() {
         showFirstNameError = editedCard.firstName.isEmpty
         showDescriptionError = editedCard.description.isEmpty
         
@@ -158,6 +158,13 @@ struct EditBusinessCardView: View {
         
         Task {
             do {
+                // Handle social links
+                for linkType in SocialLinkType.allCases {
+                    if editedCard.socialLinkValue(for: linkType) == nil {
+                        editedCard.removeSocialLink(linkType)
+                    }
+                }
+                
                 try await BusinessCard.saveChanges(editedCard)
                 businessCard = editedCard // Update the original card
                 presentationMode.wrappedValue.dismiss()
