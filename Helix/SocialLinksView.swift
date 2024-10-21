@@ -6,6 +6,8 @@
 //
 
 import SwiftUI
+import FirebaseFirestore
+import FirebaseAuth
 
 struct SocialLinksView: View {
     @Binding var businessCard: BusinessCard
@@ -29,8 +31,7 @@ struct SocialLinksView: View {
                         HStack(spacing: 0) {
                             Spacer()
                             Button(action: {
-                                setValue(nil, for: linkType)
-                                visibleLinkTypes.removeAll { $0 == linkType }
+                                removeLink(at: index)
                             }) {
                                 Image(systemName: "trash")
                                     .foregroundColor(.red)
@@ -145,6 +146,41 @@ struct SocialLinksView: View {
         case .whatsapp: businessCard.whatsappUrl = value
         case .threads: businessCard.threadsUrl = value
         }
+        
+        // After updating the businessCard, we need to save the changes to Firebase
+        saveChangesToFirebase()
+    }
+
+    private func saveChangesToFirebase() {
+        guard let userId = Auth.auth().currentUser?.uid,
+              let cardId = businessCard.id else {
+            print("Error: Unable to save changes. User ID or Card ID is missing.")
+            return
+        }
+
+        let db = Firestore.firestore()
+        let cardRef = db.collection("users").document(userId).collection("businessCards").document(cardId)
+
+        cardRef.updateData([
+            "linkedIn": businessCard.linkedIn as Any,
+            "twitter": businessCard.twitter as Any,
+            "facebookUrl": businessCard.facebookUrl as Any,
+            "instagramUrl": businessCard.instagramUrl as Any,
+            "tiktokUrl": businessCard.tiktokUrl as Any,
+            "youtubeUrl": businessCard.youtubeUrl as Any,
+            "discordUrl": businessCard.discordUrl as Any,
+            "twitchUrl": businessCard.twitchUrl as Any,
+            "snapchatUrl": businessCard.snapchatUrl as Any,
+            "telegramUrl": businessCard.telegramUrl as Any,
+            "whatsappUrl": businessCard.whatsappUrl as Any,
+            "threadsUrl": businessCard.threadsUrl as Any
+        ]) { error in
+            if let error = error {
+                print("Error updating document: \(error)")
+            } else {
+                print("Document successfully updated")
+            }
+        }
     }
 
     private func updateVisibleLinkTypes() {
@@ -168,10 +204,21 @@ struct SocialLinksView: View {
         }
         
         visibleLinkTypes = updatedTypes
+        updateOffsets()
     }
 
     private func updateOffsets() {
         offsets = Array(repeating: 0, count: visibleLinkTypes.count)
+    }
+
+    private func removeLink(at index: Int) {
+        let linkType = visibleLinkTypes[index]
+        // Remove the link type from visibleLinkTypes and offsets
+        visibleLinkTypes.remove(at: index)
+        offsets.remove(at: index)
+        // Update the businessCard by removing the corresponding social link
+        businessCard.removeSocialLink(linkType)
+        updateVisibleLinkTypes()
     }
 }
 
