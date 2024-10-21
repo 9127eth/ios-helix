@@ -38,7 +38,9 @@ struct BusinessCardGridView: View {
                         HStack {
                             Spacer()
                             Button(action: {
-                                if businessCards.count >= 1 && !isPro {
+                                if businessCards.count >= 10 {
+                                    showMaxCardsAlert = true
+                                } else if businessCards.count >= 1 && !isPro {
                                     showUpgradeModal = true
                                 } else {
                                     showCreateCard = true
