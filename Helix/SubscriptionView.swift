@@ -52,7 +52,7 @@ struct SubscriptionView: View {
                                 "Link to physical card via NFC",
                                 "Image Upload"
                             ],
-                            isPro: isPro,
+                            isCurrentPlan: isPro,
                             action: {
                                 if !isPro {
                                     purchaseSubscription(for: selectedPlan)
@@ -83,7 +83,7 @@ struct SubscriptionView: View {
                                 "Up to 10 business cards",
                                 "CV/Resume Upload"
                             ],
-                            isPro: !isPro,
+                            isCurrentPlan: !isPro,
                             action: {
                                 if isPro {
                                     // Handle downgrade action
@@ -144,7 +144,7 @@ struct PlanCard: View {
     let price: String
     let features: [String]
     var disabledFeatures: [String] = []
-    let isPro: Bool
+    let isCurrentPlan: Bool
     let action: () -> Void
     
     var body: some View {
@@ -190,23 +190,24 @@ struct PlanCard: View {
     }
     
     private var buttonText: String {
-        if isPro {
-            return title == "Helix Pro" ? "Current Plan" : "Free"
+        if isCurrentPlan {
+            return "Current Plan"
+        } else if title == "Helix Pro" {
+            return "Upgrade"
         } else {
-            return title == "Helix Pro" ? "Upgrade" : "Curent Plan"
+            return "Free"
         }
     }
     
     private var isButtonDisabled: Bool {
-        isPro
+        isCurrentPlan
     }
     
     private var buttonBackground: Color {
-        isPro ? Color.gray.opacity(0.2) : AppColors.buttonBackground
+        isButtonDisabled ? Color.gray.opacity(0.2) : AppColors.buttonBackground
     }
     
     private var buttonForeground: Color {
-        isPro ? .primary : AppColors.buttonText
+        isButtonDisabled ? .primary : AppColors.buttonText
     }
 }
-
