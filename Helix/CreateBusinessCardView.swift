@@ -28,7 +28,7 @@ struct CreateBusinessCardView: View {
             HStack {
                 Button(action: { showCancelConfirmation = true }) {
                     Text("Cancel")
-                        .foregroundColor(.blue)
+                        .foregroundColor(AppColors.primary)
                 }
                 Spacer()
                 Text("Create Business Card")
@@ -37,7 +37,7 @@ struct CreateBusinessCardView: View {
                 Spacer()
                 Button(action: saveBusinessCard) {
                     Text("Done")
-                        .foregroundColor(.blue)
+                        .foregroundColor(AppColors.primary)
                         .font(.system(size: 16, weight: .medium))
                 }
             }
@@ -62,7 +62,7 @@ struct CreateBusinessCardView: View {
                     case 3:
                         ContactInformationView(businessCard: $businessCard)
                     case 4:
-                        SocialLinksView(businessCard: $businessCard)
+                        SocialLinksView(businessCard: $businessCard, showHeader: true)
                     case 5:
                         WebLinksView(businessCard: $businessCard)
                     case 6:

@@ -27,6 +27,18 @@ struct BusinessCard: Identifiable, Codable {
     var aboutMe: String?
     var customMessage: String?
     var customMessageHeader: String?
+    var cvUrl: String?
+    var cvHeader: String?
+    var cvDescription: String?
+    var cvDisplayText: String?
+    var imageUrl: String?
+    var isActive: Bool = true
+    var createdAt: Date = Date()
+    var updatedAt: Date = Date()
+    var customSlug: String?
+    var isPro: Bool?
+    
+    // New social media link fields
     var linkedIn: String?
     var twitter: String?
     var facebookUrl: String?
@@ -39,18 +51,8 @@ struct BusinessCard: Identifiable, Codable {
     var telegramUrl: String?
     var whatsappUrl: String?
     var threadsUrl: String?
+    
     var webLinks: [WebLink]?
-    var cvUrl: String?
-    var cvHeader: String?
-    var cvDescription: String?
-    var cvDisplayText: String?
-    var imageUrl: String?
-    var isActive: Bool = true
-    var createdAt: Date = Date()
-    var updatedAt: Date = Date()
-    var customSlug: String?
-    var isPro: Bool?
-    var socialLinks: [SocialLinkType: String] = [:]
 
     init(cardSlug: String, firstName: String) {
         self.cardSlug = cardSlug
@@ -60,17 +62,48 @@ struct BusinessCard: Identifiable, Codable {
         self.isActive = true
         self.createdAt = Date()
         self.updatedAt = Date()
+        // Remove the line initializing socialLinks
+        // self.socialLinks = [:]
     }
 
     enum CodingKeys: String, CodingKey {
-        case id, cardSlug, isPrimary, firstName, middleName, lastName, prefix, credentials, pronouns, description, jobTitle, company, phoneNumber, email, aboutMe, customMessage, customMessageHeader, linkedIn, twitter, facebookUrl, instagramUrl, tiktokUrl, youtubeUrl, discordUrl, twitchUrl, snapchatUrl, telegramUrl, whatsappUrl, threadsUrl, webLinks, cvUrl, cvHeader, cvDescription, cvDisplayText, imageUrl, isActive, createdAt, updatedAt, customSlug, isPro
+        case id
+        case cardSlug
+        case isPrimary
+        case firstName
+        case middleName
+        case lastName
+        case prefix
+        case credentials
+        case pronouns
+        case description
+        case jobTitle
+        case company
+        case phoneNumber
+        case email
+        case aboutMe
+        case customMessage
+        case customMessageHeader
+        case cvUrl
+        case cvHeader
+        case cvDescription
+        case cvDisplayText
+        case imageUrl
+        case isActive
+        case createdAt
+        case updatedAt
+        case customSlug
+        case isPro
+        case linkedIn, twitter, facebookUrl, instagramUrl, tiktokUrl, youtubeUrl
+        case discordUrl, twitchUrl, snapchatUrl, telegramUrl, whatsappUrl, threadsUrl
+        case webLinks
     }
 
     var name: String {
         let fullName = [firstName, lastName].compactMap { $0 }.joined(separator: " ")
         return fullName.trimmingCharacters(in: .whitespacesAndNewlines)
     }
-    
+
     func getCardURL(username: String) -> String {
         let baseURL = "https://www.helixcard.app/c"
         if isPrimary {
@@ -79,7 +112,7 @@ struct BusinessCard: Identifiable, Codable {
             return "\(baseURL)/\(username)/\(cardSlug)"
         }
     }
-    
+
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         id = try container.decodeIfPresent(String.self, forKey: .id)
@@ -99,6 +132,36 @@ struct BusinessCard: Identifiable, Codable {
         aboutMe = try container.decodeIfPresent(String.self, forKey: .aboutMe)
         customMessage = try container.decodeIfPresent(String.self, forKey: .customMessage)
         customMessageHeader = try container.decodeIfPresent(String.self, forKey: .customMessageHeader)
+        cvUrl = try container.decodeIfPresent(String.self, forKey: .cvUrl)
+        cvHeader = try container.decodeIfPresent(String.self, forKey: .cvHeader)
+        cvDescription = try container.decodeIfPresent(String.self, forKey: .cvDescription)
+        cvDisplayText = try container.decodeIfPresent(String.self, forKey: .cvDisplayText)
+        imageUrl = try container.decodeIfPresent(String.self, forKey: .imageUrl)
+        isActive = try container.decode(Bool.self, forKey: .isActive)
+        // Updated decoding for createdAt
+        if let timestamp = try? container.decode(Timestamp.self, forKey: .createdAt) {
+            createdAt = timestamp.dateValue()
+        } else if let date = try? container.decode(Date.self, forKey: .createdAt) {
+            createdAt = date
+        } else if let timeInterval = try? container.decode(Double.self, forKey: .createdAt) {
+            // Assuming the timestamp is in milliseconds
+            createdAt = Date(timeIntervalSince1970: timeInterval / 1000)
+        } else {
+            createdAt = Date()
+        }
+        // Updated decoding for updatedAt
+        if let timestamp = try? container.decode(Timestamp.self, forKey: .updatedAt) {
+            updatedAt = timestamp.dateValue()
+        } else if let date = try? container.decode(Date.self, forKey: .updatedAt) {
+            updatedAt = date
+        } else if let timeInterval = try? container.decode(Double.self, forKey: .updatedAt) {
+            // Assuming the timestamp is in milliseconds
+            updatedAt = Date(timeIntervalSince1970: timeInterval / 1000)
+        } else {
+            updatedAt = Date()
+        }
+        customSlug = try container.decodeIfPresent(String.self, forKey: .customSlug)
+        isPro = try container.decodeIfPresent(Bool.self, forKey: .isPro)
         linkedIn = try container.decodeIfPresent(String.self, forKey: .linkedIn)
         twitter = try container.decodeIfPresent(String.self, forKey: .twitter)
         facebookUrl = try container.decodeIfPresent(String.self, forKey: .facebookUrl)
@@ -112,16 +175,6 @@ struct BusinessCard: Identifiable, Codable {
         whatsappUrl = try container.decodeIfPresent(String.self, forKey: .whatsappUrl)
         threadsUrl = try container.decodeIfPresent(String.self, forKey: .threadsUrl)
         webLinks = try container.decodeIfPresent([WebLink].self, forKey: .webLinks)
-        cvUrl = try container.decodeIfPresent(String.self, forKey: .cvUrl)
-        cvHeader = try container.decodeIfPresent(String.self, forKey: .cvHeader)
-        cvDescription = try container.decodeIfPresent(String.self, forKey: .cvDescription)
-        cvDisplayText = try container.decodeIfPresent(String.self, forKey: .cvDisplayText)
-        imageUrl = try container.decodeIfPresent(String.self, forKey: .imageUrl)
-        isActive = try container.decode(Bool.self, forKey: .isActive)
-        createdAt = try container.decode(Date.self, forKey: .createdAt)
-        updatedAt = try container.decode(Date.self, forKey: .updatedAt)
-        customSlug = try container.decodeIfPresent(String.self, forKey: .customSlug)
-        isPro = try container.decodeIfPresent(Bool.self, forKey: .isPro)
     }
 
     func encode(to encoder: Encoder) throws {
@@ -143,6 +196,16 @@ struct BusinessCard: Identifiable, Codable {
         try container.encodeIfPresent(aboutMe, forKey: .aboutMe)
         try container.encodeIfPresent(customMessage, forKey: .customMessage)
         try container.encodeIfPresent(customMessageHeader, forKey: .customMessageHeader)
+        try container.encodeIfPresent(cvUrl, forKey: .cvUrl)
+        try container.encodeIfPresent(cvHeader, forKey: .cvHeader)
+        try container.encodeIfPresent(cvDescription, forKey: .cvDescription)
+        try container.encodeIfPresent(cvDisplayText, forKey: .cvDisplayText)
+        try container.encodeIfPresent(imageUrl, forKey: .imageUrl)
+        try container.encode(isActive, forKey: .isActive)
+        try container.encode(createdAt, forKey: .createdAt)
+        try container.encode(updatedAt, forKey: .updatedAt)
+        try container.encodeIfPresent(customSlug, forKey: .customSlug)
+        try container.encodeIfPresent(isPro, forKey: .isPro)
         try container.encodeIfPresent(linkedIn, forKey: .linkedIn)
         try container.encodeIfPresent(twitter, forKey: .twitter)
         try container.encodeIfPresent(facebookUrl, forKey: .facebookUrl)
@@ -156,25 +219,57 @@ struct BusinessCard: Identifiable, Codable {
         try container.encodeIfPresent(whatsappUrl, forKey: .whatsappUrl)
         try container.encodeIfPresent(threadsUrl, forKey: .threadsUrl)
         try container.encodeIfPresent(webLinks, forKey: .webLinks)
-        try container.encodeIfPresent(cvUrl, forKey: .cvUrl)
-        try container.encodeIfPresent(cvHeader, forKey: .cvHeader)
-        try container.encodeIfPresent(cvDescription, forKey: .cvDescription)
-        try container.encodeIfPresent(cvDisplayText, forKey: .cvDisplayText)
-        try container.encodeIfPresent(imageUrl, forKey: .imageUrl)
-        try container.encode(isActive, forKey: .isActive)
-        try container.encode(isPro ?? false, forKey: .isPro)
     }
 
     mutating func updateSocialLink(type: SocialLinkType, value: String) {
-        socialLinks[type] = value
+        switch type {
+        case .linkedIn: linkedIn = value
+        case .twitter: twitter = value
+        case .facebook: facebookUrl = value
+        case .instagram: instagramUrl = value
+        case .tiktok: tiktokUrl = value
+        case .youtube: youtubeUrl = value
+        case .discord: discordUrl = value
+        case .twitch: twitchUrl = value
+        case .snapchat: snapchatUrl = value
+        case .telegram: telegramUrl = value
+        case .whatsapp: whatsappUrl = value
+        case .threads: threadsUrl = value
+        }
     }
 
     mutating func removeSocialLink(_ type: SocialLinkType) {
-        socialLinks.removeValue(forKey: type)
+        switch type {
+        case .linkedIn: linkedIn = nil
+        case .twitter: twitter = nil
+        case .facebook: facebookUrl = nil
+        case .instagram: instagramUrl = nil
+        case .tiktok: tiktokUrl = nil
+        case .youtube: youtubeUrl = nil
+        case .discord: discordUrl = nil
+        case .twitch: twitchUrl = nil
+        case .snapchat: snapchatUrl = nil
+        case .telegram: telegramUrl = nil
+        case .whatsapp: whatsappUrl = nil
+        case .threads: threadsUrl = nil
+        }
     }
 
     func socialLinkValue(for type: SocialLinkType) -> String? {
-        return socialLinks[type]
+        switch type {
+        case .linkedIn: return linkedIn
+        case .twitter: return twitter
+        case .facebook: return facebookUrl
+        case .instagram: return instagramUrl
+        case .tiktok: return tiktokUrl
+        case .youtube: return youtubeUrl
+        case .discord: return discordUrl
+        case .twitch: return twitchUrl
+        case .snapchat: return snapchatUrl
+        case .telegram: return telegramUrl
+        case .whatsapp: return whatsappUrl
+        case .threads: return threadsUrl
+        }
     }
 
     func asDictionary() throws -> [String: Any] {

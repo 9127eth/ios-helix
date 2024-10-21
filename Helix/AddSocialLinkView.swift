@@ -11,17 +11,15 @@ struct AddSocialLinkView: View {
     @Binding var availableLinks: [SocialLinkType]
     @Binding var selectedLinks: Set<SocialLinkType>
     @Binding var isPresented: Bool
+    @State private var newlySelectedLinks: Set<SocialLinkType> = []
+    var onLinksUpdated: () -> Void  // Add this line
 
     var body: some View {
         NavigationView {
             List {
-                ForEach(availableLinks, id: \.self) { linkType in
+                ForEach(SocialLinkType.allCases, id: \.self) { linkType in
                     Button(action: {
-                        if selectedLinks.contains(linkType) {
-                            selectedLinks.remove(linkType)
-                        } else {
-                            selectedLinks.insert(linkType)
-                        }
+                        toggleLink(linkType)
                     }) {
                         HStack {
                             Image(linkType.iconName)
@@ -30,12 +28,13 @@ struct AddSocialLinkView: View {
                                 .frame(width: 24, height: 24)
                             Text(linkType.displayName)
                             Spacer()
-                            if selectedLinks.contains(linkType) {
+                            if isLinkSelected(linkType) {
                                 Image(systemName: "checkmark")
                                     .foregroundColor(.blue)
                             }
                         }
                     }
+                    .disabled(!availableLinks.contains(linkType) && !selectedLinks.contains(linkType))
                 }
             }
             .listStyle(PlainListStyle())
@@ -43,10 +42,26 @@ struct AddSocialLinkView: View {
             .navigationBarItems(
                 leading: Button("Cancel") { isPresented = false },
                 trailing: Button("Add") {
+                    selectedLinks.formUnion(newlySelectedLinks)
+                    onLinksUpdated()  // Call this function
                     isPresented = false
                 }
-                .disabled(selectedLinks.isEmpty)
             )
         }
+        .onAppear {
+            newlySelectedLinks = selectedLinks
+        }
+    }
+
+    private func toggleLink(_ linkType: SocialLinkType) {
+        if newlySelectedLinks.contains(linkType) {
+            newlySelectedLinks.remove(linkType)
+        } else {
+            newlySelectedLinks.insert(linkType)
+        }
+    }
+
+    private func isLinkSelected(_ linkType: SocialLinkType) -> Bool {
+        newlySelectedLinks.contains(linkType)
     }
 }
