@@ -10,14 +10,9 @@ import SwiftUI
 struct SocialLinksView: View {
     @Binding var businessCard: BusinessCard
     @State private var showingAddLinkPopup = false
-    @State private var availableSocialLinks: [SocialLinkType] = SocialLinkType.allCases
-    @FocusState private var focusedLink: SocialLinkType?
+    @State private var visibleLinkTypes: [SocialLinkType] = []
     var showHeader: Bool
-    
-    init(businessCard: Binding<BusinessCard>, showHeader: Bool = true) {
-        self._businessCard = businessCard
-        self.showHeader = showHeader
-    }
+    @State private var offsets: [CGFloat] = []
 
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
@@ -27,41 +22,53 @@ struct SocialLinksView: View {
                     .padding(.bottom, 16)
             }
             
-            ForEach(Array(businessCard.socialLinks.keys), id: \.self) { linkType in
-                SocialLinkRow(
-                    linkType: linkType,
-                    value: Binding(
-                        get: { businessCard.socialLinks[linkType] ?? "" },
-                        set: { newValue in
-                            if let newValue = newValue {
-                                let trimmedValue = newValue.trimmingCharacters(in: .whitespacesAndNewlines)
-                                if !trimmedValue.isEmpty {
-                                    businessCard.socialLinks[linkType] = trimmedValue
-                                } else {
-                                    businessCard.socialLinks.removeValue(forKey: linkType)
-                                }
-                            } else {
-                                businessCard.socialLinks.removeValue(forKey: linkType)
+            ForEach(visibleLinkTypes.indices, id: \.self) { index in
+                let linkType = visibleLinkTypes[index]
+                ZStack {
+                    GeometryReader { geometry in
+                        HStack(spacing: 0) {
+                            Spacer()
+                            Button(action: {
+                                setValue(nil, for: linkType)
+                                visibleLinkTypes.removeAll { $0 == linkType }
+                            }) {
+                                Image(systemName: "trash")
+                                    .foregroundColor(.red)
+                                    .font(.system(size: 20))
                             }
+                            .frame(width: 60, height: geometry.size.height)
+                            .offset(x: offsets[index] + 60)
                         }
-                    ),
-                    isFocused: focusedLink == linkType,
-                    onCommit: {
-                        if let currentIndex = Array(businessCard.socialLinks.keys).firstIndex(of: linkType),
-                           currentIndex < businessCard.socialLinks.count - 1 {
-                            focusedLink = Array(businessCard.socialLinks.keys)[currentIndex + 1]
-                        } else {
-                            focusedLink = nil
-                        }
+                        .frame(height: geometry.size.height, alignment: .center)
                     }
-                )
-                .focused($focusedLink, equals: linkType)
+                    
+                    SocialLinkRow(
+                        linkType: linkType,
+                        value: binding(for: linkType)
+                    )
+                    .offset(x: offsets[index])
+                    .gesture(
+                        DragGesture(minimumDistance: 20, coordinateSpace: .local)
+                            .onChanged { gesture in
+                                if abs(gesture.translation.width) > abs(gesture.translation.height) {
+                                    offsets[index] = min(0, gesture.translation.width)
+                                }
+                            }
+                            .onEnded { gesture in
+                                withAnimation {
+                                    if gesture.translation.width < -50 && abs(gesture.translation.width) > abs(gesture.translation.height) {
+                                        offsets[index] = -60
+                                    } else {
+                                        offsets[index] = 0
+                                    }
+                                }
+                            }
+                    )
+                }
             }
             
-            Button(action: {
-                showingAddLinkPopup = true
-            }) {
-                Text("Add Social Link")
+            Button(action: { showingAddLinkPopup = true }) {
+                Text("Add Another Link")
                     .foregroundColor(AppColors.buttonText)
                     .font(.system(size: 14))
                     .padding(.horizontal, 16)
@@ -75,115 +82,113 @@ struct SocialLinksView: View {
         .padding(.top, showHeader ? 0 : 16)
         .sheet(isPresented: $showingAddLinkPopup) {
             AddSocialLinkView(
-                availableLinks: $availableSocialLinks,
+                availableLinks: .constant(SocialLinkType.allCases.filter { !visibleLinkTypes.contains($0) }),
                 selectedLinks: Binding(
-                    get: { Set(businessCard.socialLinks.keys) },
-                    set: { newSelectedLinks in
-                        for linkType in SocialLinkType.allCases {
-                            if newSelectedLinks.contains(linkType) && !businessCard.socialLinks.keys.contains(linkType) {
-                                businessCard.socialLinks[linkType] = ""
-                            } else if !newSelectedLinks.contains(linkType) && businessCard.socialLinks.keys.contains(linkType) {
-                                businessCard.socialLinks.removeValue(forKey: linkType)
-                            }
-                        }
+                    get: { Set(self.visibleLinkTypes) },
+                    set: { newLinks in
+                        self.visibleLinkTypes = Array(newLinks)
+                        updateVisibleLinkTypes()
+                        updateOffsets() // Add this line
                     }
                 ),
-                isPresented: $showingAddLinkPopup
+                isPresented: $showingAddLinkPopup,
+                onLinksUpdated: {
+                    updateVisibleLinkTypes()
+                }
             )
         }
         .onAppear {
-            if businessCard.socialLinks.isEmpty {
-                businessCard.socialLinks[.twitter] = ""
-                businessCard.socialLinks[.linkedIn] = ""
+            updateVisibleLinkTypes()
+            updateOffsets()
+        }
+        .onChange(of: visibleLinkTypes) { _ in
+            updateOffsets()
+        }
+    }
+
+    private func binding(for linkType: SocialLinkType) -> Binding<String> {
+        Binding(
+            get: { self.getValue(for: linkType) ?? "" },
+            set: { self.setValue($0, for: linkType) }
+        )
+    }
+
+    private func getValue(for linkType: SocialLinkType) -> String? {
+        switch linkType {
+        case .linkedIn: return businessCard.linkedIn
+        case .twitter: return businessCard.twitter
+        case .facebook: return businessCard.facebookUrl
+        case .instagram: return businessCard.instagramUrl
+        case .tiktok: return businessCard.tiktokUrl
+        case .youtube: return businessCard.youtubeUrl
+        case .discord: return businessCard.discordUrl
+        case .twitch: return businessCard.twitchUrl
+        case .snapchat: return businessCard.snapchatUrl
+        case .telegram: return businessCard.telegramUrl
+        case .whatsapp: return businessCard.whatsappUrl
+        case .threads: return businessCard.threadsUrl
+        }
+    }
+
+    private func setValue(_ value: String?, for linkType: SocialLinkType) {
+        switch linkType {
+        case .linkedIn: businessCard.linkedIn = value
+        case .twitter: businessCard.twitter = value
+        case .facebook: businessCard.facebookUrl = value
+        case .instagram: businessCard.instagramUrl = value
+        case .tiktok: businessCard.tiktokUrl = value
+        case .youtube: businessCard.youtubeUrl = value
+        case .discord: businessCard.discordUrl = value
+        case .twitch: businessCard.twitchUrl = value
+        case .snapchat: businessCard.snapchatUrl = value
+        case .telegram: businessCard.telegramUrl = value
+        case .whatsapp: businessCard.whatsappUrl = value
+        case .threads: businessCard.threadsUrl = value
+        }
+    }
+
+    private func updateVisibleLinkTypes() {
+        var updatedTypes = SocialLinkType.allCases.filter { linkType in
+            getValue(for: linkType) != nil && !getValue(for: linkType)!.isEmpty
+        }
+        
+        // Ensure LinkedIn and Twitter are always visible
+        if !updatedTypes.contains(.linkedIn) {
+            updatedTypes.insert(.linkedIn, at: 0)
+        }
+        if !updatedTypes.contains(.twitter) {
+            updatedTypes.insert(.twitter, at: min(1, updatedTypes.count))
+        }
+        
+        // Add newly selected links that don't have values yet
+        for linkType in visibleLinkTypes {
+            if !updatedTypes.contains(linkType) {
+                updatedTypes.append(linkType)
             }
         }
+        
+        visibleLinkTypes = updatedTypes
+    }
+
+    private func updateOffsets() {
+        offsets = Array(repeating: 0, count: visibleLinkTypes.count)
     }
 }
 
 struct SocialLinkRow: View {
     let linkType: SocialLinkType
-    @Binding var value: String?
-    let isFocused: Bool
-    let onCommit: () -> Void
-
-    @State private var localValue: String
-    @State private var offset: CGFloat = 0
-    @FocusState private var isFieldFocused: Bool
-
-    init(
-        linkType: SocialLinkType,
-        value: Binding<String?>,
-        isFocused: Bool,
-        onCommit: @escaping () -> Void
-    ) {
-        self.linkType = linkType
-        self._value = value
-        self.isFocused = isFocused
-        self.onCommit = onCommit
-        
-        if let existingValue = value.wrappedValue, !existingValue.isEmpty {
-            _localValue = State(initialValue: existingValue)
-        } else {
-            _localValue = State(initialValue: linkType.baseURL)
-        }
-    }
+    @Binding var value: String
 
     var body: some View {
-        ZStack {
-            GeometryReader { geometry in
-                HStack(spacing: 0) {
-                    Spacer()
-                    Button(action: {
-                        withAnimation {
-                            localValue = linkType.baseURL
-                            value = nil
-                            onCommit()
-                        }
-                    }) {
-                        Image(systemName: "trash")
-                            .foregroundColor(.red)
-                            .font(.system(size: 20))
-                    }
-                    .frame(width: 60, height: geometry.size.height)
-                    .offset(x: offset + 60)
-                }
-                .frame(height: geometry.size.height, alignment: .center)
-            }
-            
-            CustomTextField(
-                title: linkType.displayName,
-                text: $localValue,
-                placeholder: "Enter your \(linkType.displayName) URL",
-                onCommit: onCommit
-            )
-            .focused($isFieldFocused)
-            .keyboardType(.URL)
-            .autocapitalization(.none)
-            .disableAutocorrection(true)
-            .offset(x: offset)
-            .gesture(
-                DragGesture(minimumDistance: 20)
-                    .onChanged { gesture in
-                        if abs(gesture.translation.width) > abs(gesture.translation.height) {
-                            offset = min(0, gesture.translation.width)
-                        }
-                    }
-                    .onEnded { gesture in
-                        withAnimation {
-                            if gesture.translation.width < -50 {
-                                offset = -60
-                            } else {
-                                offset = 0
-                            }
-                        }
-                    }
-            )
+        HStack {
+            Image(linkType.iconName)
+                .resizable()
+                .scaledToFit()
+                .frame(width: 24, height: 24)
+            TextField(linkType.displayName, text: $value)
+                .textFieldStyle(RoundedBorderTextFieldStyle())
         }
-        .onChange(of: localValue) { newValue in
-            value = newValue
-        }
-        .onAppear {
-            isFieldFocused = isFocused
-        }
+        .padding(.vertical, 8)
+        .background(Color.clear)
     }
 }
