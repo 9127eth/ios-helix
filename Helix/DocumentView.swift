@@ -9,6 +9,7 @@ import SwiftUI
 import FirebaseStorage
 import FirebaseAuth
 import UniformTypeIdentifiers
+import FirebaseFirestore
 
 struct DocumentView: View {
     @Binding var businessCard: BusinessCard
@@ -152,7 +153,26 @@ struct DocumentView: View {
             }
         }
         .sheet(isPresented: $showSubscriptionView) {
-            SubscriptionView(isPro: .constant(false))
+            SubscriptionView(isPro: $isPro)
         }
+        .onAppear {
+            listenToProStatus()
+        }
+    }
+
+    private func listenToProStatus() {
+        guard let userId = Auth.auth().currentUser?.uid else { return }
+        let db = Firestore.firestore()
+        db.collection("users").document(userId)
+            .addSnapshotListener { documentSnapshot, error in
+                guard let document = documentSnapshot else {
+                    print("Error fetching document: \(error?.localizedDescription ?? "Unknown error")")
+                    return
+                }
+                let newIsPro = document.data()?["isPro"] as? Bool ?? false
+                DispatchQueue.main.async {
+                    self.isPro = newIsPro
+                }
+            }
     }
 }
