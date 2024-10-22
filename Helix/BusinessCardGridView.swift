@@ -131,6 +131,17 @@ struct BusinessCardGridView: View {
     }
     
     private func opacityForOffset(_ offset: CGFloat) -> Double {
+        // For cards
+        if offset > UIScreen.main.bounds.height * 0.3 {
+            let startFadePoint = UIScreen.main.bounds.height * 0.4  // Point where fade begins
+            let fadeDistance = UIScreen.main.bounds.height * 0.7    // Distance over which fade occurs
+            
+            let relativeOffset = scrollOffset - offset
+            let opacity = 1.0 - Double(max(0, relativeOffset - startFadePoint)) / Double(fadeDistance)
+            return max(0.2, min(1, opacity))
+        }
+        
+        // For header and other elements (original behavior)
         let opacity = 1.0 - Double(max(0, scrollOffset - offset)) / 150.0
         return max(0, min(1, opacity))
     }
