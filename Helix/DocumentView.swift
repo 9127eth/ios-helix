@@ -154,40 +154,84 @@ struct DocumentView: View {
             return
         }
         
-        isUploading = true
-        uploadProgress = 0
-        uploadError = nil
-        
-        let storage = Storage.storage()
-        let storageRef = storage.reference()
-        let documentName = "\(UUID().uuidString).pdf"
-        let documentRef = storageRef.child("docs/\(userId)/\(documentName)") // Updated path
-        
-        let uploadTask = documentRef.putFile(from: file, metadata: nil) { metadata, error in
-            isUploading = false
-            
-            if let error = error {
-                print("Error uploading document: \(error.localizedDescription)")
-                uploadError = "Error uploading document. Please try again."
-                return
-            }
-            
-            documentRef.downloadURL { url, error in
-                if let error = error {
-                    print("Error getting download URL: \(error.localizedDescription)")
-                    uploadError = "Error getting download URL. Please try again."
+        // Start accessing the security-scoped resource
+        guard file.startAccessingSecurityScopedResource() else {
+            uploadError = "Unable to access the selected file."
+            return
+        }
+        defer {
+            file.stopAccessingSecurityScopedResource()
+        }
+
+        // Use NSFileCoordinator to coordinate access to the file
+        let coordinator = NSFileCoordinator()
+        var coordinatorError: NSError?
+
+        coordinator.coordinate(readingItemAt: file, options: [], error: &coordinatorError) { (url) in
+            do {
+                // Check if the file is reachable
+                guard (try? url.checkResourceIsReachable()) == true else {
+                    uploadError = "Selected file is not reachable."
                     return
                 }
-                
-                if let downloadURL = url {
-                    businessCard.cvUrl = downloadURL.absoluteString
-                    print("Document uploaded successfully. URL: \(downloadURL.absoluteString)")
+
+                // Read the file data
+                let data = try Data(contentsOf: url)
+
+                // Proceed to upload the data to Firebase Storage
+                let storage = Storage.storage()
+                let storageRef = storage.reference()
+                let documentName = "\(UUID().uuidString).pdf"
+                let documentRef = storageRef.child("docs/\(userId)/\(documentName)")
+
+                let metadata = StorageMetadata()
+                metadata.contentType = "application/pdf"
+
+                isUploading = true
+                uploadProgress = 0
+                uploadError = nil
+
+                let uploadTask = documentRef.putData(data, metadata: metadata) { metadata, error in
+                    isUploading = false
+
+                    if let error = error {
+                        print("Error uploading document: \(error.localizedDescription)")
+                        uploadError = "Error uploading document. Please try again."
+                        return
+                    }
+
+                    documentRef.downloadURL { url, error in
+                        if let error = error {
+                            print("Error getting download URL: \(error.localizedDescription)")
+                            uploadError = "Error getting download URL. Please try again."
+                            return
+                        }
+
+                        if let downloadURL = url {
+                            DispatchQueue.main.async {
+                                businessCard.cvUrl = downloadURL.absoluteString
+                            }
+                            print("Document uploaded successfully. URL: \(downloadURL.absoluteString)")
+                        }
+                    }
                 }
+
+                // Observe upload progress
+                uploadTask.observe(.progress) { snapshot in
+                    DispatchQueue.main.async {
+                        uploadProgress = Double(snapshot.progress?.fractionCompleted ?? 0)
+                    }
+                }
+
+            } catch {
+                print("Error reading file data: \(error.localizedDescription)")
+                uploadError = "Error accessing the document. Please try again."
             }
         }
-        
-        uploadTask.observe(.progress) { snapshot in
-            uploadProgress = Double(snapshot.progress!.completedUnitCount) / Double(snapshot.progress!.totalUnitCount)
+
+        if let error = coordinatorError {
+            print("Error coordinating file access: \(error.localizedDescription)")
+            uploadError = "Error accessing the document. Please try again."
         }
     }
 }
