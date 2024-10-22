@@ -73,10 +73,37 @@ class SubscriptionManager: ObservableObject {
         
         let db = Firestore.firestore()
         do {
-            try await db.collection("users").document(userId).updateData(["isPro": isPro])
-            print("Successfully updated user's pro status in Firebase")
+            // Start a batch write
+            let batch = db.batch()
+            
+            // 1. Update user's pro status
+            let userRef = db.collection("users").document(userId)
+            batch.updateData(["isPro": isPro], forDocument: userRef)
+            
+            // 2. Get all user's business cards
+            let cardsSnapshot = try await userRef.collection("businessCards").getDocuments()
+            
+            // 3. Update each card
+            for cardDoc in cardsSnapshot.documents {
+                let cardRef = cardDoc.reference
+                let isPrimary = cardDoc.data()["isPrimary"] as? Bool ?? false
+                
+                // Update both isPro and isActive status
+                var updateData: [String: Any] = ["isPro": isPro]
+                
+                // Only update isActive for non-primary cards
+                if !isPrimary {
+                    updateData["isActive"] = isPro
+                }
+                
+                batch.updateData(updateData, forDocument: cardRef)
+            }
+            
+            // 4. Commit all changes atomically
+            try await batch.commit()
+            print("Successfully updated user and cards pro status")
         } catch {
-            print("Error updating pro status in Firebase: \(error)")
+            print("Error updating pro status and cards: \(error)")
         }
     }
     

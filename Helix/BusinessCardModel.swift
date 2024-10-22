@@ -284,13 +284,24 @@ struct BusinessCard: Identifiable, Codable {
     static func saveChanges(_ card: BusinessCard) async throws {
         guard let userId = Auth.auth().currentUser?.uid,
               let id = card.id else {
-            throw NSError(domain: "com.yourapp.error", code: 1001, userInfo: [NSLocalizedDescriptionKey: "Invalid user or card ID"])
+            throw NSError(domain: "com.yourapp.error", code: 1001, 
+                         userInfo: [NSLocalizedDescriptionKey: "Invalid user or card ID"])
         }
         
         let db = Firestore.firestore()
-        let cardRef = db.collection("users").document(userId).collection("businessCards").document(id)
+        let userRef = db.collection("users").document(userId)
+        
+        // Get the current user's pro status
+        let userDoc = try await userRef.getDocument()
+        let isPro = userDoc.data()?["isPro"] as? Bool ?? false
         
         var updatedData = try card.asDictionary()
+        
+        // Update isPro and isActive status
+        updatedData["isPro"] = isPro
+        if !card.isPrimary {
+            updatedData["isActive"] = isPro
+        }
         
         // Handle social links
         for linkType in SocialLinkType.allCases {
@@ -300,13 +311,8 @@ struct BusinessCard: Identifiable, Codable {
             }
         }
         
-        do {
-            try await cardRef.setData(updatedData, merge: true)
-            print("Successfully saved changes for card: \(id)")
-        } catch {
-            print("Error saving changes: \(error.localizedDescription)")
-            throw error
-        }
+        let cardRef = userRef.collection("businessCards").document(id)
+        try await cardRef.setData(updatedData, merge: true)
     }
 
     static func delete(_ card: BusinessCard) async throws {
