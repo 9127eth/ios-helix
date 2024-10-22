@@ -23,6 +23,7 @@ struct EditBusinessCardView: View {
     @State private var showPreview = false
     @State private var showFirstNameError = false
     @State private var showDescriptionError = false
+    @State private var isPro: Bool = false
     
     let sections = ["Card Label", "Basic Information", "Professional Information", "Contact Information", "Social Links", "Web Links", "Profile Image", "Custom Header/Message", "Document"]
     
@@ -110,6 +111,7 @@ struct EditBusinessCardView: View {
         .sheet(isPresented: $showPreview) {
             PreviewView(card: editedCard, username: username, isPresented: $showPreview)
         }
+        .onAppear(perform: fetchUserProStatus)
     }
     
     func sectionContent(for section: String, card: Binding<BusinessCard>) -> some View {
@@ -131,7 +133,7 @@ struct EditBusinessCardView: View {
         case "Custom Header/Message":
             return AnyView(CustomSectionView(businessCard: card, showHeader: false))
         case "Document":
-            return AnyView(DocumentView(businessCard: card, showHeader: false))
+            return AnyView(DocumentView(businessCard: card, showHeader: false, isPro: $isPro))
         default:
             return AnyView(EmptyView())
         }
@@ -221,6 +223,16 @@ struct EditBusinessCardView: View {
             } catch {
                 print("Error deleting card: \(error.localizedDescription)")
                 // Here you might want to show an error alert to the user
+            }
+        }
+    }
+    
+    private func fetchUserProStatus() {
+        guard let userId = Auth.auth().currentUser?.uid else { return }
+        let db = Firestore.firestore()
+        db.collection("users").document(userId).getDocument { (document, error) in
+            if let document = document, document.exists {
+                self.isPro = document.data()?["isPro"] as? Bool ?? false
             }
         }
     }
