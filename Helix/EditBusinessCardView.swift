@@ -149,7 +149,7 @@ struct EditBusinessCardView: View {
     private func saveChanges() {
         showFirstNameError = editedCard.firstName.isEmpty
         showDescriptionError = editedCard.description.isEmpty
-        
+
         var missingFields: [String] = []
         if showFirstNameError {
             missingFields.append("First Name")
@@ -157,28 +157,29 @@ struct EditBusinessCardView: View {
         if showDescriptionError {
             missingFields.append("Card Label")
         }
-        
+
         if !missingFields.isEmpty {
             let fieldList = missingFields.joined(separator: " and ")
             saveErrorMessage = "Please fill out the following required field\(missingFields.count > 1 ? "s" : ""): \(fieldList)."
             showingSaveError = true
             return
         }
-        
+
         Task {
             do {
-                // If a document is selected, upload it
+                // If a document is selected, upload it and set cvUrl
                 if let documentURL = selectedDocument {
-                    try await uploadDocument(documentURL)
+                    let downloadURLString = try await uploadDocument(documentURL)
+                    editedCard.cvUrl = downloadURLString
                 }
-                
+
                 // Handle social links
                 for linkType in SocialLinkType.allCases {
                     if editedCard.socialLinkValue(for: linkType) == nil {
                         editedCard.removeSocialLink(linkType)
                     }
                 }
-                
+
                 try await BusinessCard.saveChanges(editedCard)
                 businessCard = editedCard // Update the original card
                 presentationMode.wrappedValue.dismiss()
@@ -189,14 +190,11 @@ struct EditBusinessCardView: View {
         }
     }
     
-    private func uploadDocument(_ file: URL) async throws {
-        // Implement the upload logic here, similar to how it was in DocumentView
-
+    private func uploadDocument(_ file: URL) async throws -> String {
         guard let userId = Auth.auth().currentUser?.uid else {
             throw NSError(domain: "User not authenticated", code: -1, userInfo: nil)
         }
 
-        // Start accessing the security-scoped resource
         guard file.startAccessingSecurityScopedResource() else {
             throw NSError(domain: "Unable to access the selected file.", code: -1, userInfo: nil)
         }
@@ -204,63 +202,51 @@ struct EditBusinessCardView: View {
             file.stopAccessingSecurityScopedResource()
         }
 
-        // Use NSFileCoordinator to coordinate access to the file
         let coordinator = NSFileCoordinator()
         var coordinatorError: NSError?
+        var fileData: Data?
+        var localError: Error?
 
-        coordinator.coordinate(readingItemAt: file, options: [], error: &coordinatorError) { (url) in
+        coordinator.coordinate(readingItemAt: file, options: [], error: &coordinatorError) { url in
             do {
-                // Check if the file is reachable
                 guard (try? url.checkResourceIsReachable()) == true else {
-                    throw NSError(domain: "Selected file is not reachable.", code: -1, userInfo: nil)
+                    localError = NSError(domain: "Selected file is not reachable.", code: -1, userInfo: nil)
+                    return
                 }
-
-                // Read the file data
-                let data = try Data(contentsOf: url)
-
-                // Proceed to upload the data to Firebase Storage
-                let storage = Storage.storage()
-                let storageRef = storage.reference()
-                let documentName = "\(UUID().uuidString).pdf"
-                let documentRef = storageRef.child("docs/\(userId)/\(documentName)")
-
-                let metadata = StorageMetadata()
-                metadata.contentType = "application/pdf"
-
-                let uploadTask = documentRef.putData(data, metadata: metadata) { metadata, error in
-                    if let error = error {
-                        print("Error uploading document: \(error.localizedDescription)")
-                        return
-                    }
-
-                    documentRef.downloadURL { url, error in
-                        if let error = error {
-                            print("Error getting download URL: \(error.localizedDescription)")
-                            return
-                        }
-
-                        if let downloadURL = url {
-                            DispatchQueue.main.async {
-                                businessCard.cvUrl = downloadURL.absoluteString
-                            }
-                            print("Document uploaded successfully. URL: \(downloadURL.absoluteString)")
-                        }
-                    }
-                }
-
-                // Wait for the upload task to complete
-                uploadTask.observe(.success) { snapshot in
-                    print("Upload completed successfully")
-                }
-
-                // Handle progress or other states if needed
-
+                fileData = try Data(contentsOf: url)
             } catch {
-                print("Error reading file data: \(error.localizedDescription)")
+                localError = error
             }
         }
 
-        if let error = coordinatorError {
+        if let error = coordinatorError ?? localError {
+            throw error
+        }
+
+        guard let data = fileData else {
+            throw NSError(domain: "Failed to read file data", code: -1, userInfo: nil)
+        }
+
+        let storage = Storage.storage()
+        let storageRef = storage.reference()
+        let documentName = "\(UUID().uuidString).pdf"
+        let documentRef = storageRef.child("docs/\(userId)/\(documentName)")
+
+        let metadata = StorageMetadata()
+        metadata.contentType = "application/pdf"
+
+        do {
+            _ = try await documentRef.putDataAsync(data, metadata: metadata)
+            let downloadURL = try await documentRef.downloadURL()
+            
+            // Remove the port specification if present
+            let urlString = downloadURL.absoluteString
+            let cleanedURLString = urlString.replacingOccurrences(of: "https://firebasestorage.googleapis.com:443/", with: "https://firebasestorage.googleapis.com/")
+            
+            print("Document uploaded successfully. URL: \(cleanedURLString)")
+            return cleanedURLString
+        } catch {
+            print("Error uploading document: \(error.localizedDescription)")
             throw error
         }
     }
