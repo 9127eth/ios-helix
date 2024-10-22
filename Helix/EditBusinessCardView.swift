@@ -9,6 +9,7 @@ import SwiftUI
 import FirebaseFirestore
 import FirebaseAuth
 import NotificationCenter
+import FirebaseStorage
 
 struct EditBusinessCardView: View {
     @Binding var businessCard: BusinessCard
@@ -24,6 +25,7 @@ struct EditBusinessCardView: View {
     @State private var showFirstNameError = false
     @State private var showDescriptionError = false
     @State private var isPro: Bool = false
+    @State private var selectedDocument: URL?
     
     let sections = ["Card Label", "Basic Information", "Professional Information", "Contact Information", "Social Links", "Web Links", "Profile Image", "Custom Header/Message", "Document"]
     
@@ -133,7 +135,12 @@ struct EditBusinessCardView: View {
         case "Custom Header/Message":
             return AnyView(CustomSectionView(businessCard: card, showHeader: false))
         case "Document":
-            return AnyView(DocumentView(businessCard: card, showHeader: false, isPro: $isPro))
+            return AnyView(DocumentView(
+                businessCard: card,
+                showHeader: false,
+                isPro: $isPro,
+                selectedDocument: $selectedDocument
+            ))
         default:
             return AnyView(EmptyView())
         }
@@ -160,6 +167,11 @@ struct EditBusinessCardView: View {
         
         Task {
             do {
+                // If a document is selected, upload it
+                if let documentURL = selectedDocument {
+                    try await uploadDocument(documentURL)
+                }
+                
                 // Handle social links
                 for linkType in SocialLinkType.allCases {
                     if editedCard.socialLinkValue(for: linkType) == nil {
@@ -174,6 +186,82 @@ struct EditBusinessCardView: View {
                 saveErrorMessage = error.localizedDescription
                 showingSaveError = true
             }
+        }
+    }
+    
+    private func uploadDocument(_ file: URL) async throws {
+        // Implement the upload logic here, similar to how it was in DocumentView
+
+        guard let userId = Auth.auth().currentUser?.uid else {
+            throw NSError(domain: "User not authenticated", code: -1, userInfo: nil)
+        }
+
+        // Start accessing the security-scoped resource
+        guard file.startAccessingSecurityScopedResource() else {
+            throw NSError(domain: "Unable to access the selected file.", code: -1, userInfo: nil)
+        }
+        defer {
+            file.stopAccessingSecurityScopedResource()
+        }
+
+        // Use NSFileCoordinator to coordinate access to the file
+        let coordinator = NSFileCoordinator()
+        var coordinatorError: NSError?
+
+        coordinator.coordinate(readingItemAt: file, options: [], error: &coordinatorError) { (url) in
+            do {
+                // Check if the file is reachable
+                guard (try? url.checkResourceIsReachable()) == true else {
+                    throw NSError(domain: "Selected file is not reachable.", code: -1, userInfo: nil)
+                }
+
+                // Read the file data
+                let data = try Data(contentsOf: url)
+
+                // Proceed to upload the data to Firebase Storage
+                let storage = Storage.storage()
+                let storageRef = storage.reference()
+                let documentName = "\(UUID().uuidString).pdf"
+                let documentRef = storageRef.child("docs/\(userId)/\(documentName)")
+
+                let metadata = StorageMetadata()
+                metadata.contentType = "application/pdf"
+
+                let uploadTask = documentRef.putData(data, metadata: metadata) { metadata, error in
+                    if let error = error {
+                        print("Error uploading document: \(error.localizedDescription)")
+                        return
+                    }
+
+                    documentRef.downloadURL { url, error in
+                        if let error = error {
+                            print("Error getting download URL: \(error.localizedDescription)")
+                            return
+                        }
+
+                        if let downloadURL = url {
+                            DispatchQueue.main.async {
+                                businessCard.cvUrl = downloadURL.absoluteString
+                            }
+                            print("Document uploaded successfully. URL: \(downloadURL.absoluteString)")
+                        }
+                    }
+                }
+
+                // Wait for the upload task to complete
+                uploadTask.observe(.success) { snapshot in
+                    print("Upload completed successfully")
+                }
+
+                // Handle progress or other states if needed
+
+            } catch {
+                print("Error reading file data: \(error.localizedDescription)")
+            }
+        }
+
+        if let error = coordinatorError {
+            throw error
         }
     }
     
