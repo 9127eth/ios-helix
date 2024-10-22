@@ -167,6 +167,7 @@ struct CreateBusinessCardView: View {
                     var cardData = self.businessCard
                     cardData.isPrimary = primaryCardPlaceholder
                     cardData.isActive = isPro || primaryCardPlaceholder
+                    cardData.isPro = isPro  // Add this line
                     
                     if primaryCardPlaceholder {
                         cardData.cardSlug = username
