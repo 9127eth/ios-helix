@@ -27,5 +27,13 @@
 		<string>NDEF</string>
 		<string>TAG</string>
 	</array>
+	<key>NSCameraUsageDescription</key>
+	<string>We need access to your camera to take profile pictures or document photos.</string>
+	<key>UIFileSharingEnabled</key>
+	<true/>
+	<key>LSSupportsOpeningDocumentsInPlace</key>
+	<true/>
+	<key>NSFileProviderDomainUsageDescription</key>
+	<string>This app needs access to files from cloud services to allow you to upload documents.</string>
 </dict>
 </plist>
