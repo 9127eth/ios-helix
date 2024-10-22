@@ -18,6 +18,7 @@ struct SettingsView: View {
     @StateObject private var subscriptionManager = SubscriptionManager()
     @State private var isRestoringPurchases = false
     @State private var restoreError: String?
+    @State private var subscriptionPlanType: String = ""
 
     var body: some View {
         ScrollView {
@@ -59,7 +60,7 @@ struct SettingsView: View {
                             HStack {
                                 Text("Subscription")
                                 Spacer()
-                                Text(isPro ? "Helix Pro" : "Free Plan")
+                                Text(isPro ? "Helix Pro \(subscriptionPlanType)" : "Free Plan")
                                     .foregroundColor(.gray)
                             }
                             .frame(maxWidth: .infinity, alignment: .leading)
@@ -176,6 +177,16 @@ struct SettingsView: View {
         db.collection("users").document(userId).getDocument { (document, error) in
             if let document = document, document.exists {
                 self.isPro = document.data()?["isPro"] as? Bool ?? false
+                
+                // Get subscription type from stripeSubscriptionId or similar field
+                if let subscriptionId = document.data()?["stripeSubscriptionId"] as? String {
+                    // Determine plan type based on subscription ID
+                    if subscriptionId.contains("monthly") {
+                        self.subscriptionPlanType = "Monthly"
+                    } else {
+                        self.subscriptionPlanType = "Yearly"
+                    }
+                }
             }
         }
     }

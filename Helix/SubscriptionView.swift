@@ -7,6 +7,8 @@
 
 import SwiftUI
 import StoreKit
+import Firebase
+import FirebaseAuth
 
 struct SubscriptionView: View {
     @Binding var isPro: Bool
@@ -15,6 +17,8 @@ struct SubscriptionView: View {
     @StateObject private var subscriptionManager = SubscriptionManager()
     @State private var isLoading = true
     @State private var errorMessage: String?
+    // Add state for current user plan
+    @State private var currentUserPlan: PlanType?
     
     enum PlanType {
         case yearly, monthly
@@ -45,7 +49,8 @@ struct SubscriptionView: View {
                         // Pro Plan
                         PlanCard(
                             title: "Helix Pro",
-                            price: selectedPlan == .monthly ? "$2.99/month" : "$12.99/year",
+                            price: isPro ? (currentUserPlan == .monthly ? "$2.99/month" : "$12.99/year")
+                                       : (selectedPlan == .monthly ? "$2.99/month" : "$12.99/year"),
                             features: [
                                 "Up to 10 business cards",
                                 "CV/Resume Upload",
@@ -84,13 +89,7 @@ struct SubscriptionView: View {
                                 "CV/Resume Upload"
                             ],
                             isCurrentPlan: !isPro,
-                            action: {
-                                if isPro {
-                                    // Handle downgrade action
-                                    // This is where you'd implement the actual downgrade process
-                                    print("Downgrading to Free plan")
-                                }
-                            }
+                            action: { } // Empty action since we don't want any downgrade functionality
                         )
                     }
                     .padding()
@@ -102,6 +101,7 @@ struct SubscriptionView: View {
         .onAppear {
             Task {
                 await loadProducts()
+                await loadCurrentPlan()
             }
         }
     }
@@ -115,6 +115,22 @@ struct SubscriptionView: View {
         } catch {
             errorMessage = "Failed to load products: \(error.localizedDescription)"
             isLoading = false
+        }
+    }
+    
+    @MainActor
+    private func loadCurrentPlan() async {
+        guard let userId = Auth.auth().currentUser?.uid else { return }
+        let db = Firestore.firestore()
+        do {
+            let doc = try await db.collection("users").document(userId).getDocument()
+            if let subscriptionId = doc.data()?["stripeSubscriptionId"] as? String {
+                // Assuming you store the plan type in the subscription ID or have another field
+                // You'll need to adjust this logic based on how you store the plan type
+                currentUserPlan = subscriptionId.contains("monthly") ? .monthly : .yearly
+            }
+        } catch {
+            print("Error loading current plan: \(error)")
         }
     }
     
@@ -195,19 +211,25 @@ struct PlanCard: View {
         } else if title == "Helix Pro" {
             return "Upgrade"
         } else {
-            return "Free"
+            return "Free Plan"
         }
     }
     
     private var isButtonDisabled: Bool {
-        isCurrentPlan
+        isCurrentPlan || (title == "Free Plan") // Disable button for Free Plan regardless
     }
     
     private var buttonBackground: Color {
-        isButtonDisabled ? Color.gray.opacity(0.2) : AppColors.buttonBackground
+        if title == "Helix Pro" && isCurrentPlan {
+            return AppColors.buttonBackground
+        }
+        return isButtonDisabled ? Color.gray.opacity(0.2) : AppColors.buttonBackground
     }
     
     private var buttonForeground: Color {
-        isButtonDisabled ? .primary : AppColors.buttonText
+        if title == "Helix Pro" && isCurrentPlan {
+            return AppColors.buttonText
+        }
+        return isButtonDisabled ? .primary : AppColors.buttonText
     }
 }
