@@ -13,24 +13,31 @@ import UniformTypeIdentifiers
 struct DocumentView: View {
     @Binding var businessCard: BusinessCard
     @State private var isDocumentPickerPresented = false
+    @State private var uploadError: String?
+    @Binding var selectedDocument: URL?
+    @State private var showSubscriptionView = false
     @State private var isUploading = false
     @State private var uploadProgress: Double = 0
-    @State private var uploadError: String?
     @FocusState private var focusedField: Field?
-    @State private var showSubscriptionView = false
     var showHeader: Bool
     @Binding var isPro: Bool
-    
+
     enum Field: Hashable {
         case cvHeader, cvDescription, cvDisplayText
     }
-    
-    init(businessCard: Binding<BusinessCard>, showHeader: Bool = true, isPro: Binding<Bool>) {
+
+    init(
+        businessCard: Binding<BusinessCard>,
+        showHeader: Bool = true,
+        isPro: Binding<Bool>,
+        selectedDocument: Binding<URL?> // Added parameter
+    ) {
         self._businessCard = businessCard
         self.showHeader = showHeader
         self._isPro = isPro
+        self._selectedDocument = selectedDocument // Initialize the binding
     }
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
             if showHeader {
@@ -58,7 +65,7 @@ struct DocumentView: View {
                         .background($isPro.wrappedValue ? AppColors.buttonBackground : Color.gray.opacity(0.3))
                         .cornerRadius(16)
                 }
-                .disabled(!$isPro.wrappedValue || isUploading)
+                .disabled(!$isPro.wrappedValue)
                 
                 // "Upgrade" button for non-pro users
                 if !$isPro.wrappedValue {
@@ -74,7 +81,6 @@ struct DocumentView: View {
                             .background(AppColors.buttonBackground)
                             .cornerRadius(16)
                     }
-                    .disabled(isUploading)
                 }
             }
             
@@ -116,15 +122,16 @@ struct DocumentView: View {
                 .disabled(!$isPro.wrappedValue)
                 .opacity($isPro.wrappedValue ? 1 : 0.6)
             
-            if isUploading {
-                ProgressView(value: uploadProgress)
-                    .progressViewStyle(LinearProgressViewStyle())
-            }
-            
             if let error = uploadError {
                 Text(error)
                     .foregroundColor(.red)
                     .font(.caption)
+            }
+            
+            if let selectedDoc = selectedDocument {
+                Text("Selected document: \(selectedDoc.lastPathComponent)")
+                    .font(.caption)
+                    .foregroundColor(.gray)
             }
         }
         .padding(.top, showHeader ? 0 : 16)
@@ -136,7 +143,8 @@ struct DocumentView: View {
             switch result {
             case .success(let files):
                 if let file = files.first {
-                    uploadDocument(file)
+                    selectedDocument = file
+                    uploadError = nil
                 }
             case .failure(let error):
                 print("Error selecting document: \(error.localizedDescription)")
@@ -145,93 +153,6 @@ struct DocumentView: View {
         }
         .sheet(isPresented: $showSubscriptionView) {
             SubscriptionView(isPro: .constant(false))
-        }
-    }
-    
-    private func uploadDocument(_ file: URL) {
-        guard let userId = Auth.auth().currentUser?.uid else {
-            uploadError = "User not authenticated"
-            return
-        }
-        
-        // Start accessing the security-scoped resource
-        guard file.startAccessingSecurityScopedResource() else {
-            uploadError = "Unable to access the selected file."
-            return
-        }
-        defer {
-            file.stopAccessingSecurityScopedResource()
-        }
-
-        // Use NSFileCoordinator to coordinate access to the file
-        let coordinator = NSFileCoordinator()
-        var coordinatorError: NSError?
-
-        coordinator.coordinate(readingItemAt: file, options: [], error: &coordinatorError) { (url) in
-            do {
-                // Check if the file is reachable
-                guard (try? url.checkResourceIsReachable()) == true else {
-                    uploadError = "Selected file is not reachable."
-                    return
-                }
-
-                // Read the file data
-                let data = try Data(contentsOf: url)
-
-                // Proceed to upload the data to Firebase Storage
-                let storage = Storage.storage()
-                let storageRef = storage.reference()
-                let documentName = "\(UUID().uuidString).pdf"
-                let documentRef = storageRef.child("docs/\(userId)/\(documentName)")
-
-                let metadata = StorageMetadata()
-                metadata.contentType = "application/pdf"
-
-                isUploading = true
-                uploadProgress = 0
-                uploadError = nil
-
-                let uploadTask = documentRef.putData(data, metadata: metadata) { metadata, error in
-                    isUploading = false
-
-                    if let error = error {
-                        print("Error uploading document: \(error.localizedDescription)")
-                        uploadError = "Error uploading document. Please try again."
-                        return
-                    }
-
-                    documentRef.downloadURL { url, error in
-                        if let error = error {
-                            print("Error getting download URL: \(error.localizedDescription)")
-                            uploadError = "Error getting download URL. Please try again."
-                            return
-                        }
-
-                        if let downloadURL = url {
-                            DispatchQueue.main.async {
-                                businessCard.cvUrl = downloadURL.absoluteString
-                            }
-                            print("Document uploaded successfully. URL: \(downloadURL.absoluteString)")
-                        }
-                    }
-                }
-
-                // Observe upload progress
-                uploadTask.observe(.progress) { snapshot in
-                    DispatchQueue.main.async {
-                        uploadProgress = Double(snapshot.progress?.fractionCompleted ?? 0)
-                    }
-                }
-
-            } catch {
-                print("Error reading file data: \(error.localizedDescription)")
-                uploadError = "Error accessing the document. Please try again."
-            }
-        }
-
-        if let error = coordinatorError {
-            print("Error coordinating file access: \(error.localizedDescription)")
-            uploadError = "Error accessing the document. Please try again."
         }
     }
 }
