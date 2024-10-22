@@ -161,7 +161,7 @@ struct DocumentView: View {
         let storage = Storage.storage()
         let storageRef = storage.reference()
         let documentName = "\(UUID().uuidString).pdf"
-        let documentRef = storageRef.child("documents/\(userId)/\(documentName)")
+        let documentRef = storageRef.child("docs/\(userId)/\(documentName)") // Updated path
         
         let uploadTask = documentRef.putFile(from: file, metadata: nil) { metadata, error in
             isUploading = false
