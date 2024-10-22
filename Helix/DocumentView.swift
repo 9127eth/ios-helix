@@ -19,16 +19,16 @@ struct DocumentView: View {
     @FocusState private var focusedField: Field?
     @State private var showSubscriptionView = false
     var showHeader: Bool
-    var isPro: Bool
+    @Binding var isPro: Bool
     
     enum Field: Hashable {
         case cvHeader, cvDescription, cvDisplayText
     }
     
-    init(businessCard: Binding<BusinessCard>, showHeader: Bool = true, isPro: Bool = false) {
+    init(businessCard: Binding<BusinessCard>, showHeader: Bool = true, isPro: Binding<Bool>) {
         self._businessCard = businessCard
         self.showHeader = showHeader
-        self.isPro = isPro
+        self._isPro = isPro
     }
     
     var body: some View {
@@ -45,45 +45,45 @@ struct DocumentView: View {
                 .padding(.bottom, 8)
             
             HStack {
+                // "Choose File" button is always visible
                 Button(action: { 
-                    if isPro {
-                        isDocumentPickerPresented = true
-                    } else {
-                        showSubscriptionView = true
-                    }
+                    isDocumentPickerPresented = true
                 }) {
-                    Text(isPro ? "Choose File" : "Upgrade")
-                        .foregroundColor(AppColors.buttonText)
+                    Text("Choose File")
+                        .foregroundColor($isPro.wrappedValue ? AppColors.buttonText : .gray)
                         .font(.system(size: UIFont.labelFontSize * 0.8))
                         .padding(.horizontal, 16)
                         .padding(.vertical, 8)
-                        .frame(width: 120) // Set a fixed width
-                        .background(AppColors.buttonBackground)
+                        .frame(width: 120)
+                        .background($isPro.wrappedValue ? AppColors.buttonBackground : Color.gray.opacity(0.3))
                         .cornerRadius(16)
                 }
-                .disabled(isUploading)
+                .disabled(!$isPro.wrappedValue || isUploading)
                 
-                if !isPro {
-                    Text("Get Helix Pro to add a document")
-                        .foregroundColor(.gray)
-                        .font(.system(size: UIFont.labelFontSize * 0.8))
-                        .padding(.leading, 8)
+                // "Upgrade" button for non-pro users
+                if !$isPro.wrappedValue {
+                    Button(action: {
+                        showSubscriptionView = true
+                    }) {
+                        Text("Upgrade")
+                            .foregroundColor(AppColors.buttonText)
+                            .font(.system(size: UIFont.labelFontSize * 0.8))
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 8)
+                            .frame(width: 120)
+                            .background(AppColors.buttonBackground)
+                            .cornerRadius(16)
+                    }
+                    .disabled(isUploading)
                 }
             }
             
-            if !isPro {
-                Button(action: {}) {
-                    Text(businessCard.cvUrl == nil ? "Choose File" : "Replace Document")
-                        .foregroundColor(.gray)
-                        .font(.system(size: UIFont.labelFontSize * 0.8))
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 8)
-                        .frame(width: 120) // Set the same fixed width
-                        .background(Color.gray.opacity(0.3))
-                        .cornerRadius(16)
-                }
-                .disabled(true)
-                .padding(.top, 2)
+            // Helix Pro message for non-pro users
+            if !$isPro.wrappedValue {
+                Text("Upgrade to Helix Pro to add a document")
+                    .foregroundColor(.foreground)
+                    .font(.system(size: UIFont.labelFontSize * 0.8))
+                    .padding(.leading, 8)
             }
             
             if let cvUrl = businessCard.cvUrl {
@@ -97,24 +97,24 @@ struct DocumentView: View {
                 set: { businessCard.cvHeader = $0.isEmpty ? nil : $0 }
             ), onCommit: { focusedField = .cvDescription })
                 .focused($focusedField, equals: .cvHeader)
-                .disabled(!isPro)
-                .opacity(isPro ? 1 : 0.6)
+                .disabled(!$isPro.wrappedValue)
+                .opacity($isPro.wrappedValue ? 1 : 0.6)
             
             CustomTextField(title: "Description", text: Binding(
                 get: { businessCard.cvDescription ?? "" },
                 set: { businessCard.cvDescription = $0.isEmpty ? nil : $0 }
             ), onCommit: { focusedField = .cvDisplayText })
                 .focused($focusedField, equals: .cvDescription)
-                .disabled(!isPro)
-                .opacity(isPro ? 1 : 0.6)
+                .disabled(!$isPro.wrappedValue)
+                .opacity($isPro.wrappedValue ? 1 : 0.6)
             
             CustomTextField(title: "File Name Display Text (Optional)", text: Binding(
                 get: { businessCard.cvDisplayText ?? "" },
                 set: { businessCard.cvDisplayText = $0.isEmpty ? nil : $0 }
             ), onCommit: { focusedField = nil })
                 .focused($focusedField, equals: .cvDisplayText)
-                .disabled(!isPro)
-                .opacity(isPro ? 1 : 0.6)
+                .disabled(!$isPro.wrappedValue)
+                .opacity($isPro.wrappedValue ? 1 : 0.6)
             
             if isUploading {
                 ProgressView(value: uploadProgress)
