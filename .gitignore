@@ -1,3 +1,4 @@
 .env.local
 Config.xcconfig
 hello.txt
+GoogleService-Info.plist

@@ -7,10 +7,10 @@
 import SwiftUI
 import Firebase
 import FirebaseAuth
+import FirebaseStorage
 
 struct SettingsView: View {
     @EnvironmentObject var authManager: AuthenticationManager
-    @State private var showDeleteConfirmation = false
     @Binding var isAuthenticated: Bool
     @AppStorage("isDarkMode") private var isDarkMode = false
     @State private var scrollOffset: CGFloat = 0  // Track scroll offset
@@ -19,6 +19,7 @@ struct SettingsView: View {
     @State private var isRestoringPurchases = false
     @State private var restoreError: String?
     @State private var subscriptionPlanType: String = ""
+    @State private var activeAlert: AlertType?
 
     var body: some View {
         ScrollView {
@@ -105,12 +106,15 @@ struct SettingsView: View {
                         }
 
                         Button(action: {
-                            showDeleteConfirmation = true
+                            print("Delete account button tapped")
+                            print("Setting activeAlert to deleteConfirmation")
+                            activeAlert = .deleteConfirmation
+                            print("activeAlert is now set: \(String(describing: activeAlert))")
                         }) {
                             Text("Delete Account")
                                 .foregroundColor(.red)
                                 .frame(maxWidth: .infinity, alignment: .leading)
-                                .padding(.vertical, 8)  // Reduced vertical padding
+                                .padding(.vertical, 8)
                                 .padding(.horizontal, 16)
                                 .background(AppColors.inputFieldBackground)
                         }
@@ -132,23 +136,27 @@ struct SettingsView: View {
         }
         .coordinateSpace(name: "scroll")
         .background(AppColors.background)
-        .alert(isPresented: $showDeleteConfirmation) {
-            Alert(
-                title: Text("Delete Account"),
-                message: Text("Are you sure you want to delete your account? This action is irreversible."),
-                primaryButton: .destructive(Text("Delete")) {
-                    deleteAccount()
-                },
-                secondaryButton: .cancel()
-            )
+        .alert(item: $activeAlert) { alertType in
+            switch alertType {
+            case .deleteConfirmation:
+                return Alert(
+                    title: Text("Delete Account"),
+                    message: Text("Are you sure you want to delete your account? This action is irreversible."),
+                    primaryButton: .destructive(Text("Delete")) {
+                        print("Delete confirmed in alert")
+                        deleteAccount()
+                    },
+                    secondaryButton: .cancel()
+                )
+            case .restoreError(let message):
+                return Alert(
+                    title: Text("Restore Failed"),
+                    message: Text(message),
+                    dismissButton: .default(Text("OK"))
+                )
+            }
         }
         .onAppear(perform: fetchUserProStatus)
-        .alert(item: Binding<RestoreError?>(
-            get: { restoreError.map { RestoreError(message: $0) } },
-            set: { restoreError = $0?.message }
-        )) { error in
-            Alert(title: Text("Restore Failed"), message: Text(error.message), dismissButton: .default(Text("OK")))
-        }
     }
 
     private var headerView: some View {
@@ -168,7 +176,98 @@ struct SettingsView: View {
     }
 
     private func deleteAccount() {
-        // Implement account deletion logic here
+        print("deleteAccount function called") // Add this debug log
+        let db = Firestore.firestore()
+        guard let userId = Auth.auth().currentUser?.uid else {
+            print("No user ID found") // Add this debug log
+            return
+        }
+        print("User ID found: \(userId)") // Add this debug log
+        
+        // First, attempt to delete the account
+        Task {
+            do {
+                // 1. Delete all images from Storage
+                let storage = Storage.storage()
+                let imagesRef = storage.reference().child("images/\(userId)")
+                try? await deleteStorageFolder(reference: imagesRef)
+                
+                // 2. Delete all documents from Storage
+                let docsRef = storage.reference().child("docs/\(userId)")
+                try? await deleteStorageFolder(reference: docsRef)
+                
+                // 3. Delete all business cards from Firestore
+                let cardsRef = db.collection("users").document(userId).collection("businessCards")
+                let cards = try await cardsRef.getDocuments()
+                for card in cards.documents {
+                    try await card.reference.delete()
+                }
+                
+                // 4. Finally, attempt to delete the user account
+                try await Auth.auth().currentUser?.delete()
+                
+                // 5. If successful, sign out and reset auth state
+                authManager.signOut()
+                
+            } catch let error as NSError {
+                // Handle Firebase Auth errors
+                if error.code == AuthErrorCode.requiresRecentLogin.rawValue {
+                    // Show alert to user that they need to re-authenticate
+                    showAlert(
+                        title: "Re-authentication Required",
+                        message: "For security reasons, please sign out and sign in again before deleting your account.",
+                        primaryButton: "Sign Out",
+                        primaryAction: {
+                            authManager.signOut()
+                        }
+                    )
+                } else {
+                    // Show generic error alert
+                    showAlert(
+                        title: "Error",
+                        message: "Failed to delete account: \(error.localizedDescription)",
+                        primaryButton: "OK"
+                    )
+                }
+            }
+        }
+    }
+
+    private func deleteStorageFolder(reference: StorageReference) async throws {
+        do {
+            let items = try await reference.listAll()
+            
+            // Delete all items in parallel
+            try await withThrowingTaskGroup(of: Void.self) { group in
+                for item in items.items {
+                    group.addTask {
+                        try await item.delete()
+                    }
+                }
+                
+                // Wait for all deletions to complete
+                try await group.waitForAll()
+            }
+        } catch {
+            print("Error deleting storage folder: \(error.localizedDescription)")
+            // We're using try? in the calling function, so this error will be ignored
+            throw error
+        }
+    }
+
+    private func showAlert(title: String, message: String, primaryButton: String, primaryAction: (() -> Void)? = nil) {
+        let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
+        
+        let action = UIAlertAction(title: primaryButton, style: .default) { _ in
+            primaryAction?()
+        }
+        alert.addAction(action)
+        
+        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+           let window = windowScene.windows.first,
+           let rootViewController = window.rootViewController {
+            rootViewController.present(alert, animated: true)
+        }
     }
 
     private func fetchUserProStatus() {
@@ -213,4 +312,18 @@ struct ScrollOffsetKey: PreferenceKey {
 struct RestoreError: Identifiable {
     let id = UUID()
     let message: String
+}
+
+enum AlertType: Identifiable {
+    case deleteConfirmation
+    case restoreError(String)
+    
+    var id: Int {
+        switch self {
+        case .deleteConfirmation:
+            return 0
+        case .restoreError:
+            return 1
+        }
+    }
 }
