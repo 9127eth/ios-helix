@@ -33,7 +33,7 @@ struct SocialLinksView: View {
                             Button(action: {
                                 removeLink(at: index)
                             }) {
-                                Image(systemName: "trash")
+                                Image("trashDelete")
                                     .foregroundColor(.red)
                                     .font(.system(size: 20))
                             }

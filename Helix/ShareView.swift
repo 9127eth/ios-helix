@@ -79,7 +79,7 @@ struct ShareView: View {
                                 }
                             }) {
                                 HStack {
-                                    Image(systemName: showCopiedCheckmark ? "checkmark" : "doc.on.doc")
+                                    Image(showCopiedCheckmark ? "clipboardCheck" : "Copyplus2")
                                     Text(showCopiedCheckmark ? "Copied!" : "Copy Link")
                                 }
                                 .frame(maxWidth: .infinity)
@@ -102,7 +102,7 @@ struct ShareView: View {
                                 }
                             }) {
                                 HStack {
-                                    Image(systemName: "square.and.arrow.up")
+                                    Image("share.3")
                                     Text("Share Link")
                                 }
                                 .frame(maxWidth: .infinity)
@@ -138,7 +138,7 @@ struct ShareView: View {
                             
                             Button(action: shareQRCode) {
                                 HStack {
-                                    Image(systemName: "square.and.arrow.up")
+                                    Image("share.3")
                                     Text("Share QR Code")
                                 }
                                 .frame(maxWidth: .infinity)

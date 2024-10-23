@@ -122,7 +122,7 @@ struct AuthenticationView: View {
             }
             
             Button(action: { showEmailAuth = true }) {
-                AuthButtonView(image: "envelope", text: "Continue with Email", isSystemImage: true)
+                AuthButtonView(image: "email", text: "Continue with Email", isSystemImage: false)
             }
         }
     }
