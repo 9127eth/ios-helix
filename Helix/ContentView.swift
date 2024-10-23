@@ -22,6 +22,7 @@ struct ContentView: View {
     @AppStorage("isDarkMode") private var isDarkMode = false
     @StateObject private var subscriptionManager = SubscriptionManager()
     @State private var isPro: Bool = false
+    @State private var isShowingSplash = true
     
     init() {
         setupNavigationBarAppearance()
@@ -51,16 +52,32 @@ struct ContentView: View {
     }
     
     var body: some View {
-        Group {
-            if authManager.isAuthenticated {
-                authenticatedView
-            } else {
-                AuthenticationView()
+        ZStack {
+            Group {
+                if authManager.isAuthenticated {
+                    authenticatedView
+                } else {
+                    AuthenticationView()
+                }
+            }
+            .background(AppColors.background)
+            .preferredColorScheme(isDarkMode ? .dark : .light)
+            .environmentObject(authManager)
+            .opacity(isShowingSplash ? 0 : 1)
+            
+            if isShowingSplash {
+                SplashScreenView()
+                    .transition(.opacity)
+                    .zIndex(1)
             }
         }
-        .background(AppColors.background)
-        .preferredColorScheme(isDarkMode ? .dark : .light)
-        .environmentObject(authManager)
+        .onAppear {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                withAnimation(.easeInOut(duration: 0.5)) {
+                    isShowingSplash = false
+                }
+            }
+        }
     }
     
     private var authenticatedView: some View {
