@@ -38,7 +38,7 @@ struct WebLinksView: View {
                         HStack(spacing: 0) {
                             Spacer()
                             Button(action: { removeLink(at: index) }) {
-                                Image(systemName: "trash")
+                                Image("trashDelete")
                                     .foregroundColor(.red)
                                     .font(.system(size: 20))
                             }

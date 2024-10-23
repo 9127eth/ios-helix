@@ -181,15 +181,15 @@ struct BusinessCardItemView: View {
                 
                 HStack(spacing: 16) {
                     Button(action: { showingEditView = true }) {
-                        Image(systemName: "square.and.pencil")
+                        Image("pencilEdit")
                             .frame(width: 30, height: 30)
                     }
                     Button(action: { showPreview = true }) {
-                        Image(systemName: "magnifyingglass")
+                        Image("previewCard")
                             .frame(width: 30, height: 30)
                     }
                     Button(action: { showShare = true }) {
-                        Image(systemName: "square.and.arrow.up")
+                        Image("share.3")
                             .frame(width: 30, height: 30)
                     }
                     .disabled(!card.isActive)
