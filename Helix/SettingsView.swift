@@ -176,43 +176,44 @@ struct SettingsView: View {
     }
 
     private func deleteAccount() {
-        print("deleteAccount function called") // Add this debug log
-        let db = Firestore.firestore()
-        guard let userId = Auth.auth().currentUser?.uid else {
-            print("No user ID found") // Add this debug log
+        print("deleteAccount function called")
+        guard let user = Auth.auth().currentUser else {
+            print("No user found")
             return
         }
-        print("User ID found: \(userId)") // Add this debug log
         
-        // First, attempt to delete the account
         Task {
             do {
-                // 1. Delete all images from Storage
+                // First, attempt to delete the user account to check authentication
+                try await user.delete()
+                
+                // If delete succeeds, then proceed with cleaning up data
+                let userId = user.uid
                 let storage = Storage.storage()
+                let db = Firestore.firestore()
+                
+                // Delete storage items
                 let imagesRef = storage.reference().child("images/\(userId)")
                 try? await deleteStorageFolder(reference: imagesRef)
                 
-                // 2. Delete all documents from Storage
                 let docsRef = storage.reference().child("docs/\(userId)")
                 try? await deleteStorageFolder(reference: docsRef)
                 
-                // 3. Delete all business cards from Firestore
+                // Delete Firestore documents
                 let cardsRef = db.collection("users").document(userId).collection("businessCards")
                 let cards = try await cardsRef.getDocuments()
                 for card in cards.documents {
                     try await card.reference.delete()
                 }
                 
-                // 4. Finally, attempt to delete the user account
-                try await Auth.auth().currentUser?.delete()
+                // Delete user document
+                try await db.collection("users").document(userId).delete()
                 
-                // 5. If successful, sign out and reset auth state
+                // Finally, sign out
                 authManager.signOut()
                 
             } catch let error as NSError {
-                // Handle Firebase Auth errors
                 if error.code == AuthErrorCode.requiresRecentLogin.rawValue {
-                    // Show alert to user that they need to re-authenticate
                     showAlert(
                         title: "Re-authentication Required",
                         message: "For security reasons, please sign out and sign in again before deleting your account.",
@@ -222,7 +223,6 @@ struct SettingsView: View {
                         }
                     )
                 } else {
-                    // Show generic error alert
                     showAlert(
                         title: "Error",
                         message: "Failed to delete account: \(error.localizedDescription)",
