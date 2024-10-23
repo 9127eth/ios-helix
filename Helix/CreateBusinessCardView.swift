@@ -293,11 +293,14 @@ struct CreateBusinessCardView: View {
                 // Proceed to upload the data to Firebase Storage
                 let storage = Storage.storage()
                 let storageRef = storage.reference()
-                let documentName = "\(UUID().uuidString).pdf"
-                let documentRef = storageRef.child("docs/\(userId)/\(documentName)")
+                // Use the original filename instead of generating a UUID
+                let originalFilename = url.lastPathComponent
+                let documentRef = storageRef.child("docs/\(userId)/\(originalFilename)")
 
                 let metadata = StorageMetadata()
                 metadata.contentType = "application/pdf"
+                // Store the original filename in metadata
+                metadata.customMetadata = ["originalFilename": originalFilename]
 
                 let uploadTask = documentRef.putData(data, metadata: metadata) { metadata, error in
                     if let error = error {

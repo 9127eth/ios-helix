@@ -229,11 +229,12 @@ struct EditBusinessCardView: View {
 
         let storage = Storage.storage()
         let storageRef = storage.reference()
-        let documentName = "\(UUID().uuidString).pdf"
-        let documentRef = storageRef.child("docs/\(userId)/\(documentName)")
+        let originalFilename = file.lastPathComponent
+        let documentRef = storageRef.child("docs/\(userId)/\(originalFilename)")
 
         let metadata = StorageMetadata()
         metadata.contentType = "application/pdf"
+        metadata.customMetadata = ["originalFilename": originalFilename]
 
         do {
             _ = try await documentRef.putDataAsync(data, metadata: metadata)
