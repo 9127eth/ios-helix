@@ -1,4 +1,4 @@
-//
+// 
 //  CreateProgressBar.swift
 //  Helix
 //
@@ -32,7 +32,7 @@ public struct CreateProgressBar: View {
                 
                 if index < steps.count - 1 {
                     Rectangle()
-                        .fill(index < currentStep ? AppColors.primary : Color.gray.opacity(0.3))
+                        .fill(index < currentStep ? Color.gray.opacity(0.5) : Color.gray.opacity(0.3))
                         .frame(height: 2)
                         .frame(maxWidth: .infinity)
                 }

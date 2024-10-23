@@ -137,7 +137,10 @@ struct BusinessCardItemView: View {
                         .foregroundColor(AppColors.bodyPrimaryText)
                         .padding(.top, 4)
                         .padding(.trailing, 4)
+                        .frame(width: 44, height: 30) // Increase the frame size
+                        .contentShape(Rectangle()) // Make the entire frame tappable
                 }
+                .buttonStyle(PlainButtonStyle()) // Remove default button styling
             }
             
             if let jobTitle = card.jobTitle {
@@ -181,15 +184,15 @@ struct BusinessCardItemView: View {
                 
                 HStack(spacing: 16) {
                     Button(action: { showingEditView = true }) {
-                        Image("pencilEdit")
+                        Image(systemName: "square.and.pencil")
                             .frame(width: 30, height: 30)
                     }
                     Button(action: { showPreview = true }) {
-                        Image("previewCard")
+                        Image(systemName: "magnifyingglass")
                             .frame(width: 30, height: 30)
                     }
                     Button(action: { showShare = true }) {
-                        Image("share.3")
+                        Image(systemName: "square.and.arrow.up")
                             .frame(width: 30, height: 30)
                     }
                     .disabled(!card.isActive)
