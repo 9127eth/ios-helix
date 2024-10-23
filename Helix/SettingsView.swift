@@ -9,6 +9,28 @@ import Firebase
 import FirebaseAuth
 import FirebaseStorage
 
+struct SmallToggleStyle: ToggleStyle {
+    func makeBody(configuration: Self.Configuration) -> some View {
+        Button(action: { configuration.isOn.toggle() }) {
+            HStack {
+                configuration.label
+                Spacer()
+                RoundedRectangle(cornerRadius: 16, style: .circular)
+                    .fill(configuration.isOn ? Color.green : Color.gray)
+                    .frame(width: 40, height: 24)
+                    .overlay(
+                        Circle()
+                            .fill(Color.white)
+                            .padding(2)
+                            .offset(x: configuration.isOn ? 8 : -8)
+                    )
+                    .animation(.spring(), value: configuration.isOn)
+            }
+        }
+        .buttonStyle(PlainButtonStyle())
+    }
+}
+
 struct SettingsView: View {
     @EnvironmentObject var authManager: AuthenticationManager
     @Binding var isAuthenticated: Bool
@@ -38,7 +60,8 @@ struct SettingsView: View {
 
                     VStack(spacing: 0) {
                         Toggle("Dark Mode", isOn: $isDarkMode)
-                            .padding(.vertical, 8)  // Reduced vertical padding
+                            .toggleStyle(SmallToggleStyle())
+                            .padding(.vertical, 10)
                             .padding(.horizontal, 16)
                             .background(AppColors.inputFieldBackground)
                     }
@@ -59,13 +82,13 @@ struct SettingsView: View {
                             // Action to open subscription view (to be implemented)
                         }) {
                             HStack {
-                                Text("Subscription")
+                                Text("Current Subscription")
                                 Spacer()
                                 Text(isPro ? "Helix Pro \(subscriptionPlanType)" : "Free Plan")
-                                    .foregroundColor(.gray)
+                                    .foregroundColor(AppColors.foreground)
                             }
                             .frame(maxWidth: .infinity, alignment: .leading)
-                            .padding(.vertical, 8)
+                            .padding(.vertical, 10)
                             .padding(.horizontal, 16)
                             .background(AppColors.inputFieldBackground)
                         }
@@ -76,33 +99,41 @@ struct SettingsView: View {
                             }
                         }) {
                             HStack {
+                                Image("restore")
+
+                                    .foregroundColor(AppColors.foreground)
                                 Text("Restore Purchases")
+                                    .foregroundColor(AppColors.foreground)
+                                Spacer()
                                 if isRestoringPurchases {
                                     ProgressView()
                                         .tint(AppColors.buttonText)
                                 }
                             }
-                            .frame(minWidth: 200)
-                            .padding(.vertical, 12)
-                            .padding(.horizontal, 20)
-                            .background(AppColors.buttonBackground)
-                            .foregroundColor(AppColors.buttonText)
-                            .cornerRadius(20)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(.vertical, 8)
+                            .padding(.horizontal, 16)
+                            .background(AppColors.inputFieldBackground)
                         }
-                        .padding(.vertical, 8)
-                        .padding(.horizontal, 16)
 
-                        Divider()
+
+
 
                         Button(action: {
                             authManager.signOut()
                         }) {
-                            Text("Sign Out")
-                                .foregroundColor(.red)
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                                .padding(.vertical, 8)  // Reduced vertical padding
-                                .padding(.horizontal, 16)
-                                .background(AppColors.inputFieldBackground)
+                            HStack {
+                                Image("signOut")
+
+                                    .foregroundColor(.red)
+                                Text("Sign Out")
+                                    .foregroundColor(.red)
+                                Spacer()
+                            }
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(.vertical, 8)
+                            .padding(.horizontal, 16)
+                            .background(AppColors.inputFieldBackground)
                         }
 
                         Button(action: {
@@ -111,12 +142,18 @@ struct SettingsView: View {
                             activeAlert = .deleteConfirmation
                             print("activeAlert is now set: \(String(describing: activeAlert))")
                         }) {
-                            Text("Delete Account")
-                                .foregroundColor(.red)
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                                .padding(.vertical, 8)
-                                .padding(.horizontal, 16)
-                                .background(AppColors.inputFieldBackground)
+                            HStack {
+                                Image("trashWarning")
+
+                                    .foregroundColor(.red)
+                                Text("Delete Account")
+                                    .foregroundColor(.red)
+                                Spacer()
+                            }
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(.vertical, 8)
+                            .padding(.horizontal, 16)
+                            .background(AppColors.inputFieldBackground)
                         }
                     }
                     .background(Color(UIColor.secondarySystemGroupedBackground))

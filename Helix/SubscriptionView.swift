@@ -191,12 +191,17 @@ struct PlanCard: View {
             }
             
             Button(action: action) {
-                Text(buttonText)
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(buttonBackground)
-                    .foregroundColor(buttonForeground)
-                    .cornerRadius(10)
+                HStack {
+                    if title == "Helix Pro" && !isCurrentPlan {
+                        Image("lightning")
+                    }
+                    Text(buttonText)
+                }
+                .frame(maxWidth: .infinity)
+                .padding()
+                .background(buttonBackground)
+                .foregroundColor(buttonForeground)
+                .cornerRadius(10)
             }
             .disabled(isButtonDisabled)
         }

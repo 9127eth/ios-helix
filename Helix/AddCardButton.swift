@@ -14,8 +14,8 @@ struct AddCardButton: View {
     var body: some View {
         Button(action: action) {
             HStack {
-                Image(systemName: "plus")
-                    .font(.title2)
+                Image("addNewCard")
+                    .renderingMode(.template)
                 Text("Create New Card")
                     .font(.headline)
             }

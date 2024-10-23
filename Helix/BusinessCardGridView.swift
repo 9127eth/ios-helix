@@ -46,13 +46,18 @@ struct BusinessCardGridView: View {
                                     showCreateCard = true
                                 }
                             }) {
-                                Label("Create New", systemImage: "plus")
-                                    .font(.footnote)
-                                    .foregroundColor(AppColors.buttonText)
-                                    .padding(.vertical, 8)
-                                    .padding(.horizontal, 12)
-                                    .background(AppColors.buttonBackground)
-                                    .cornerRadius(16)
+                                Label {
+                                    Text("Create New")
+                                } icon: {
+                                    Image("addNewCard")
+                                        .renderingMode(.template)
+                                }
+                                .font(.footnote)
+                                .foregroundColor(AppColors.buttonText)
+                                .padding(.vertical, 8)
+                                .padding(.horizontal, 12)
+                                .background(AppColors.buttonBackground)
+                                .cornerRadius(16)
                             }
                         }
                         .padding(.horizontal)

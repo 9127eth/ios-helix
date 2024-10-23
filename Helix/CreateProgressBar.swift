@@ -23,7 +23,8 @@ public struct CreateProgressBar: View {
                         .fill(index <= currentStep ? AppColors.primary : Color.gray.opacity(0.3))
                         .frame(width: 40, height: 40)
                     
-                    Image(systemName: iconName(for: index))
+                    Image(iconName(for: index))
+                        .renderingMode(.template)
                         .foregroundColor(index <= currentStep ? .black : .gray)
                 }
                 
@@ -41,13 +42,13 @@ public struct CreateProgressBar: View {
     
     private func iconName(for index: Int) -> String {
         switch index {
-        case 0: return "person"
+        case 0: return "profile"
         case 1: return "briefcase"
-        case 2: return "rectangle.stack"
-        case 3: return "envelope"
-        case 4: return "link"
-        case 5: return "globe"
-        case 6: return "camera"
+        case 2: return "Label"
+        case 3: return "email"
+        case 4: return "social"
+        case 5: return "Link"
+        case 6: return "upload"
         default: return "circle"
         }
     }
