@@ -19,18 +19,16 @@ public struct CreateProgressBar: View {
         HStack(spacing: 0) {
             ForEach(0..<steps.count, id: \.self) { index in
                 ZStack {
-                    if index <= currentStep {
-                        Circle()
-                            .fill(AppColors.primary)
-                            .frame(width: 40, height: 40)
-                    }
+                    Circle()
+                        .fill(circleColor(for: index))
+                        .frame(width: 40, height: 40)
                     
                     Image(iconName(for: index))
                         .renderingMode(.template)
                         .foregroundColor(index <= currentStep ? .black : .gray)
-                        .frame(width: 24, height: 24) // Set a fixed size for the icon
+                        .frame(width: 24, height: 24)
                 }
-                .frame(width: 40, height: 40) // Maintain the overall frame size
+                .frame(width: 40, height: 40)
                 
                 if index < steps.count - 1 {
                     Rectangle()
@@ -42,6 +40,16 @@ public struct CreateProgressBar: View {
         }
         .padding(.horizontal, 16)
         .padding(.top, 12)
+    }
+    
+    private func circleColor(for index: Int) -> Color {
+        if index == currentStep {
+            return AppColors.primary
+        } else if index < currentStep {
+            return Color.gray.opacity(0.5)
+        } else {
+            return Color.clear
+        }
     }
     
     private func iconName(for index: Int) -> String {
