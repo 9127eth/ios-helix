@@ -19,14 +19,18 @@ public struct CreateProgressBar: View {
         HStack(spacing: 0) {
             ForEach(0..<steps.count, id: \.self) { index in
                 ZStack {
-                    Circle()
-                        .fill(index <= currentStep ? AppColors.primary : Color.gray.opacity(0.3))
-                        .frame(width: 40, height: 40)
+                    if index <= currentStep {
+                        Circle()
+                            .fill(AppColors.primary)
+                            .frame(width: 40, height: 40)
+                    }
                     
                     Image(iconName(for: index))
                         .renderingMode(.template)
                         .foregroundColor(index <= currentStep ? .black : .gray)
+                        .frame(width: 24, height: 24) // Set a fixed size for the icon
                 }
+                .frame(width: 40, height: 40) // Maintain the overall frame size
                 
                 if index < steps.count - 1 {
                     Rectangle()
