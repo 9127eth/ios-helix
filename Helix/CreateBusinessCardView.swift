@@ -31,7 +31,7 @@ struct CreateBusinessCardView: View {
             HStack {
                 Button(action: { showCancelConfirmation = true }) {
                     Text("Cancel")
-                        .foregroundColor(AppColors.primary)
+                        .foregroundColor(Color.blue)
                 }
                 Spacer()
                 Text("Create Business Card")
@@ -40,7 +40,7 @@ struct CreateBusinessCardView: View {
                 Spacer()
                 Button(action: saveBusinessCard) {
                     Text("Done")
-                        .foregroundColor(AppColors.primary)
+                        .foregroundColor(Color.blue)
                         .font(.system(size: 16, weight: .medium))
                 }
             }
