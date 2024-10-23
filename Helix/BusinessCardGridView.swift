@@ -108,14 +108,16 @@ struct BusinessCardGridView: View {
     
     private var headerView: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Button(action: {
-                showSubscriptionView = true
-            }) {
-                Text("Get Helix Pro")
-                    .font(.subheadline)
-                    .foregroundColor(AppColors.helixPro)
+            if !isPro {
+                Button(action: {
+                    showSubscriptionView = true
+                }) {
+                    Text("Get Helix Pro")
+                        .font(.subheadline)
+                        .foregroundColor(AppColors.helixPro)
+                }
+                .padding(.bottom, 5)
             }
-            .padding(.bottom, 5)
             
             Text("Business Cards")
                 .font(.largeTitle)
