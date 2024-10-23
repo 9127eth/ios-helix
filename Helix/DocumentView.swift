@@ -10,6 +10,7 @@ import FirebaseStorage
 import FirebaseAuth
 import UniformTypeIdentifiers
 import FirebaseFirestore
+import SafariServices
 
 struct DocumentView: View {
     @Binding var businessCard: BusinessCard
@@ -22,6 +23,7 @@ struct DocumentView: View {
     @FocusState private var focusedField: Field?
     var showHeader: Bool
     @Binding var isPro: Bool
+    @State private var showDocumentPreview = false
 
     enum Field: Hashable {
         case cvHeader, cvDescription, cvDisplayText
@@ -94,9 +96,22 @@ struct DocumentView: View {
             }
             
             if let cvUrl = businessCard.cvUrl {
-                Text("Document uploaded: \(cvUrl)")
-                    .font(.caption)
-                    .foregroundColor(.gray)
+                HStack(spacing: 20) {
+                    Button("View Current Document") {
+                        showDocumentPreview = true
+                    }
+                    .foregroundColor(.blue)
+                    .padding(.leading, 8) // Added padding to align with "Choose File" button
+                    
+                    Spacer() // Added spacer to push the Delete button to the right
+                    
+                    Button("Remove") {
+                        // Functionality to be added later
+                        print("Delete button tapped")
+                    }
+                    .foregroundColor(.red)
+                }
+                .font(.system(size: UIFont.labelFontSize * 0.8))
             }
             
             CustomTextField(title: "Header", text: Binding(
@@ -155,6 +170,11 @@ struct DocumentView: View {
         .sheet(isPresented: $showSubscriptionView) {
             SubscriptionView(isPro: $isPro)
         }
+        .sheet(isPresented: $showDocumentPreview) {
+            if let cvUrl = businessCard.cvUrl, let url = URL(string: cvUrl) {
+                SafariView(url: url)
+            }
+        }
         .onAppear {
             listenToProStatus()
         }
@@ -176,3 +196,5 @@ struct DocumentView: View {
             }
     }
 }
+
+// Add this struct at the end of the file
