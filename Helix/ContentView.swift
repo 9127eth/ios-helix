@@ -105,7 +105,8 @@ struct ContentView: View {
                 Label {
                     Text("Cards")
                 } icon: {
-                    Image(systemName: "rectangle.stack")
+                    Image("cardsNavi")
+                        .renderingMode(.template)
                 }
             }
             .tag(0)
@@ -117,7 +118,8 @@ struct ContentView: View {
                 Label {
                     Text("Settings")
                 } icon: {
-                    Image(systemName: "gearshape")
+                    Image("settingsNavi")
+                        .renderingMode(.template)
                 }
             }
             .tag(1)

@@ -15,14 +15,20 @@ struct BottomMenuBar: View {
             Spacer()
             Button(action: { selectedTab = 0 }) {
                 VStack {
-                    Image(systemName: "rectangle.on.rectangle")
+                    Image("cardsNavi")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 24, height: 24)
                     Text("Cards")
                 }
             }
             Spacer()
             Button(action: { selectedTab = 1 }) {
                 VStack {
-                    Image(systemName: "gear")
+                    Image("settingsNavi")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 24, height: 24)
                     Text("Settings")
                 }
             }
