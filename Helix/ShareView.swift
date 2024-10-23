@@ -33,7 +33,7 @@ struct ShareView: View {
                         if let jobTitle = card.jobTitle {
                             Text(jobTitle)
                                 .font(.system(size: 20))
-                                .foregroundColor(.black)
+                                .foregroundColor(.bodyPrimaryText)
                         }
                         
                         if card.jobTitle != nil && card.company != nil {
