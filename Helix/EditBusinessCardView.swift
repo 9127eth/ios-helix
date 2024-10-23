@@ -167,6 +167,11 @@ struct EditBusinessCardView: View {
 
         Task {
             do {
+                // If the document URL was cleared, delete the old document
+                if businessCard.cvUrl != nil && editedCard.cvUrl == nil {
+                    try await deleteDocumentIfNeeded()
+                }
+
                 // If a document is selected, upload it and set cvUrl
                 if let documentURL = selectedDocument {
                     let downloadURLString = try await uploadDocument(documentURL)
@@ -309,6 +314,27 @@ struct EditBusinessCardView: View {
             if let document = document, document.exists {
                 self.isPro = document.data()?["isPro"] as? Bool ?? false
             }
+        }
+    }
+    
+    private func deleteDocumentIfNeeded() async throws {
+        guard let userId = Auth.auth().currentUser?.uid,
+              let originalDocUrl = businessCard.cvUrl,
+              let url = URL(string: originalDocUrl) else {
+            return
+        }
+
+        // Extract the file path from the URL
+        let components = url.pathComponents
+        if let docIndex = components.firstIndex(of: "docs"),
+           docIndex + 2 < components.count {
+            let filePath = "docs/\(components[docIndex + 1])/\(components[docIndex + 2])"
+            
+            let storage = Storage.storage()
+            let storageRef = storage.reference()
+            let documentRef = storageRef.child(filePath)
+            
+            try await documentRef.delete()
         }
     }
     

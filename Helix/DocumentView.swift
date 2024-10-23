@@ -24,6 +24,7 @@ struct DocumentView: View {
     var showHeader: Bool
     @Binding var isPro: Bool
     @State private var showDocumentPreview = false
+    @State private var shouldDeleteDocument = false
 
     enum Field: Hashable {
         case cvHeader, cvDescription, cvDisplayText
@@ -107,6 +108,11 @@ struct DocumentView: View {
                     
                     Button("Remove") {
                         // Functionality to be added later
+                        shouldDeleteDocument = true
+                        businessCard.cvUrl = nil
+                        businessCard.cvHeader = nil
+                        businessCard.cvDescription = nil
+                        businessCard.cvDisplayText = nil
                         print("Delete button tapped")
                     }
                     .foregroundColor(.red)
@@ -198,3 +204,4 @@ struct DocumentView: View {
 }
 
 // Add this struct at the end of the file
+
