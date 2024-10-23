@@ -45,6 +45,15 @@ struct ProfileImageView: View {
                         ProgressView()
                             .frame(width: 100, height: 100)
                     }
+                    
+                    // Add remove button
+                    Button(action: {
+                        businessCard.imageUrl = nil  // This only updates the UI locally
+                    }) {
+                        Text("Remove")
+                            .foregroundColor(.red)
+                            .font(.system(size: 14))
+                    }
                 } else {
                     Image(systemName: "person.circle.fill")
                         .resizable()

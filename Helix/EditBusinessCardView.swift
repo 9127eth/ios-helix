@@ -167,7 +167,12 @@ struct EditBusinessCardView: View {
 
         Task {
             do {
-                // If the document URL was cleared, delete the old document
+                // Handle image deletion if it was removed
+                if businessCard.imageUrl != nil && editedCard.imageUrl == nil {
+                    try await deleteImageIfNeeded()
+                }
+
+                // Handle document deletion if it was removed
                 if businessCard.cvUrl != nil && editedCard.cvUrl == nil {
                     try await deleteDocumentIfNeeded()
                     
@@ -351,6 +356,18 @@ struct EditBusinessCardView: View {
             
             try await documentRef.delete()
         }
+    }
+    
+    private func deleteImageIfNeeded() async throws {
+        guard let userId = Auth.auth().currentUser?.uid,
+              let originalImageUrl = businessCard.imageUrl,
+              let url = URL(string: originalImageUrl) else {
+            return
+        }
+
+        let storage = Storage.storage()
+        let storageRef = storage.reference(forURL: originalImageUrl)
+        try await storageRef.delete()
     }
     
     init(businessCard: Binding<BusinessCard>, username: String) {
