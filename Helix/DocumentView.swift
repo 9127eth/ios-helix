@@ -107,7 +107,6 @@ struct DocumentView: View {
                     Spacer() // Added spacer to push the Delete button to the right
                     
                     Button("Remove") {
-                        // Functionality to be added later
                         shouldDeleteDocument = true
                         businessCard.cvUrl = nil
                         businessCard.cvHeader = nil
