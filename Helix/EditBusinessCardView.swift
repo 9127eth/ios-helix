@@ -170,9 +170,24 @@ struct EditBusinessCardView: View {
                 // If the document URL was cleared, delete the old document
                 if businessCard.cvUrl != nil && editedCard.cvUrl == nil {
                     try await deleteDocumentIfNeeded()
+                    
+                    // Update Firestore document to remove CV-related fields
+                    guard let userId = Auth.auth().currentUser?.uid,
+                          let cardId = editedCard.id else { return }
+                    
+                    let db = Firestore.firestore()
+                    let cardRef = db.collection("users").document(userId)
+                        .collection("businessCards").document(cardId)
+                    
+                    try await cardRef.updateData([
+                        "cvUrl": FieldValue.delete(),
+                        "cvHeader": FieldValue.delete(),
+                        "cvDescription": FieldValue.delete(),
+                        "cvDisplayText": FieldValue.delete()
+                    ])
                 }
 
-                // If a document is selected, upload it and set cvUrl
+                // If a new document is selected, upload it
                 if let documentURL = selectedDocument {
                     let downloadURLString = try await uploadDocument(documentURL)
                     editedCard.cvUrl = downloadURLString
