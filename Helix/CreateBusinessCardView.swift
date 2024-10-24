@@ -76,31 +76,43 @@ struct CreateBusinessCardView: View {
                                 showFirstNameError: $showFirstNameError,
                                 showAboutMe: false
                             )
+                            SaveAndCloseButtonView(action: saveBusinessCard)
+                                .padding(.top, 16)
                             CancelButtonView(action: { showCancelConfirmation = true })
                         }
                     case 1:
                         VStack {
                             ProfessionalInformationView(businessCard: $businessCard)
+                            SaveAndCloseButtonView(action: saveBusinessCard)
+                                .padding(.top, 16)
                             CancelButtonView(action: { showCancelConfirmation = true })
                         }
                     case 2:
                         VStack {
                             DescriptionView(businessCard: $businessCard, showDescriptionError: $showDescriptionError)
+                            SaveAndCloseButtonView(action: saveBusinessCard)
+                                .padding(.top, 16)
                             CancelButtonView(action: { showCancelConfirmation = true })
                         }
                     case 3:
                         VStack {
                             ContactInformationView(businessCard: $businessCard)
+                            SaveAndCloseButtonView(action: saveBusinessCard)
+                                .padding(.top, 16)
                             CancelButtonView(action: { showCancelConfirmation = true })
                         }
                     case 4:
                         VStack {
                             SocialLinksView(businessCard: $businessCard, showHeader: true)
+                            SaveAndCloseButtonView(action: saveBusinessCard)
+                                .padding(.top, 16)
                             CancelButtonView(action: { showCancelConfirmation = true })
                         }
                     case 5:
                         VStack {
                             WebLinksView(businessCard: $businessCard)
+                            SaveAndCloseButtonView(action: saveBusinessCard)
+                                .padding(.top, 16)
                             CancelButtonView(action: { showCancelConfirmation = true })
                         }
                     case 6:
@@ -149,6 +161,9 @@ struct CreateBusinessCardView: View {
                             .padding(.horizontal)
                             .padding(.top, 16)
                             
+
+                            SaveAndCloseButtonView(action: saveBusinessCard)
+                                .padding(.top, 16)
                             CancelButtonView(action: { showCancelConfirmation = true })
                         }
                     case 7:
@@ -439,14 +454,24 @@ struct CancelButtonView: View {
     
     var body: some View {
         Button(action: action) {
-            Text("Cancel")
+            Text("Do this later")
                 .foregroundColor(.red)
                 .frame(maxWidth: .infinity)
-                .padding()
-                .background(Color.red.opacity(0.1))
-                .cornerRadius(10)
+                .padding(.vertical, 8)
         }
-        .padding(.top, 20)
+    }
+}
+
+struct SaveAndCloseButtonView: View {
+    var action: () -> Void
+    
+    var body: some View {
+        Button(action: action) {
+            Text("Save and close")
+                .foregroundColor(.blue)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 8)
+        }
     }
 }
 
