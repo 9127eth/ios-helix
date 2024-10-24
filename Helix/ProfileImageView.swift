@@ -24,6 +24,17 @@ struct ProfileImageView: View {
     
     var body: some View {
         VStack(alignment: .center, spacing: 20) {
+            VStack(spacing: 4) {
+                Text("More options to personalize your card")
+                    .font(.subheadline)
+                    .foregroundColor(.gray)
+                Text("(you can do this later)")
+                    .font(.caption)
+                    .foregroundColor(.gray)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.bottom, 8)
+            
             if showHeader {
                 Text("Add an Image")
                     .font(.headline)
