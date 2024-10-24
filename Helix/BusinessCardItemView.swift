@@ -123,14 +123,50 @@ struct BusinessCardItemView: View {
                 Spacer()
                 
                 Menu {
-                    Button("Preview") { showPreview = true }
-                    Button("Share") { showShare = true }
-                    Button("Edit") { showingEditView = true }
-                    Button("Add to NFC") {
-                        addToNFC()
+                    Button {
+                        showPreview = true
+                    } label: {
+                        Label {
+                            Text("Preview")
+                        } icon: {
+                            Image("previewCard")
+                        }
                     }
-                    Button("Delete", role: .destructive) {
+                    Button {
+                        showShare = true
+                    } label: {
+                        Label {
+                            Text("Share")
+                        } icon: {
+                            Image("share.3")
+                        }
+                    }
+                    Button {
+                        showingEditView = true
+                    } label: {
+                        Label {
+                            Text("Edit")
+                        } icon: {
+                            Image("pencilEdit")
+                        }
+                    }
+                    Button {
+                        addToNFC()
+                    } label: {
+                        Label {
+                            Text("Add to NFC")
+                        } icon: {
+                            Image("nfc")
+                        }
+                    }
+                    Button(role: .destructive) {
                         showingDeleteConfirmation = true
+                    } label: {
+                        Label {
+                            Text("Delete")
+                        } icon: {
+                            Image("trashDelete")
+                        }
                     }
                 } label: {
                     Image(systemName: "ellipsis")
