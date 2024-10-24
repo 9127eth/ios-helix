@@ -30,11 +30,13 @@ struct CreateBusinessCardView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            // Navigation bar
+            // Navigation bar modification
             HStack {
-                Button(action: { showCancelConfirmation = true }) {
-                    Text("Cancel")
-                        .foregroundColor(Color.blue)
+                if currentStep > 0 {
+                    Button(action: { currentStep -= 1 }) {
+                        Text("Previous")
+                            .foregroundColor(Color.blue)
+                    }
                 }
                 Spacer()
                 Text("Create Card")
@@ -68,67 +70,87 @@ struct CreateBusinessCardView: View {
                 VStack(spacing: 20) {
                     switch currentStep {
                     case 0:
-                        BasicInformationView(
-                            businessCard: $businessCard,
-                            showFirstNameError: $showFirstNameError,
-                            showAboutMe: false  // Hide About Me when creating a new card
-                        )
-                    case 1:
-                        ProfessionalInformationView(businessCard: $businessCard)
-                    case 2:
-                        DescriptionView(businessCard: $businessCard, showDescriptionError: $showDescriptionError)
-                    case 3:
-                        ContactInformationView(businessCard: $businessCard)
-                    case 4:
-                        SocialLinksView(businessCard: $businessCard, showHeader: true)
-                    case 5:
-                        WebLinksView(businessCard: $businessCard)
-                    case 6:
-                        ProfileImageView(businessCard: $businessCard)
-                        
-                        // About Me Section
-                        DisclosureGroup(isExpanded: $isAboutMeExpanded) {
-                            VStack(alignment: .leading, spacing: 8) {
-                                TextEditor(text: Binding(
-                                    get: { businessCard.aboutMe ?? "" },
-                                    set: { businessCard.aboutMe = $0.isEmpty ? nil : $0 }
-                                ))
-                                .frame(height: 100)
-                                .padding(8)
-                                .background(AppColors.inputFieldBackground)
-                                .cornerRadius(8)
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 8)
-                                        .stroke(Color.gray.opacity(0.2), lineWidth: 1)
-                                )
-                                .padding(.bottom, 16)
-                                
-
-                            }
-                            .padding(.top, 8)
-                        } label: {
-                            Text("About Me")
-                                .font(.headline)
-                                .foregroundColor(.primary)
-                        }
-                        .padding(.horizontal)
-                        .padding(.top, 16)
-                        
-                        // Add Document Section
-                        DisclosureGroup(isExpanded: $isAddDocumentExpanded) {
-                            DocumentView(
+                        VStack {
+                            BasicInformationView(
                                 businessCard: $businessCard,
-                                showHeader: false,
-                                isPro: $isPro,
-                                selectedDocument: $selectedDocument
+                                showFirstNameError: $showFirstNameError,
+                                showAboutMe: false
                             )
-                        } label: {
-                            Text("Add Document")
-                                .font(.headline)
-                                .foregroundColor(.primary)
+                            CancelButtonView(action: { showCancelConfirmation = true })
                         }
-                        .padding(.horizontal)
-                        .padding(.top, 16)
+                    case 1:
+                        VStack {
+                            ProfessionalInformationView(businessCard: $businessCard)
+                            CancelButtonView(action: { showCancelConfirmation = true })
+                        }
+                    case 2:
+                        VStack {
+                            DescriptionView(businessCard: $businessCard, showDescriptionError: $showDescriptionError)
+                            CancelButtonView(action: { showCancelConfirmation = true })
+                        }
+                    case 3:
+                        VStack {
+                            ContactInformationView(businessCard: $businessCard)
+                            CancelButtonView(action: { showCancelConfirmation = true })
+                        }
+                    case 4:
+                        VStack {
+                            SocialLinksView(businessCard: $businessCard, showHeader: true)
+                            CancelButtonView(action: { showCancelConfirmation = true })
+                        }
+                    case 5:
+                        VStack {
+                            WebLinksView(businessCard: $businessCard)
+                            CancelButtonView(action: { showCancelConfirmation = true })
+                        }
+                    case 6:
+                        VStack {
+                            ProfileImageView(businessCard: $businessCard)
+                            
+                            // About Me Section
+                            DisclosureGroup(isExpanded: $isAboutMeExpanded) {
+                                VStack(alignment: .leading, spacing: 8) {
+                                    TextEditor(text: Binding(
+                                        get: { businessCard.aboutMe ?? "" },
+                                        set: { businessCard.aboutMe = $0.isEmpty ? nil : $0 }
+                                    ))
+                                    .frame(height: 100)
+                                    .padding(8)
+                                    .background(AppColors.inputFieldBackground)
+                                    .cornerRadius(8)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 8)
+                                            .stroke(Color.gray.opacity(0.2), lineWidth: 1)
+                                    )
+                                    .padding(.bottom, 16)
+                                }
+                                .padding(.top, 8)
+                            } label: {
+                                Text("About Me")
+                                    .font(.headline)
+                                    .foregroundColor(.primary)
+                            }
+                            .padding(.horizontal)
+                            .padding(.top, 16)
+                            
+                            // Add Document Section
+                            DisclosureGroup(isExpanded: $isAddDocumentExpanded) {
+                                DocumentView(
+                                    businessCard: $businessCard,
+                                    showHeader: false,
+                                    isPro: $isPro,
+                                    selectedDocument: $selectedDocument
+                                )
+                            } label: {
+                                Text("Add Document")
+                                    .font(.headline)
+                                    .foregroundColor(.primary)
+                            }
+                            .padding(.horizontal)
+                            .padding(.top, 16)
+                            
+                            CancelButtonView(action: { showCancelConfirmation = true })
+                        }
                     case 7:
                         DocumentView(
                             businessCard: $businessCard,
@@ -411,3 +433,20 @@ struct CreateBusinessCardView: View {
         }
     }
 }
+
+struct CancelButtonView: View {
+    var action: () -> Void
+    
+    var body: some View {
+        Button(action: action) {
+            Text("Cancel")
+                .foregroundColor(.red)
+                .frame(maxWidth: .infinity)
+                .padding()
+                .background(Color.red.opacity(0.1))
+                .cornerRadius(10)
+        }
+        .padding(.top, 20)
+    }
+}
+
