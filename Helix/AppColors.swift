@@ -26,6 +26,9 @@ struct AppColors {
     
     static let mainSubBackground = Color("mainSubBackground")
     static let cardSubBackground = Color("cardSubBackground")
+    static let cardDepthDefault = Color("cardDepthDefault")
+    
+    static let tertColor = Color("tertColor")
     
     private init() {}
 }

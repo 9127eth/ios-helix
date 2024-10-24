@@ -109,7 +109,7 @@ struct BusinessCardItemView: View {
         ZStack {
             // Background shadow layer for depth effect
             RoundedRectangle(cornerRadius: 20)
-                .fill(AppColors.buttonBackground) // Using your primary color
+                .fill(AppColors.cardDepthDefault) // Update this line to use cardDepthDefault
                 .offset(x: 8, y: 8) // Offset to create depth effect
             
             // Main card content
