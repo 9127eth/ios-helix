@@ -21,7 +21,6 @@ struct EditBusinessCardView: View {
     @State private var saveErrorMessage = ""
     @State private var expandedSections: Set<String> = []
     @State private var showingDeleteConfirmation = false
-    @State private var showPreview = false
     @State private var showFirstNameError = false
     @State private var showDescriptionError = false
     @State private var isPro: Bool = false
@@ -76,12 +75,13 @@ struct EditBusinessCardView: View {
                     }
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    HStack {
-                        Button(action: { showPreview = true }) {
-                            Text("Preview")
-                        }
-                        Button("Save") {
-                            saveChanges()
+                    Button(action: {
+                        saveChanges()
+                    }) {
+                        HStack {
+                            Image("save")
+                                .renderingMode(.template)
+                            Text("Save")
                         }
                     }
                 }
@@ -109,9 +109,6 @@ struct EditBusinessCardView: View {
             }
         } message: {
             Text("Are you sure you want to delete this business card? This action is irreversible.")
-        }
-        .sheet(isPresented: $showPreview) {
-            PreviewView(card: editedCard, username: username, isPresented: $showPreview)
         }
         .onAppear(perform: fetchUserProStatus)
     }

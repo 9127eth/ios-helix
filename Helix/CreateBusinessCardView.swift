@@ -34,14 +34,16 @@ struct CreateBusinessCardView: View {
                         .foregroundColor(Color.blue)
                 }
                 Spacer()
-                Text("Create Business Card")
+                Text("Create Card")
                     .font(.headline)
                     .foregroundColor(AppColors.bodyPrimaryText)
                 Spacer()
-                Button(action: saveBusinessCard) {
-                    Text("Done")
-                        .foregroundColor(Color.blue)
-                        .font(.system(size: 16, weight: .medium))
+                if currentStep < steps.count - 1 {
+                    Button(action: handleNextButton) {
+                        Text("Next")
+                            .foregroundColor(Color.blue)
+                            .font(.system(size: 16, weight: .medium))
+                    }
                 }
             }
             .padding()
@@ -98,19 +100,14 @@ struct CreateBusinessCardView: View {
                         }
                     }
                     Spacer()
-                    if currentStep < steps.count - 1 {
-                        Button(action: handleNextButton) {
-                            HStack {
-                                Text("Next")
-                                Image(systemName: "chevron.right")
-                            }
+                    Button(action: saveBusinessCard) {
+                        Text("Done")
                             .foregroundColor(AppColors.buttonText)
-                        }
-                        .padding(.horizontal, 20)
-                        .padding(.vertical, 10)
-                        .background(AppColors.buttonBackground)
-                        .cornerRadius(20)
                     }
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 10)
+                    .background(AppColors.buttonBackground)
+                    .cornerRadius(20)
                 }
                 .padding(.horizontal, 20)
                 .padding(.bottom, 20) // Add more bottom padding
