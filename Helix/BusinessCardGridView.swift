@@ -64,13 +64,11 @@ struct BusinessCardGridView: View {
                         }
                         .padding(.horizontal)
                         .padding(.bottom, 4)
-                        .opacity(opacityForOffset(UIScreen.main.bounds.height * 0.2))
                     }
                     
                     LazyVStack(spacing: 16) {
                         ForEach(Array($businessCards.enumerated()), id: \.element.id) { index, $card in
                             BusinessCardItemView(card: $card, username: username)
-                                .opacity(opacityForOffset(UIScreen.main.bounds.height * 0.3 + CGFloat(index) * 150))
                         }
                         AddCardButton(action: {
                             if businessCards.count >= 10 {
@@ -81,7 +79,6 @@ struct BusinessCardGridView: View {
                                 showCreateCard = true
                             }
                         })
-                            .opacity(opacityForOffset(UIScreen.main.bounds.height * 0.3 + CGFloat(businessCards.count) * 150))
                     }
                 }
                 .padding()
