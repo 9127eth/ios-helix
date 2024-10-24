@@ -22,6 +22,8 @@ struct CreateBusinessCardView: View {
     @State private var alertMessage = ""
     @State private var selectedDocument: URL?
     @State private var isPro: Bool = false  // Add this line
+    @State private var isAboutMeExpanded = false
+    @State private var isAddDocumentExpanded = false
 
     let steps = ["Basic Information", "Professional Information", "Description", "Contact Information", "Social Links", "Web Links", "Profile Image"]
 
@@ -72,6 +74,50 @@ struct CreateBusinessCardView: View {
                         WebLinksView(businessCard: $businessCard)
                     case 6:
                         ProfileImageView(businessCard: $businessCard)
+                        
+                        // About Me Section
+                        DisclosureGroup(isExpanded: $isAboutMeExpanded) {
+                            VStack(alignment: .leading, spacing: 8) {
+                                TextEditor(text: Binding(
+                                    get: { businessCard.aboutMe ?? "" },
+                                    set: { businessCard.aboutMe = $0.isEmpty ? nil : $0 }
+                                ))
+                                .frame(height: 100)
+                                .padding(8)
+                                .background(Color(.secondarySystemBackground))
+                                .cornerRadius(8)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 8)
+                                        .stroke(Color.gray.opacity(0.2), lineWidth: 1)
+                                )
+                                .padding(.bottom, 16)
+                                
+
+                            }
+                            .padding(.top, 8)
+                        } label: {
+                            Text("About Me")
+                                .font(.headline)
+                                .foregroundColor(.primary)
+                        }
+                        .padding(.horizontal)
+                        .padding(.top, 16)
+                        
+                        // Add Document Section
+                        DisclosureGroup(isExpanded: $isAddDocumentExpanded) {
+                            DocumentView(
+                                businessCard: $businessCard,
+                                showHeader: false,
+                                isPro: $isPro,
+                                selectedDocument: $selectedDocument
+                            )
+                        } label: {
+                            Text("Add Document")
+                                .font(.headline)
+                                .foregroundColor(.primary)
+                        }
+                        .padding(.horizontal)
+                        .padding(.top, 16)
                     case 7:
                         DocumentView(
                             businessCard: $businessCard,
@@ -128,6 +174,9 @@ struct CreateBusinessCardView: View {
             Alert(title: Text("Error"), message: Text(alertMessage), dismissButton: .default(Text("OK")))
         }
         .dismissKeyboardOnTap()
+        .onAppear {
+            fetchUserProStatus()
+        }
     }
 
     private func saveBusinessCard() {
@@ -334,6 +383,19 @@ struct CreateBusinessCardView: View {
 
         if let error = coordinatorError {
             throw error
+        }
+    }
+
+    private func fetchUserProStatus() {
+        guard let userId = Auth.auth().currentUser?.uid else { return }
+        let db = Firestore.firestore()
+        let userRef = db.collection("users").document(userId)
+        userRef.getDocument { document, error in
+            if let document = document, document.exists {
+                self.isPro = document.data()?["isPro"] as? Bool ?? false
+            } else {
+                print("Error fetching user document: \(error?.localizedDescription ?? "Unknown error")")
+            }
         }
     }
 }
