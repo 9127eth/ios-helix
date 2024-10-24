@@ -61,7 +61,11 @@ struct CreateBusinessCardView: View {
                 VStack(spacing: 20) {
                     switch currentStep {
                     case 0:
-                        BasicInformationView(businessCard: $businessCard, showFirstNameError: $showFirstNameError)
+                        BasicInformationView(
+                            businessCard: $businessCard,
+                            showFirstNameError: $showFirstNameError,
+                            showAboutMe: false  // Hide About Me when creating a new card
+                        )
                     case 1:
                         ProfessionalInformationView(businessCard: $businessCard)
                     case 2:
@@ -84,7 +88,7 @@ struct CreateBusinessCardView: View {
                                 ))
                                 .frame(height: 100)
                                 .padding(8)
-                                .background(AppColors.textFieldBackground) // Changed this line
+                                .background(AppColors.inputFieldBackground)
                                 .cornerRadius(8)
                                 .overlay(
                                     RoundedRectangle(cornerRadius: 8)
