@@ -61,7 +61,6 @@ struct BusinessCardGridView: View {
                                 .background(AppColors.buttonBackground)
                                 .cornerRadius(16)
                             }
-                            Spacer()
                         }
                         .padding(.horizontal)
                         .padding(.bottom, 4)
@@ -130,7 +129,7 @@ struct BusinessCardGridView: View {
             
             HStack(spacing: 8) {
                 Image("calendar")
-                    .foregroundColor(.gray)
+                    .foregroundColor(AppColors.tertColor)
                 Text("It's \(formattedDate())")
                     .font(.subheadline)
                     .foregroundColor(.gray)
