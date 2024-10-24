@@ -27,11 +27,11 @@ struct BusinessCardGridView: View {
     var body: some View {
         GeometryReader { geometry in
             ScrollView {
-                VStack(spacing: 20) {
+                VStack(spacing: 10) {
                     headerView
                         .opacity(opacityForOffset(0))
                     
-                    Spacer(minLength: UIScreen.main.bounds.height * 0.035)
+                    Spacer(minLength: UIScreen.main.bounds.height * 0.02)
                     
                     // Only show the "Create New" button if there are cards
                     if !businessCards.isEmpty {
@@ -48,11 +48,13 @@ struct BusinessCardGridView: View {
                             }) {
                                 Label {
                                     Text("Create New")
+                                        .font(.footnote)
                                 } icon: {
                                     Image("addNewCard")
-                                        .renderingMode(.template)
+                                        .resizable()
+                                        .aspectRatio(contentMode: .fit)
+                                        .frame(width: 20, height: 20)
                                 }
-                                .font(.footnote)
                                 .foregroundColor(AppColors.buttonText)
                                 .padding(.vertical, 8)
                                 .padding(.horizontal, 12)
@@ -61,7 +63,7 @@ struct BusinessCardGridView: View {
                             }
                         }
                         .padding(.horizontal)
-                        .padding(.bottom, 8)
+                        .padding(.bottom, 4)
                         .opacity(opacityForOffset(UIScreen.main.bounds.height * 0.2))
                     }
                     
@@ -125,16 +127,20 @@ struct BusinessCardGridView: View {
             }
             
             Text("Business Cards")
-                .font(.largeTitle)
+                .font(.system(size: 60, weight: .bold)) // Increased font size
                 .fontWeight(.bold)
             
-            Text("All our dreams can come true, if we have the courage to pursue them. - Walt Disney")
-                .font(.subheadline)
-                .foregroundColor(.gray)
+            HStack(spacing: 8) {
+                Image("calendar")
+                    .foregroundColor(.gray)
+                Text("It's \(formattedDate())")
+                    .font(.subheadline)
+                    .foregroundColor(.gray)
+            }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.top, 40)
-        .padding(.bottom, 20)
+        .padding(.bottom, 10)
     }
     
     private func opacityForOffset(_ offset: CGFloat) -> Double {
@@ -161,5 +167,11 @@ struct BusinessCardGridView: View {
                 self.isPro = document.data()?["isPro"] as? Bool ?? false
             }
         }
+    }
+    
+    private func formattedDate() -> String {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "EEEE, MMMM d"
+        return dateFormatter.string(from: Date())
     }
 }
