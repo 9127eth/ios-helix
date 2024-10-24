@@ -61,6 +61,7 @@ struct BusinessCardGridView: View {
                                 .background(AppColors.buttonBackground)
                                 .cornerRadius(16)
                             }
+                            Spacer()
                         }
                         .padding(.horizontal)
                         .padding(.bottom, 4)
