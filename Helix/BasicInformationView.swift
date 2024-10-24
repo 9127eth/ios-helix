@@ -11,11 +11,16 @@ struct BasicInformationView: View {
     @FocusState private var focusedField: Field?
     var showHeader: Bool
     @Binding var showFirstNameError: Bool
+    var showAboutMe: Bool
     
-    init(businessCard: Binding<BusinessCard>, showHeader: Bool = true, showFirstNameError: Binding<Bool>) {
+    init(businessCard: Binding<BusinessCard>, 
+         showHeader: Bool = true, 
+         showFirstNameError: Binding<Bool>,
+         showAboutMe: Bool = true) {
         self._businessCard = businessCard
         self.showHeader = showHeader
         self._showFirstNameError = showFirstNameError
+        self.showAboutMe = showAboutMe
     }
     
     enum Field: Hashable {
@@ -59,25 +64,27 @@ struct BasicInformationView: View {
                     .focused($focusedField, equals: .pronouns)
             .focused($focusedField, equals: .pronouns)
                     }
-            VStack(alignment: .leading, spacing: 8) {
-                Text("About Me")
-                    .font(.subheadline)
-                    .foregroundColor(.gray)
-                    .padding(.bottom, 4)
-                
-                TextEditor(text: Binding(
-                    get: { businessCard.aboutMe ?? "" },
-                    set: { businessCard.aboutMe = $0.isEmpty ? nil : $0 }
-                ))
-                .frame(height: 100)
-                .padding(8)
-                .background(AppColors.textFieldBackground)
-                .cornerRadius(8)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 8)
-                        .stroke(Color.gray.opacity(0.2), lineWidth: 1)
-                )
-                .focused($focusedField, equals: .aboutMe)
+            if showAboutMe {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("About Me")
+                        .font(.subheadline)
+                        .foregroundColor(.gray)
+                        .padding(.bottom, 4)
+                    
+                    TextEditor(text: Binding(
+                        get: { businessCard.aboutMe ?? "" },
+                        set: { businessCard.aboutMe = $0.isEmpty ? nil : $0 }
+                    ))
+                    .frame(height: 100)
+                    .padding(8)
+                    .background(AppColors.inputFieldBackground)
+                    .cornerRadius(8)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 8)
+                            .stroke(Color.gray.opacity(0.2), lineWidth: 1)
+                    )
+                    .focused($focusedField, equals: .aboutMe)
+                }
             }
         }
         .padding(.top, showHeader ? 0 : 16)
@@ -92,4 +99,3 @@ struct BasicInformationView_Previews: PreviewProvider {
         )
     }
 }
-
