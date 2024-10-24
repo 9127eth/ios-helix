@@ -106,173 +106,181 @@ struct BusinessCardItemView: View {
     }
     
     private var cardContent: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack(alignment: .top) {
-                Text(card.description)
-                    .font(.system(size: 30))
-                    .fontWeight(.bold)
-                    .lineLimit(1)
-                    .truncationMode(.tail)
-                    .foregroundColor(AppColors.bodyPrimaryText)
-                    .onTapGesture {
-                        if card.isActive {
-                            showShare = true
-                        }
-                    }
-                
-                Spacer()
-                
-                Menu {
-                    Button {
-                        showPreview = true
-                    } label: {
-                        Label {
-                            Text("Preview")
-                        } icon: {
-                            Image("previewCard")
-                        }
-                    }
-                    Button {
-                        showShare = true
-                    } label: {
-                        Label {
-                            Text("Share")
-                        } icon: {
-                            Image("share.3")
-                        }
-                    }
-                    Button {
-                        showingEditView = true
-                    } label: {
-                        Label {
-                            Text("Edit")
-                        } icon: {
-                            Image("pencilEdit")
-                        }
-                    }
-                    Button {
-                        addToNFC()
-                    } label: {
-                        Label {
-                            Text("Add to NFC")
-                        } icon: {
-                            Image("nfc")
-                        }
-                    }
-                    Button(role: .destructive) {
-                        showingDeleteConfirmation = true
-                    } label: {
-                        Label {
-                            Text("Delete")
-                        } icon: {
-                            Image("trashDelete")
-                        }
-                    }
-                } label: {
-                    Image(systemName: "ellipsis")
+        ZStack {
+            // Background shadow layer for depth effect
+            RoundedRectangle(cornerRadius: 20)
+                .fill(AppColors.buttonBackground) // Using your primary color
+                .offset(x: 8, y: 8) // Offset to create depth effect
+            
+            // Main card content
+            VStack(alignment: .leading, spacing: 8) {
+                HStack(alignment: .top) {
+                    Text(card.description)
+                        .font(.system(size: 30))
+                        .fontWeight(.bold)
+                        .lineLimit(1)
+                        .truncationMode(.tail)
                         .foregroundColor(AppColors.bodyPrimaryText)
-                        .padding(.top, 4)
-                        .padding(.trailing, 4)
-                        .frame(width: 44, height: 30) // Increase the frame size
-                        .contentShape(Rectangle()) // Make the entire frame tappable
-                }
-                .buttonStyle(PlainButtonStyle()) // Remove default button styling
-            }
-            
-            // New section for name and credentials
-            Text(buildNameAndCredentials())
-                .font(.system(size: 14))
-                .foregroundColor(AppColors.bodyPrimaryText.opacity(0.8))
-                .lineLimit(1)
-            
-            if let jobTitle = card.jobTitle {
-                Text(jobTitle)
-                    .font(.subheadline)
-                    .foregroundColor(AppColors.bodyPrimaryText.opacity(0.8))
-                    .lineLimit(1)
-            }
-            
-            if let company = card.company {
-                Text(company)
-                    .font(.subheadline)
-                    .foregroundColor(AppColors.bodyPrimaryText.opacity(0.8))
-                    .lineLimit(1)
-            }
-            
-            Spacer()
-            
-            Divider()
-                .background(AppColors.divider)
-            
-            // Bottom section with buttons
-            HStack {
-                // Status indicators section with share tap area
-                HStack(spacing: 4) {
-                    VStack(alignment: .leading) {
-                        HStack(spacing: 4) {
-                            if card.isPrimary {
-                                Text("Main")
-                                    .font(.caption)
-                                    .foregroundColor(Color.gray)
-                            }
-                            if !card.isActive {
-                                Text("Inactive")
-                                    .font(.caption)
-                                    .padding(.horizontal, 8)
-                                    .padding(.vertical, 4)
-                                    .background(Color.gray.opacity(0.2))
-                                    .foregroundColor(Color.gray)
-                                    .cornerRadius(4)
-                            }
-                        }
-                    }
-                    // Make sure there's always a tappable area, even if no status indicators are shown
-                    Color.clear
-                        .frame(height: 20)
-                }
-                .frame(width: 120) // Set a fixed width for the tappable area
-                .contentShape(Rectangle())
-                .simultaneousGesture(
-                    TapGesture()
-                        .onEnded { _ in
+                        .onTapGesture {
                             if card.isActive {
                                 showShare = true
                             }
                         }
-                )
+                    
+                    Spacer()
+                    
+                    Menu {
+                        Button {
+                            showPreview = true
+                        } label: {
+                            Label {
+                                Text("Preview")
+                            } icon: {
+                                Image("previewCard")
+                            }
+                        }
+                        Button {
+                            showShare = true
+                        } label: {
+                            Label {
+                                Text("Share")
+                            } icon: {
+                                Image("share.3")
+                            }
+                        }
+                        Button {
+                            showingEditView = true
+                        } label: {
+                            Label {
+                                Text("Edit")
+                            } icon: {
+                                Image("pencilEdit")
+                            }
+                        }
+                        Button {
+                            addToNFC()
+                        } label: {
+                            Label {
+                                Text("Add to NFC")
+                            } icon: {
+                                Image("nfc")
+                            }
+                        }
+                        Button(role: .destructive) {
+                            showingDeleteConfirmation = true
+                        } label: {
+                            Label {
+                                Text("Delete")
+                            } icon: {
+                                Image("trashDelete")
+                            }
+                        }
+                    } label: {
+                        Image(systemName: "ellipsis")
+                            .foregroundColor(AppColors.bodyPrimaryText)
+                            .padding(.top, 4)
+                            .padding(.trailing, 4)
+                            .frame(width: 44, height: 30) // Increase the frame size
+                            .contentShape(Rectangle()) // Make the entire frame tappable
+                    }
+                    .buttonStyle(PlainButtonStyle()) // Remove default button styling
+                }
+                
+                // New section for name and credentials
+                Text(buildNameAndCredentials())
+                    .font(.system(size: 14))
+                    .foregroundColor(AppColors.bodyPrimaryText.opacity(0.8))
+                    .lineLimit(1)
+                
+                if let jobTitle = card.jobTitle {
+                    Text(jobTitle)
+                        .font(.subheadline)
+                        .foregroundColor(AppColors.bodyPrimaryText.opacity(0.8))
+                        .lineLimit(1)
+                }
+                
+                if let company = card.company {
+                    Text(company)
+                        .font(.subheadline)
+                        .foregroundColor(AppColors.bodyPrimaryText.opacity(0.8))
+                        .lineLimit(1)
+                }
                 
                 Spacer()
                 
-                // Action buttons
-                HStack(spacing: 16) {
-                    Button(action: { showingEditView = true }) {
-                        Image("pencilEdit")
-                            .frame(width: 30, height: 30)
+                Divider()
+                    .background(AppColors.divider)
+                
+                // Bottom section with buttons
+                HStack {
+                    // Status indicators section with share tap area
+                    HStack(spacing: 4) {
+                        VStack(alignment: .leading) {
+                            HStack(spacing: 4) {
+                                if card.isPrimary {
+                                    Text("Main")
+                                        .font(.caption)
+                                        .foregroundColor(Color.gray)
+                                }
+                                if !card.isActive {
+                                    Text("Inactive")
+                                        .font(.caption)
+                                        .padding(.horizontal, 8)
+                                        .padding(.vertical, 4)
+                                        .background(Color.gray.opacity(0.2))
+                                        .foregroundColor(Color.gray)
+                                        .cornerRadius(4)
+                                }
+                            }
+                        }
+                        // Make sure there's always a tappable area, even if no status indicators are shown
+                        Color.clear
+                            .frame(height: 20)
                     }
-                    Button(action: { showPreview = true }) {
-                        Image("previewCard")
-                            .frame(width: 30, height: 30)
+                    .frame(width: 120) // Set a fixed width for the tappable area
+                    .contentShape(Rectangle())
+                    .simultaneousGesture(
+                        TapGesture()
+                            .onEnded { _ in
+                                if card.isActive {
+                                    showShare = true
+                                }
+                            }
+                    )
+                    
+                    Spacer()
+                    
+                    // Action buttons
+                    HStack(spacing: 16) {
+                        Button(action: { showingEditView = true }) {
+                            Image("pencilEdit")
+                                .frame(width: 30, height: 30)
+                        }
+                        Button(action: { showPreview = true }) {
+                            Image("previewCard")
+                                .frame(width: 30, height: 30)
+                        }
+                        Button(action: { showShare = true }) {
+                            Image("share.3")
+                                .frame(width: 30, height: 30)
+                        }
+                        .disabled(!card.isActive)
                     }
-                    Button(action: { showShare = true }) {
-                        Image("share.3")
-                            .frame(width: 30, height: 30)
-                    }
-                    .disabled(!card.isActive)
+                    .foregroundColor(colorScheme == .dark ? Color(hex: 0xdddee3) : .black)
+                    .font(.system(size: 18))
                 }
-                .foregroundColor(colorScheme == .dark ? Color(hex: 0xdddee3) : .black)
-                .font(.system(size: 18))
             }
+            .padding()
+            .frame(height: 200)
+            .background(AppColors.cardGridBackground)
+            .cornerRadius(20)
+            .overlay(
+                RoundedRectangle(cornerRadius: 20)
+                    .stroke(Color(hex: 0xe5e6ed), lineWidth: 1)
+                    .opacity(colorScheme == .dark ? 1 : 0)
+            )
         }
-        .padding()
         .frame(height: 200)
-        .background(AppColors.cardGridBackground)
-        .cornerRadius(20)
-        .overlay(
-            RoundedRectangle(cornerRadius: 20)
-                .stroke(Color(hex: 0xe5e6ed), lineWidth: 1)
-                .opacity(colorScheme == .dark ? 1 : 0)
-        )
-        .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
     }
     
     private func deleteCard() {
