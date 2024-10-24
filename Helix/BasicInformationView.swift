@@ -19,7 +19,7 @@ struct BasicInformationView: View {
     }
     
     enum Field: Hashable {
-        case firstName, middleName, lastName, prefix, pronouns
+        case firstName, middleName, lastName, prefix, pronouns, aboutMe
     }
     
     var body: some View {
@@ -57,6 +57,27 @@ struct BasicInformationView: View {
                     set: { businessCard.pronouns = $0.isEmpty ? nil : $0 }
                 ), onCommit: { focusedField = nil })
                     .focused($focusedField, equals: .pronouns)
+            .focused($focusedField, equals: .pronouns)
+                    }
+            VStack(alignment: .leading, spacing: 8) {
+                Text("About Me")
+                    .font(.subheadline)
+                    .foregroundColor(.gray)
+                    .padding(.bottom, 4)
+                
+                TextEditor(text: Binding(
+                    get: { businessCard.aboutMe ?? "" },
+                    set: { businessCard.aboutMe = $0.isEmpty ? nil : $0 }
+                ))
+                .frame(height: 100)
+                .padding(8)
+                .background(AppColors.textFieldBackground)
+                .cornerRadius(8)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 8)
+                        .stroke(Color.gray.opacity(0.2), lineWidth: 1)
+                )
+                .focused($focusedField, equals: .aboutMe)
             }
         }
         .padding(.top, showHeader ? 0 : 16)
@@ -71,3 +92,4 @@ struct BasicInformationView_Previews: PreviewProvider {
         )
     }
 }
+

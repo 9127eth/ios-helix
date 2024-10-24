@@ -84,7 +84,7 @@ struct CreateBusinessCardView: View {
                                 ))
                                 .frame(height: 100)
                                 .padding(8)
-                                .background(Color(.secondarySystemBackground))
+                                .background(AppColors.textFieldBackground) // Changed this line
                                 .cornerRadius(8)
                                 .overlay(
                                     RoundedRectangle(cornerRadius: 8)
