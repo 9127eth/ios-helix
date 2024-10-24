@@ -24,6 +24,7 @@ struct CreateBusinessCardView: View {
     @State private var isPro: Bool = false  // Add this line
     @State private var isAboutMeExpanded = false
     @State private var isAddDocumentExpanded = false
+    @State private var keyboardHeight: CGFloat = 0
 
     let steps = ["Basic Information", "Professional Information", "Description", "Contact Information", "Social Links", "Web Links", "Profile Image"]
 
@@ -43,6 +44,12 @@ struct CreateBusinessCardView: View {
                 if currentStep < steps.count - 1 {
                     Button(action: handleNextButton) {
                         Text("Next")
+                            .foregroundColor(Color.blue)
+                            .font(.system(size: 16, weight: .medium))
+                    }
+                } else {
+                    Button(action: saveBusinessCard) {
+                        Text("Finish")
                             .foregroundColor(Color.blue)
                             .font(.system(size: 16, weight: .medium))
                     }
@@ -134,38 +141,16 @@ struct CreateBusinessCardView: View {
                     }
                 }
                 .padding()
+                .padding(.bottom, keyboardHeight) // Only add padding when keyboard is shown
             }
-            
-            // Navigation buttons
-            VStack {
-                Spacer() // This pushes the content to the bottom
-                HStack {
-                    if currentStep > 0 {
-                        Button(action: { currentStep -= 1 }) {
-                            HStack {
-                                Image(systemName: "chevron.left")
-                                Text("Previous")
-                            }
-                            .foregroundColor(AppColors.bodyPrimaryText)
-                        }
-                    }
-                    Spacer()
-                    Button(action: saveBusinessCard) {
-                        Text("Done")
-                            .foregroundColor(AppColors.buttonText)
-                    }
-                    .padding(.horizontal, 20)
-                    .padding(.vertical, 10)
-                    .background(AppColors.buttonBackground)
-                    .cornerRadius(20)
-                }
-                .padding(.horizontal, 20)
-                .padding(.bottom, 20) // Add more bottom padding
-            }
-            .padding(.bottom, 30) // Add extra bottom padding to lift from screen edge
         }
         .background(AppColors.background)
-        .edgesIgnoringSafeArea(.bottom)
+        .onAppear {
+            setupKeyboardObservers()
+        }
+        .onDisappear {
+            removeKeyboardObservers()
+        }
         .confirmationDialog("Are you sure you want to cancel?", isPresented: $showCancelConfirmation, titleVisibility: .visible) {
             Button("Cancel without saving", role: .destructive) {
                 showCreateCard = false
@@ -181,6 +166,29 @@ struct CreateBusinessCardView: View {
         .onAppear {
             fetchUserProStatus()
         }
+    }
+
+    private func setupKeyboardObservers() {
+        NotificationCenter.default.addObserver(
+            forName: UIResponder.keyboardWillShowNotification,
+            object: nil,
+            queue: .main
+        ) { notification in
+            guard let keyboardFrame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect else { return }
+            self.keyboardHeight = keyboardFrame.height
+        }
+        
+        NotificationCenter.default.addObserver(
+            forName: UIResponder.keyboardWillHideNotification,
+            object: nil,
+            queue: .main
+        ) { _ in
+            self.keyboardHeight = 0
+        }
+    }
+    
+    private func removeKeyboardObservers() {
+        NotificationCenter.default.removeObserver(self)
     }
 
     private func saveBusinessCard() {
