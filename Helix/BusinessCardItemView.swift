@@ -109,10 +109,10 @@ struct BusinessCardItemView: View {
         VStack(alignment: .leading, spacing: 8) {
             HStack(alignment: .top) {
                 Text(card.description)
-                    .font(.system(size: 30))  // Fixed font size
+                    .font(.system(size: 30))
                     .fontWeight(.bold)
-                    .lineLimit(1)  // Limit to one line
-                    .truncationMode(.tail)  // Add ellipsis at the end
+                    .lineLimit(1)
+                    .truncationMode(.tail)
                     .foregroundColor(AppColors.bodyPrimaryText)
                     .onTapGesture {
                         if card.isActive {
@@ -179,11 +179,27 @@ struct BusinessCardItemView: View {
                 .buttonStyle(PlainButtonStyle()) // Remove default button styling
             }
             
+            // New section for name and credentials
+            Text(buildNameAndCredentials())
+                .font(.system(size: 14))
+                .foregroundColor(AppColors.bodyPrimaryText.opacity(0.8))
+                .lineLimit(1)
+                .onTapGesture {
+                    if card.isActive {
+                        showShare = true
+                    }
+                }
+            
             if let jobTitle = card.jobTitle {
                 Text(jobTitle)
                     .font(.subheadline)
                     .foregroundColor(AppColors.bodyPrimaryText.opacity(0.8))
                     .lineLimit(1)
+                    .onTapGesture {
+                        if card.isActive {
+                            showShare = true
+                        }
+                    }
             }
             
             if let company = card.company {
@@ -191,6 +207,11 @@ struct BusinessCardItemView: View {
                     .font(.subheadline)
                     .foregroundColor(AppColors.bodyPrimaryText.opacity(0.8))
                     .lineLimit(1)
+                    .onTapGesture {
+                        if card.isActive {
+                            showShare = true
+                        }
+                    }
             }
             
             Spacer()
@@ -198,7 +219,9 @@ struct BusinessCardItemView: View {
             Divider()
                 .background(AppColors.divider)
             
+            // Bottom section with buttons remains unchanged
             HStack {
+                // Status indicators section
                 HStack(spacing: 4) {
                     if card.isPrimary {
                         Text("Main")
@@ -218,6 +241,7 @@ struct BusinessCardItemView: View {
                 
                 Spacer()
                 
+                // Action buttons remain unchanged
                 HStack(spacing: 16) {
                     Button(action: { showingEditView = true }) {
                         Image("pencilEdit")
@@ -240,13 +264,20 @@ struct BusinessCardItemView: View {
         .padding()
         .frame(height: 200)
         .background(AppColors.cardGridBackground)
-        .cornerRadius(20) // Increased from 8 to 20
+        .cornerRadius(20)
         .overlay(
-            RoundedRectangle(cornerRadius: 20) // Increased from 8 to 20
+            RoundedRectangle(cornerRadius: 20)
                 .stroke(Color(hex: 0xe5e6ed), lineWidth: 1)
                 .opacity(colorScheme == .dark ? 1 : 0)
         )
         .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
+        // Add a tap gesture to the entire card background
+        .contentShape(Rectangle()) // Makes the entire card tappable
+        .onTapGesture {
+            if card.isActive {
+                showShare = true
+            }
+        }
     }
     
     private func deleteCard() {
@@ -274,6 +305,24 @@ struct BusinessCardItemView: View {
         DispatchQueue.main.async {
             self.nfcWriter.writeToNFC(url: url)
         }
+    }
+    
+    private func buildNameAndCredentials() -> AttributedString {
+        var result = AttributedString(card.firstName)
+        result.font = .system(size: 14).bold()
+
+        if let lastName = card.lastName {
+            result += AttributedString(" \(lastName)")
+            result[result.range(of: lastName)!].font = .system(size: 14).bold()
+        }
+
+        if let credentials = card.credentials, !credentials.isEmpty {
+            result += AttributedString(", \(credentials)")
+            let credentialsRange = result.range(of: ", \(credentials)")!
+            result[credentialsRange].font = .system(size: 14)
+        }
+
+        return result
     }
 }
 
