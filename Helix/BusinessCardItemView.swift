@@ -184,22 +184,12 @@ struct BusinessCardItemView: View {
                 .font(.system(size: 14))
                 .foregroundColor(AppColors.bodyPrimaryText.opacity(0.8))
                 .lineLimit(1)
-                .onTapGesture {
-                    if card.isActive {
-                        showShare = true
-                    }
-                }
             
             if let jobTitle = card.jobTitle {
                 Text(jobTitle)
                     .font(.subheadline)
                     .foregroundColor(AppColors.bodyPrimaryText.opacity(0.8))
                     .lineLimit(1)
-                    .onTapGesture {
-                        if card.isActive {
-                            showShare = true
-                        }
-                    }
             }
             
             if let company = card.company {
@@ -207,11 +197,6 @@ struct BusinessCardItemView: View {
                     .font(.subheadline)
                     .foregroundColor(AppColors.bodyPrimaryText.opacity(0.8))
                     .lineLimit(1)
-                    .onTapGesture {
-                        if card.isActive {
-                            showShare = true
-                        }
-                    }
             }
             
             Spacer()
@@ -219,29 +204,46 @@ struct BusinessCardItemView: View {
             Divider()
                 .background(AppColors.divider)
             
-            // Bottom section with buttons remains unchanged
+            // Bottom section with buttons
             HStack {
-                // Status indicators section
+                // Status indicators section with share tap area
                 HStack(spacing: 4) {
-                    if card.isPrimary {
-                        Text("Main")
-                            .font(.caption)
-                            .foregroundColor(Color.gray)
+                    VStack(alignment: .leading) {
+                        HStack(spacing: 4) {
+                            if card.isPrimary {
+                                Text("Main")
+                                    .font(.caption)
+                                    .foregroundColor(Color.gray)
+                            }
+                            if !card.isActive {
+                                Text("Inactive")
+                                    .font(.caption)
+                                    .padding(.horizontal, 8)
+                                    .padding(.vertical, 4)
+                                    .background(Color.gray.opacity(0.2))
+                                    .foregroundColor(Color.gray)
+                                    .cornerRadius(4)
+                            }
+                        }
                     }
-                    if !card.isActive {
-                        Text("Inactive")
-                            .font(.caption)
-                            .padding(.horizontal, 8)
-                            .padding(.vertical, 4)
-                            .background(Color.gray.opacity(0.2))
-                            .foregroundColor(Color.gray)
-                            .cornerRadius(4)
-                    }
+                    // Make sure there's always a tappable area, even if no status indicators are shown
+                    Color.clear
+                        .frame(height: 20)
                 }
+                .frame(width: 120) // Set a fixed width for the tappable area
+                .contentShape(Rectangle())
+                .simultaneousGesture(
+                    TapGesture()
+                        .onEnded { _ in
+                            if card.isActive {
+                                showShare = true
+                            }
+                        }
+                )
                 
                 Spacer()
                 
-                // Action buttons remain unchanged
+                // Action buttons
                 HStack(spacing: 16) {
                     Button(action: { showingEditView = true }) {
                         Image("pencilEdit")
@@ -271,13 +273,6 @@ struct BusinessCardItemView: View {
                 .opacity(colorScheme == .dark ? 1 : 0)
         )
         .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
-        // Add a tap gesture to the entire card background
-        .contentShape(Rectangle()) // Makes the entire card tappable
-        .onTapGesture {
-            if card.isActive {
-                showShare = true
-            }
-        }
     }
     
     private func deleteCard() {
