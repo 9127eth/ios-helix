@@ -59,11 +59,17 @@ struct SettingsView: View {
                         .frame(maxWidth: .infinity, alignment: .leading)
 
                     VStack(spacing: 0) {
-                        Toggle("Dark Mode", isOn: $isDarkMode)
-                            .toggleStyle(SmallToggleStyle())
-                            .padding(.vertical, 10)
-                            .padding(.horizontal, 16)
-                            .background(AppColors.inputFieldBackground)
+                        Toggle(isOn: $isDarkMode) {
+                            HStack {
+                                Image("Sun")
+                                    .foregroundColor(AppColors.foreground)
+                                Text("Dark Mode")
+                            }
+                        }
+                        .toggleStyle(SmallToggleStyle())
+                        .padding(.vertical, 10)
+                        .padding(.horizontal, 16)
+                        .background(AppColors.inputFieldBackground)
                     }
                     .background(Color(UIColor.secondarySystemGroupedBackground))
                     .cornerRadius(8)
@@ -82,6 +88,8 @@ struct SettingsView: View {
                             // Action to open subscription view (to be implemented)
                         }) {
                             HStack {
+                                Image("subscription")
+                                    .foregroundColor(AppColors.foreground)
                                 Text("Current Subscription")
                                 Spacer()
                                 Text(isPro ? "Helix Pro \(subscriptionPlanType)" : "Free Plan")
