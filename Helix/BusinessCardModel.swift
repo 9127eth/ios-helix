@@ -53,7 +53,8 @@ struct BusinessCard: Identifiable, Codable {
     var threadsUrl: String?
     
     var webLinks: [WebLink]?
-
+    var cardDepthColor: String?  // Store hex color string
+    
     init(cardSlug: String, firstName: String) {
         self.cardSlug = cardSlug
         self.firstName = firstName
