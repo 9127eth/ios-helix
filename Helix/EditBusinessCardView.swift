@@ -128,7 +128,7 @@ struct EditBusinessCardView: View {
         case "Web Links":
             return AnyView(WebLinksView(businessCard: card, showHeader: false))
         case "Profile Image":
-            return AnyView(ProfileImageView(businessCard: card, showHeader: false))
+            return AnyView(ProfileImageView(businessCard: card, showHeader: false, isCreating: false))
         case "Custom Header/Message":
             return AnyView(CustomSectionView(businessCard: card, showHeader: false))
         case "Document":

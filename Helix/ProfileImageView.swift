@@ -16,24 +16,28 @@ struct ProfileImageView: View {
     @State private var isUploading = false
     @State private var uploadError: String?
     var showHeader: Bool
+    var isCreating: Bool
     
-    init(businessCard: Binding<BusinessCard>, showHeader: Bool = true) {
+    init(businessCard: Binding<BusinessCard>, showHeader: Bool = true, isCreating: Bool = false) {
         self._businessCard = businessCard
         self.showHeader = showHeader
+        self.isCreating = isCreating
     }
     
     var body: some View {
         VStack(alignment: .center, spacing: 20) {
-            VStack(spacing: 4) {
-                Text("More options to personalize your card")
-                    .font(.subheadline)
-                    .foregroundColor(.gray)
-                Text("(you can do this later)")
-                    .font(.caption)
-                    .foregroundColor(.gray)
+            if isCreating {
+                VStack(spacing: 4) {
+                    Text("More options to personalize your card")
+                        .font(.subheadline)
+                        .foregroundColor(.gray)
+                    Text("(you can do this later)")
+                        .font(.caption)
+                        .foregroundColor(.gray)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.bottom, 8)
             }
-            .frame(maxWidth: .infinity)
-            .padding(.bottom, 8)
             
             if showHeader {
                 Text("Add an Image")
