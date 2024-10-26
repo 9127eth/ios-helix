@@ -117,7 +117,7 @@ struct CreateBusinessCardView: View {
                         }
                     case 6:
                         VStack {
-                            ProfileImageView(businessCard: $businessCard)
+                            ProfileImageView(businessCard: $businessCard, isCreating: true)
                             
                             // About Me Section
                             DisclosureGroup(isExpanded: $isAboutMeExpanded) {
