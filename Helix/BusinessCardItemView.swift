@@ -88,19 +88,12 @@ struct BusinessCardItemView: View {
     }
     
     private var actionButtons: some View {
-        VStack(spacing: 20) {
-            HStack(spacing: 20) {
-                actionButton(title: "Share", action: { showShare = true })
-                actionButton(title: "Preview", action: { showPreview = true })
-            }
-            HStack(spacing: 20) {
-                actionButton(title: "Edit", action: { showingEditView = true })
-                actionButton(title: "Delete", action: { showingDeleteConfirmation = true })
-            }
-            HStack(spacing: 20) {
-                actionButton(title: "Change Color", action: { showColorPicker = true })
-            }
+        VStack(spacing: 12) {
+            actionButton(title: "Edit", action: { showingEditView = true })
+            actionButton(title: "Preview", action: { showPreview = true })
+            actionButton(title: "Share", action: { showShare = true })
         }
+        .padding(.vertical, 20)
     }
     
     private func actionButton(title: String, action: @escaping () -> Void) -> some View {
@@ -108,10 +101,12 @@ struct BusinessCardItemView: View {
             Text(title)
                 .font(.system(size: 15, weight: .medium))
                 .foregroundColor(AppColors.buttonText)
-                .frame(width: 90, height: 40)
-                .background(AppColors.buttonBackground)
+                .frame(maxWidth: .infinity)
+                .frame(height: 40)
+                .background(AppColors.secondary)
                 .cornerRadius(12)
         }
+        .frame(width: 160)
     }
     
     private var cardContent: some View {
