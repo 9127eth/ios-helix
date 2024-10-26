@@ -56,8 +56,8 @@ struct ShareView: View {
                                 .interpolation(.none)
                                 .resizable()
                                 .scaledToFit()
-                                .frame(width: 160, height: 160) // Slightly reduced size to accommodate padding
-                                .padding(10) // Add padding around the QR code
+                                .frame(width: 160, height: 160)
+                                .padding(10)
                                 .background(Color.white)
                                 .cornerRadius(10)
                         }
@@ -65,7 +65,7 @@ struct ShareView: View {
                         Text(card.getCardURL(username: username))
                             .font(.caption)
                         
-                        // Buttons with adjusted width, standardized height, and increased spacing
+                        // Buttons with adjusted width
                         VStack(spacing: 15) {
                             Button(action: {
                                 UIPasteboard.general.string = card.getCardURL(username: username)
@@ -88,7 +88,7 @@ struct ShareView: View {
                                 .foregroundColor(AppColors.buttonText)
                                 .cornerRadius(20)
                             }
-                            .frame(width: 320)
+                            .frame(width: 200)
                             
                             Button(action: {
                                 let url = card.getCardURL(username: username)
@@ -97,7 +97,6 @@ struct ShareView: View {
                                 if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
                                    let window = windowScene.windows.first,
                                    let rootViewController = window.rootViewController {
-                                    // Present the activity view controller directly
                                     rootViewController.presentedViewController?.present(activityViewController, animated: true, completion: nil)
                                 }
                             }) {
@@ -107,19 +106,19 @@ struct ShareView: View {
                                 }
                                 .frame(maxWidth: .infinity)
                                 .frame(height: 44)
-                                .background(Color.black)
-                                .foregroundColor(.white)
-                                .cornerRadius(20)
+                                .background(AppColors.cardDepthDefault)  // Changed from Color.black
+                                .foregroundColor(.black)
+                                .cornerRadius(22)  // Changed from 20 to 22 for more rounded corners
                             }
-                            .frame(width: 320)
+                            .frame(width: 200)
                         }
                         
-                        // Section divider with a thin gray line and padding
                         Divider()
                             .background(Color.gray.opacity(0.5))
                             .padding(.vertical, 10)
                         
-                        VStack(alignment: .center, spacing: 15) {
+                        // QR Code sharing section with horizontal layout
+                        HStack(spacing: 20) {
                             Text("Share QR Code")
                                 .font(.headline)
                             
@@ -129,26 +128,26 @@ struct ShareView: View {
                                 }
                             }
                             .pickerStyle(SegmentedPickerStyle())
-                            .padding(.horizontal)
-                            
-                            if selectedFormat == .png {
-                                Toggle("Transparent background", isOn: $noBackground)
-                                    .padding(.horizontal)
-                            }
-                            
-                            Button(action: shareQRCode) {
-                                HStack {
-                                    Image("share.3")
-                                    Text("Share QR Code")
-                                }
-                                .frame(maxWidth: .infinity)
-                                .frame(height: 44)
-                                .background(AppColors.buttonBackground)
-                                .foregroundColor(AppColors.buttonText)
-                                .cornerRadius(20)
-                            }
-                            .frame(width: 320)
+                            .frame(width: 120)
                         }
+                        
+                        if selectedFormat == .png {
+                            Toggle("Transparent background", isOn: $noBackground)
+                                .padding(.horizontal)
+                        }
+                        
+                        Button(action: shareQRCode) {
+                            HStack {
+                                Image("share.3")
+                                Text("Share QR Code")
+                            }
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 44)
+                            .background(AppColors.secondary)
+                            .foregroundColor(AppColors.buttonText)
+                            .cornerRadius(20)
+                        }
+                        .frame(width: 200)
                     }
                     .frame(maxWidth: .infinity)
                 }

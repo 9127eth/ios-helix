@@ -30,6 +30,8 @@ struct AppColors {
     
     static let tertColor = Color("tertColor")
     
+    static let secondary = Color("secondaryColor")
+    
     private init() {}
 }
 
