@@ -91,10 +91,12 @@ struct SettingsView: View {
                                 Image("subscription")
                                     .foregroundColor(AppColors.foreground)
                                 Text("Current Subscription")
+                                    .foregroundColor(AppColors.foreground)  // Added this
                                 Spacer()
                                 Text(isPro ? "Helix Pro \(subscriptionPlanType)" : "Free Plan")
                                     .foregroundColor(AppColors.foreground)
                             }
+                            .foregroundColor(AppColors.foreground)  // Added this to the HStack
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .padding(.vertical, 10)
                             .padding(.horizontal, 16)
@@ -133,9 +135,9 @@ struct SettingsView: View {
                             HStack {
                                 Image("signOut")
 
-                                    .foregroundColor(.red)
+                                    .foregroundColor(AppColors.buttonText)
                                 Text("Sign Out")
-                                    .foregroundColor(.red)
+                                    .foregroundColor(AppColors.buttonText)
                                 Spacer()
                             }
                             .frame(maxWidth: .infinity, alignment: .leading)
