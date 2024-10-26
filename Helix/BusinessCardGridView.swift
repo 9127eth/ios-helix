@@ -116,15 +116,25 @@ struct BusinessCardGridView: View {
                 Button(action: {
                     showSubscriptionView = true
                 }) {
-                    Text("Get Helix Pro")
-                        .font(.subheadline)
-                        .foregroundColor(AppColors.helixPro)
+                    HStack(spacing: 6) {
+                        Image(systemName: "bolt.fill")
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .frame(width: 12, height: 12)
+                        Text("Get Helix Pro")
+                            .font(.subheadline)
+                    }
+                    .foregroundColor(AppColors.helixPro)
+                    .padding(.vertical, 6)
+                    .padding(.horizontal, 12)
+                    .background(Color.gray.opacity(0.15))  // Changed to gray with opacity
+                    .cornerRadius(16)
                 }
                 .padding(.bottom, 5)
             }
             
             Text("Business Cards")
-                .font(.system(size: 60, weight: .bold)) // Increased font size
+                .font(.system(size: 60, weight: .bold))
                 .fontWeight(.bold)
             
             HStack(spacing: 8) {
