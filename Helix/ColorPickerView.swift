@@ -25,7 +25,7 @@ struct ColorPickerView: View {
             VStack(spacing: 20) {
                 // Predefined colors
                 VStack(alignment: .leading) {
-                    Text("Preset Colors")
+                    Text("Presets")
                         .font(.headline)
                     
                     HStack(spacing: 15) {
@@ -50,11 +50,11 @@ struct ColorPickerView: View {
                 Spacer()
             }
             .padding()
-            .navigationTitle("Card Depth Color")
+            .navigationTitle("Card Color")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Done") {
+                    Button("Save") {
                         saveColor()
                         dismiss()
                     }

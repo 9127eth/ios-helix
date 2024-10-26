@@ -75,6 +75,7 @@ struct BusinessCardItemView: View {
         }
         .sheet(isPresented: $showColorPicker) {
             ColorPickerView(selectedColor: $selectedColor, card: $card)
+                .presentationDetents([.fraction(0.40)])
         }
         .alert("Confirm Deletion", isPresented: $showingDeleteConfirmation) {
             Button("Cancel", role: .cancel) {}
