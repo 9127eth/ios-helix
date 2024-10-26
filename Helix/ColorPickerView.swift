@@ -22,35 +22,22 @@ struct ColorPickerView: View {
     
     var body: some View {
         NavigationView {
-            VStack(spacing: 20) {
+            HStack(spacing: 20) {
                 // Predefined colors
-                VStack(alignment: .leading) {
-                    Text("Presets")
-                        .font(.headline)
-                    
-                    HStack(spacing: 15) {
-                        ForEach(predefinedColors, id: \.name) { colorOption in
-                            ColorButton(color: colorOption.color,
-                                      isSelected: selectedColor == colorOption.color) {
-                                selectedColor = colorOption.color
-                            }
-                        }
+                ForEach(predefinedColors, id: \.name) { colorOption in
+                    ColorButton(color: colorOption.color,
+                              isSelected: selectedColor == colorOption.color) {
+                        selectedColor = colorOption.color
                     }
                 }
                 
-                Divider()
-                
-                // Custom color picker
-                VStack(alignment: .leading) {
-                    Text("Custom Color")
-                        .font(.headline)
-                    ColorPicker("Select a custom color", selection: $selectedColor)
-                }
-                
-                Spacer()
+                // Custom color picker button
+                ColorPicker("", selection: $selectedColor)
+                    .labelsHidden()
+                    .frame(width: 50, height: 50)
             }
             .padding()
-            .navigationTitle("Card Color")
+            .navigationTitle("Select Color")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
@@ -91,7 +78,7 @@ struct ColorButton: View {
         Button(action: action) {
             Circle()
                 .fill(color)
-                .frame(width: 40, height: 40)
+                .frame(width: 50, height: 50)
                 .overlay(
                     Circle()
                         .stroke(Color.primary, lineWidth: isSelected ? 2 : 0)
