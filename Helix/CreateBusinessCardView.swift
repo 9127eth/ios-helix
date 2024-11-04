@@ -70,15 +70,18 @@ struct CreateBusinessCardView: View {
                 VStack(spacing: 20) {
                     switch currentStep {
                     case 0:
-                        VStack {
+                        VStack(spacing: 24) {
                             BasicInformationView(
                                 businessCard: $businessCard,
                                 showFirstNameError: $showFirstNameError,
                                 showAboutMe: false
                             )
-                            SaveAndCloseButtonView(action: saveBusinessCard)
-                                .padding(.top, 16)
-                            CancelButtonView(action: { showCancelConfirmation = true })
+                            
+                            VStack(spacing: 12) {
+                                SaveAndCloseButtonView(action: saveBusinessCard)
+                                CancelButtonView(action: { showCancelConfirmation = true })
+                            }
+                            .padding(.top, 24)
                         }
                     case 1:
                         VStack {
@@ -455,10 +458,16 @@ struct CancelButtonView: View {
     var body: some View {
         Button(action: action) {
             Text("Do this later")
-                .foregroundColor(.red)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 8)
+                .foregroundColor(.gray)
+                .padding(.vertical, 12)
+                .padding(.horizontal, 24)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 20)
+                        .stroke(Color.gray, lineWidth: 1)
+                )
         }
+        .padding(.horizontal)
+        .padding(.top, 12)
     }
 }
 
@@ -468,10 +477,13 @@ struct SaveAndCloseButtonView: View {
     var body: some View {
         Button(action: action) {
             Text("Save and close")
-                .foregroundColor(.blue)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 8)
+                .foregroundColor(.white)
+                .padding(.vertical, 12)
+                .padding(.horizontal, 24)
+                .background(Color.accentColor)
+                .cornerRadius(20)
         }
+        .padding(.horizontal)
     }
 }
 
