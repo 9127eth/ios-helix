@@ -80,10 +80,40 @@ struct SettingsView: View {
                         .font(.subheadline)
                         .foregroundColor(.gray)
                         .padding(.vertical, 10)
-                        .padding(.leading, 16)  // Added left padding
+                        .padding(.leading, 16)
                         .frame(maxWidth: .infinity, alignment: .leading)
 
                     VStack(spacing: 0) {
+                        // Add Email Address
+                        HStack {
+                            Image(systemName: "envelope")
+                                .foregroundColor(AppColors.foreground)
+                            Text("Email Address:")
+                                .foregroundColor(AppColors.foreground)
+                            Spacer()
+                            Text(Auth.auth().currentUser?.email ?? "Not available")
+                                .foregroundColor(AppColors.foreground)
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.vertical, 10)
+                        .padding(.horizontal, 16)
+                        .background(AppColors.inputFieldBackground)
+
+                        // Add Sign-in Method
+                        HStack {
+                            Image(systemName: "person.circle")
+                                .foregroundColor(AppColors.foreground)
+                            Text("Signed in with:")
+                                .foregroundColor(AppColors.foreground)
+                            Spacer()
+                            Text(getSignInMethod())
+                                .foregroundColor(AppColors.foreground)
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.vertical, 10)
+                        .padding(.horizontal, 16)
+                        .background(AppColors.inputFieldBackground)
+
                         Button(action: {
                             // Action to open subscription view (to be implemented)
                         }) {
@@ -347,6 +377,24 @@ struct SettingsView: View {
             restoreError = error.localizedDescription
         }
         isRestoringPurchases = false
+    }
+
+    private func getSignInMethod() -> String {
+        guard let user = Auth.auth().currentUser else { return "Unknown" }
+        
+        if user.providerData.isEmpty { return "Unknown" }
+        
+        let providerId = user.providerData[0].providerID
+        switch providerId {
+        case "google.com":
+            return "Google"
+        case "apple.com":
+            return "Apple ID"
+        case "password":
+            return "Email"
+        default:
+            return "Unknown"
+        }
     }
 }
 
