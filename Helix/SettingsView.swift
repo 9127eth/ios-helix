@@ -42,6 +42,8 @@ struct SettingsView: View {
     @State private var restoreError: String?
     @State private var subscriptionPlanType: String = ""
     @State private var activeAlert: AlertType?
+    @State private var showingFAQ = false
+    @State private var showingContact = false
 
     var body: some View {
         ScrollView {
@@ -164,10 +166,9 @@ struct SettingsView: View {
                         }) {
                             HStack {
                                 Image("signOut")
-
-                                    .foregroundColor(AppColors.buttonText)
+                                    .foregroundColor(AppColors.foreground)
                                 Text("Sign Out")
-                                    .foregroundColor(AppColors.buttonText)
+                                    .foregroundColor(AppColors.foreground)
                                 Spacer()
                             }
                             .frame(maxWidth: .infinity, alignment: .leading)
@@ -198,6 +199,56 @@ struct SettingsView: View {
                     }
                     .background(Color(UIColor.secondarySystemGroupedBackground))
                     .cornerRadius(8)
+
+                    // Support Section
+                    Text("Support")
+                        .font(.subheadline)
+                        .foregroundColor(.gray)
+                        .padding(.vertical, 10)
+                        .padding(.leading, 16)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.top, 20)
+
+                    VStack(spacing: 0) {
+                        Button(action: {
+                            showingFAQ = true
+                        }) {
+                            HStack {
+                                Image(systemName: "questionmark.circle")
+                                    .foregroundColor(AppColors.foreground)
+                                Text("FAQ")
+                                    .foregroundColor(AppColors.foreground)
+                                Spacer()
+                                Image(systemName: "chevron.right")
+                                    .foregroundColor(Color.gray)
+                            }
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(.vertical, 10)
+                            .padding(.horizontal, 16)
+                            .background(AppColors.inputFieldBackground)
+                        }
+
+                        Button(action: {
+                            showingContact = true
+                        }) {
+                            HStack {
+                                Image(systemName: "message")
+                                    .foregroundColor(AppColors.foreground)
+                                Text("Contact Us")
+                                    .foregroundColor(AppColors.foreground)
+                                Spacer()
+                                Image(systemName: "chevron.right")
+                                    .foregroundColor(Color.gray)
+                            }
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(.vertical, 10)
+                            .padding(.horizontal, 16)
+                            .background(AppColors.inputFieldBackground)
+                        }
+                    }
+                    .background(Color(UIColor.secondarySystemGroupedBackground))
+                    .cornerRadius(8)
+                    .padding(.bottom, 20)
                 }
             }
             .padding()
@@ -234,6 +285,12 @@ struct SettingsView: View {
             }
         }
         .onAppear(perform: fetchUserProStatus)
+        .sheet(isPresented: $showingFAQ) {
+            FAQView()
+        }
+        .sheet(isPresented: $showingContact) {
+            ContactView()
+        }
     }
 
     private var headerView: some View {
