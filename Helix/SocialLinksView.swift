@@ -21,6 +21,11 @@ struct SocialLinksView: View {
             if showHeader {
                 Text("Social Links")
                     .font(.headline)
+                    .padding(.bottom, 8)
+                
+                Text("Make sure to enter the full URL (e.g. \"www.twitter.com/Username\")")
+                    .font(.caption)
+                    .foregroundColor(.gray)
                     .padding(.bottom, 16)
             }
             

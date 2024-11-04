@@ -44,7 +44,7 @@ public struct CreateProgressBar: View {
     
     private func circleColor(for index: Int) -> Color {
         if index == currentStep {
-            return AppColors.primary
+            return .white
         } else if index < currentStep {
             return Color.gray.opacity(0.5)
         } else {

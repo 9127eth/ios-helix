@@ -457,14 +457,9 @@ struct CancelButtonView: View {
     
     var body: some View {
         Button(action: action) {
-            Text("Do this later")
+            Text("Cancel")
+                .font(.subheadline)
                 .foregroundColor(.gray)
-                .padding(.vertical, 12)
-                .padding(.horizontal, 24)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 20)
-                        .stroke(Color.gray, lineWidth: 1)
-                )
         }
         .padding(.horizontal)
         .padding(.top, 12)
@@ -477,11 +472,14 @@ struct SaveAndCloseButtonView: View {
     var body: some View {
         Button(action: action) {
             Text("Save and close")
-                .foregroundColor(.white)
-                .padding(.vertical, 12)
-                .padding(.horizontal, 24)
-                .background(Color.accentColor)
-                .cornerRadius(20)
+                .font(.subheadline)
+                .foregroundColor(.gray)
+                .padding(.vertical, 8)
+                .padding(.horizontal, 16)
+                .background(
+                    RoundedRectangle(cornerRadius: 20)
+                        .fill(AppColors.barMenuBackground)
+                )
         }
         .padding(.horizontal)
     }
