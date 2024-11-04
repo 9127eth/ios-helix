@@ -81,6 +81,19 @@ struct FAQView: View {
         NavigationView {
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
+                    // Add header section
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Frequently Asked Questions")
+                            .font(.title)
+                            .fontWeight(.bold)
+                            .foregroundColor(AppColors.bodyPrimaryText)
+                        
+                        Text("Quick answers to common questions")
+                            .font(.subheadline)
+                            .foregroundColor(AppColors.bodySecondaryText)
+                    }
+                    .padding(.bottom, 24)
+                    
                     ForEach(faqItems) { item in
                         faqItem(item)
                     }

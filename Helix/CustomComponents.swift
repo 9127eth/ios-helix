@@ -30,12 +30,14 @@ struct CustomTextField: View {
                     SecureField("", text: $text, onCommit: {
                         onCommit?()
                     })
+                    .textInputAutocapitalization(.never)
                     .padding(.vertical, 8)
                     .padding(.horizontal, 12)
                 } else {
                     TextField("", text: $text, onCommit: {
                         onCommit?()
                     })
+                    .textInputAutocapitalization(.never)
                     .padding(.vertical, 8)
                     .padding(.horizontal, 12)
                 }

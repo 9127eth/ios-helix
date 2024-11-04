@@ -86,7 +86,7 @@ struct SettingsView: View {
                         .frame(maxWidth: .infinity, alignment: .leading)
 
                     VStack(spacing: 0) {
-                        // Add Email Address
+                        // Email and Sign-in method items remain here
                         HStack {
                             Image(systemName: "envelope")
                                 .foregroundColor(AppColors.foreground)
@@ -101,7 +101,7 @@ struct SettingsView: View {
                         .padding(.horizontal, 16)
                         .background(AppColors.inputFieldBackground)
 
-                        // Add Sign-in Method
+                        // Sign-in method remains
                         HStack {
                             Image(systemName: "person.circle")
                                 .foregroundColor(AppColors.foreground)
@@ -116,51 +116,7 @@ struct SettingsView: View {
                         .padding(.horizontal, 16)
                         .background(AppColors.inputFieldBackground)
 
-                        Button(action: {
-                            // Action to open subscription view (to be implemented)
-                        }) {
-                            HStack {
-                                Image("subscription")
-                                    .foregroundColor(AppColors.foreground)
-                                Text("Current Subscription")
-                                    .foregroundColor(AppColors.foreground)  // Added this
-                                Spacer()
-                                Text(isPro ? "Helix Pro \(subscriptionPlanType)" : "Free Plan")
-                                    .foregroundColor(AppColors.foreground)
-                            }
-                            .foregroundColor(AppColors.foreground)  // Added this to the HStack
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .padding(.vertical, 10)
-                            .padding(.horizontal, 16)
-                            .background(AppColors.inputFieldBackground)
-                        }
-
-                        Button(action: {
-                            Task {
-                                await restorePurchases()
-                            }
-                        }) {
-                            HStack {
-                                Image("restore")
-
-                                    .foregroundColor(AppColors.foreground)
-                                Text("Restore Purchases")
-                                    .foregroundColor(AppColors.foreground)
-                                Spacer()
-                                if isRestoringPurchases {
-                                    ProgressView()
-                                        .tint(AppColors.buttonText)
-                                }
-                            }
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .padding(.vertical, 8)
-                            .padding(.horizontal, 16)
-                            .background(AppColors.inputFieldBackground)
-                        }
-
-
-
-
+                        // Sign out and Delete account buttons remain here
                         Button(action: {
                             authManager.signOut()
                         }) {
@@ -179,13 +135,10 @@ struct SettingsView: View {
 
                         Button(action: {
                             print("Delete account button tapped")
-                            print("Setting activeAlert to deleteConfirmation")
                             activeAlert = .deleteConfirmation
-                            print("activeAlert is now set: \(String(describing: activeAlert))")
                         }) {
                             HStack {
                                 Image("trashWarning")
-
                                     .foregroundColor(.red)
                                 Text("Delete Account")
                                     .foregroundColor(.red)
@@ -199,6 +152,60 @@ struct SettingsView: View {
                     }
                     .background(Color(UIColor.secondarySystemGroupedBackground))
                     .cornerRadius(8)
+                    .padding(.bottom, 20)
+
+                    // New Subscription Section
+                    Text("Subscription")
+                        .font(.subheadline)
+                        .foregroundColor(.gray)
+                        .padding(.vertical, 10)
+                        .padding(.leading, 16)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+
+                    VStack(spacing: 0) {
+                        Button(action: {
+                            // Action to open subscription view
+                        }) {
+                            HStack {
+                                Image("subscription")
+                                    .foregroundColor(AppColors.foreground)
+                                Text("Current Subscription")
+                                    .foregroundColor(AppColors.foreground)
+                                Spacer()
+                                Text(isPro ? "Helix Pro \(subscriptionPlanType)" : "Free Plan")
+                                    .foregroundColor(AppColors.foreground)
+                            }
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(.vertical, 10)
+                            .padding(.horizontal, 16)
+                            .background(AppColors.inputFieldBackground)
+                        }
+
+                        Button(action: {
+                            Task {
+                                await restorePurchases()
+                            }
+                        }) {
+                            HStack {
+                                Image("restore")
+                                    .foregroundColor(AppColors.foreground)
+                                Text("Restore Purchases")
+                                    .foregroundColor(AppColors.foreground)
+                                Spacer()
+                                if isRestoringPurchases {
+                                    ProgressView()
+                                        .tint(AppColors.buttonText)
+                                }
+                            }
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(.vertical, 8)
+                            .padding(.horizontal, 16)
+                            .background(AppColors.inputFieldBackground)
+                        }
+                    }
+                    .background(Color(UIColor.secondarySystemGroupedBackground))
+                    .cornerRadius(8)
+                    .padding(.bottom, 20)
 
                     // Support Section
                     Text("Support")
