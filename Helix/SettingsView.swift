@@ -171,6 +171,13 @@ struct SettingsView: View {
                                 .background(AppColors.inputFieldBackground)
                             }
                         }
+                        
+                        // Modern divider
+                        Rectangle()
+                            .fill(Color.gray.opacity(0.15))
+                            .frame(height: 1)
+                            .padding(.vertical, 12)
+                            .padding(.horizontal, 16)
 
                         // Sign out button
                         Button(action: {
@@ -357,36 +364,40 @@ struct SettingsView: View {
         }
         .sheet(isPresented: $showChangeEmail) {
             NavigationView {
-                VStack(spacing: 20) {
-                    VStack(alignment: .leading, spacing: 20) {
-                        CustomTextField(title: "Current Password", text: $currentPassword, isSecure: true)
-                            .frame(width: 280)
-                        CustomTextField(title: "New Email", text: $newEmail)
-                            .frame(width: 280)
-                            .textInputAutocapitalization(.never)
-                            .keyboardType(.emailAddress)
-                        
-                        Button(action: {
-                            Task {
-                                await changeEmail()
+                VStack {
+                    Spacer()
+                        .frame(height: 80) // Add space at the top
+                    
+                    VStack(spacing: 20) {
+                        VStack(alignment: .leading, spacing: 20) {
+                            CustomTextField(title: "Current Password", text: $currentPassword, isSecure: true)
+                                .frame(width: 280)
+                            CustomTextField(title: "New Email", text: $newEmail)
+                                .frame(width: 280)
+                                .textInputAutocapitalization(.never)
+                                .keyboardType(.emailAddress)
+                            
+                            Button(action: {
+                                Task {
+                                    await changeEmail()
+                                }
+                            }) {
+                                Text("Update Email")
+                                    .font(.system(size: 15, weight: .medium))
+                                    .padding(.horizontal, 20)
+                                    .padding(.vertical, 8)
                             }
-                        }) {
-                            Text("Update Email")
-                                .font(.system(size: 15, weight: .medium))
-                                .padding(.horizontal, 20)
-                                .padding(.vertical, 8)
+                            .background(AppColors.buttonBackground)
+                            .foregroundColor(AppColors.buttonText)
+                            .cornerRadius(8)
+                            .frame(maxWidth: .infinity, alignment: .center)
+                            .padding(.top, 8)
                         }
-                        .background(AppColors.buttonBackground)
-                        .foregroundColor(AppColors.buttonText)
-                        .cornerRadius(8)
-                        .frame(maxWidth: .infinity, alignment: .center)
-                        .padding(.top, 8)
+                        .padding(.horizontal)
                     }
-                    .padding(.horizontal)
                     
                     Spacer()
                 }
-                .padding(.top, 20)
                 .navigationTitle("Change Email")
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
@@ -408,53 +419,57 @@ struct SettingsView: View {
         }) {
             NavigationView {
                 ZStack {
-                    VStack(spacing: 20) {
-                        VStack(alignment: .leading, spacing: 20) {
-                            if !showSuccessMessage {
-                                CustomTextField(title: "Current Password", text: $currentPassword, isSecure: true)
-                                    .frame(width: 280)
-                                CustomTextField(title: "New Password", text: $newPassword, isSecure: true)
-                                    .frame(width: 280)
-                                CustomTextField(title: "Confirm New Password", text: $confirmPassword, isSecure: true)
-                                    .frame(width: 280)
-                                
-                                Button(action: {
-                                    Task {
-                                        await changePassword()
+                    VStack {
+                        Spacer()
+                            .frame(height: 80) // Add space at the top
+                        
+                        VStack(spacing: 20) {
+                            VStack(alignment: .leading, spacing: 20) {
+                                if !showSuccessMessage {
+                                    CustomTextField(title: "Current Password", text: $currentPassword, isSecure: true)
+                                        .frame(width: 280)
+                                    CustomTextField(title: "New Password", text: $newPassword, isSecure: true)
+                                        .frame(width: 280)
+                                    CustomTextField(title: "Confirm New Password", text: $confirmPassword, isSecure: true)
+                                        .frame(width: 280)
+                                    
+                                    Button(action: {
+                                        Task {
+                                            await changePassword()
+                                        }
+                                    }) {
+                                        if isProcessing {
+                                            ProgressView()
+                                                .progressViewStyle(CircularProgressViewStyle(tint: AppColors.buttonText))
+                                                .frame(height: 20)
+                                        } else {
+                                            Text("Update Password")
+                                                .font(.system(size: 15, weight: .medium))
+                                                .padding(.horizontal, 20)
+                                                .padding(.vertical, 8)
+                                        }
                                     }
-                                }) {
-                                    if isProcessing {
-                                        ProgressView()
-                                            .progressViewStyle(CircularProgressViewStyle(tint: AppColors.buttonText))
-                                            .frame(height: 20)
-                                    } else {
-                                        Text("Update Password")
-                                            .font(.system(size: 15, weight: .medium))
-                                            .padding(.horizontal, 20)
-                                            .padding(.vertical, 8)
+                                    .disabled(isProcessing)
+                                    .background(AppColors.buttonBackground)
+                                    .foregroundColor(AppColors.buttonText)
+                                    .cornerRadius(8)
+                                    .frame(maxWidth: .infinity, alignment: .center)
+                                    .padding(.top, 8)
+                                    
+                                    Button(action: handleForgotPassword) {
+                                        Text("Forgot password?")
+                                            .font(.footnote)
+                                            .foregroundColor(AppColors.bodyPrimaryText)
                                     }
+                                    .frame(maxWidth: .infinity, alignment: .center)
+                                    .padding(.top, 4)
                                 }
-                                .disabled(isProcessing)
-                                .background(AppColors.buttonBackground)
-                                .foregroundColor(AppColors.buttonText)
-                                .cornerRadius(8)
-                                .frame(maxWidth: .infinity, alignment: .center)
-                                .padding(.top, 8)
-                                
-                                Button(action: handleForgotPassword) {
-                                    Text("Forgot password?")
-                                        .font(.footnote)
-                                        .foregroundColor(AppColors.bodyPrimaryText)
-                                }
-                                .frame(maxWidth: .infinity, alignment: .center)
-                                .padding(.top, 4)
                             }
+                            .padding(.horizontal)
                         }
-                        .padding(.horizontal)
                         
                         Spacer()
                     }
-                    .padding(.top, 20)
                     
                     if showSuccessMessage {
                         VStack(spacing: 16) {
