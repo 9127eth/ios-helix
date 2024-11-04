@@ -44,6 +44,23 @@ struct SettingsView: View {
     @State private var activeAlert: AlertType?
     @State private var showingFAQ = false
     @State private var showingContact = false
+    @State private var showChangeEmail = false
+    @State private var showChangePassword = false
+    @State private var newEmail = ""
+    @State private var currentPassword = ""
+    @State private var newPassword = ""
+    @State private var confirmPassword = ""
+    @State private var showAlert = false
+    @State private var alertTitle = ""
+    @State private var alertMessage = ""
+    @State private var showSuccessMessage = false
+    @State private var isProcessing = false
+    @State private var currentPasswordError = false
+    @State private var currentPasswordErrorMessage = ""
+    @State private var newPasswordError = false
+    @State private var newPasswordErrorMessage = ""
+    @State private var confirmPasswordError = false
+    @State private var confirmPasswordErrorMessage = ""
 
     var body: some View {
         ScrollView {
@@ -86,7 +103,7 @@ struct SettingsView: View {
                         .frame(maxWidth: .infinity, alignment: .leading)
 
                     VStack(spacing: 0) {
-                        // Email and Sign-in method items remain here
+                        // Email and Sign-in method display
                         HStack {
                             Image(systemName: "envelope")
                                 .foregroundColor(AppColors.foreground)
@@ -101,7 +118,7 @@ struct SettingsView: View {
                         .padding(.horizontal, 16)
                         .background(AppColors.inputFieldBackground)
 
-                        // Sign-in method remains
+                        // Sign-in method display
                         HStack {
                             Image(systemName: "person.circle")
                                 .foregroundColor(AppColors.foreground)
@@ -116,7 +133,46 @@ struct SettingsView: View {
                         .padding(.horizontal, 16)
                         .background(AppColors.inputFieldBackground)
 
-                        // Sign out and Delete account buttons remain here
+                        // Conditionally show email/password change buttons
+                        if getSignInMethod() == "Email" {
+                            Button(action: {
+                                showChangeEmail = true
+                            }) {
+                                HStack {
+                                    Image(systemName: "envelope.badge")
+                                        .foregroundColor(AppColors.foreground)
+                                    Text("Change Email")
+                                        .foregroundColor(AppColors.foreground)
+                                    Spacer()
+                                    Image(systemName: "chevron.right")
+                                        .foregroundColor(Color.gray)
+                                }
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .padding(.vertical, 10)
+                                .padding(.horizontal, 16)
+                                .background(AppColors.inputFieldBackground)
+                            }
+                            
+                            Button(action: {
+                                showChangePassword = true
+                            }) {
+                                HStack {
+                                    Image(systemName: "lock.rotation")
+                                        .foregroundColor(AppColors.foreground)
+                                    Text("Change Password")
+                                        .foregroundColor(AppColors.foreground)
+                                    Spacer()
+                                    Image(systemName: "chevron.right")
+                                        .foregroundColor(Color.gray)
+                                }
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .padding(.vertical, 10)
+                                .padding(.horizontal, 16)
+                                .background(AppColors.inputFieldBackground)
+                            }
+                        }
+
+                        // Sign out button
                         Button(action: {
                             authManager.signOut()
                         }) {
@@ -133,6 +189,7 @@ struct SettingsView: View {
                             .background(AppColors.inputFieldBackground)
                         }
 
+                        // Delete account button
                         Button(action: {
                             print("Delete account button tapped")
                             activeAlert = .deleteConfirmation
@@ -298,6 +355,147 @@ struct SettingsView: View {
         .sheet(isPresented: $showingContact) {
             ContactView()
         }
+        .sheet(isPresented: $showChangeEmail) {
+            NavigationView {
+                VStack(spacing: 20) {
+                    VStack(alignment: .leading, spacing: 20) {
+                        CustomTextField(title: "Current Password", text: $currentPassword, isSecure: true)
+                            .frame(width: 280)
+                        CustomTextField(title: "New Email", text: $newEmail)
+                            .frame(width: 280)
+                            .textInputAutocapitalization(.never)
+                            .keyboardType(.emailAddress)
+                        
+                        Button(action: {
+                            Task {
+                                await changeEmail()
+                            }
+                        }) {
+                            Text("Update Email")
+                                .font(.system(size: 15, weight: .medium))
+                                .padding(.horizontal, 20)
+                                .padding(.vertical, 8)
+                        }
+                        .background(AppColors.buttonBackground)
+                        .foregroundColor(AppColors.buttonText)
+                        .cornerRadius(8)
+                        .frame(maxWidth: .infinity, alignment: .center)
+                        .padding(.top, 8)
+                    }
+                    .padding(.horizontal)
+                    
+                    Spacer()
+                }
+                .padding(.top, 20)
+                .navigationTitle("Change Email")
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .navigationBarTrailing) {
+                        Button("Cancel") {
+                            showChangeEmail = false
+                        }
+                    }
+                }
+            }
+        }
+        .sheet(isPresented: $showChangePassword, onDismiss: {
+            // Reset all states when sheet is dismissed
+            showSuccessMessage = false
+            isProcessing = false
+            newPassword = ""
+            confirmPassword = ""
+            currentPassword = ""
+        }) {
+            NavigationView {
+                ZStack {
+                    VStack(spacing: 20) {
+                        VStack(alignment: .leading, spacing: 20) {
+                            if !showSuccessMessage {
+                                CustomTextField(title: "Current Password", text: $currentPassword, isSecure: true)
+                                    .frame(width: 280)
+                                CustomTextField(title: "New Password", text: $newPassword, isSecure: true)
+                                    .frame(width: 280)
+                                CustomTextField(title: "Confirm New Password", text: $confirmPassword, isSecure: true)
+                                    .frame(width: 280)
+                                
+                                Button(action: {
+                                    Task {
+                                        await changePassword()
+                                    }
+                                }) {
+                                    if isProcessing {
+                                        ProgressView()
+                                            .progressViewStyle(CircularProgressViewStyle(tint: AppColors.buttonText))
+                                            .frame(height: 20)
+                                    } else {
+                                        Text("Update Password")
+                                            .font(.system(size: 15, weight: .medium))
+                                            .padding(.horizontal, 20)
+                                            .padding(.vertical, 8)
+                                    }
+                                }
+                                .disabled(isProcessing)
+                                .background(AppColors.buttonBackground)
+                                .foregroundColor(AppColors.buttonText)
+                                .cornerRadius(8)
+                                .frame(maxWidth: .infinity, alignment: .center)
+                                .padding(.top, 8)
+                                
+                                Button(action: handleForgotPassword) {
+                                    Text("Forgot password?")
+                                        .font(.footnote)
+                                        .foregroundColor(AppColors.bodyPrimaryText)
+                                }
+                                .frame(maxWidth: .infinity, alignment: .center)
+                                .padding(.top, 4)
+                            }
+                        }
+                        .padding(.horizontal)
+                        
+                        Spacer()
+                    }
+                    .padding(.top, 20)
+                    
+                    if showSuccessMessage {
+                        VStack(spacing: 16) {
+                            Image(systemName: "checkmark.circle.fill")
+                                .resizable()
+                                .frame(width: 40, height: 40)
+                                .foregroundColor(AppColors.buttonBackground)
+                            
+                            Text("Password Updated Successfully!")
+                                .font(.headline)
+                                .multilineTextAlignment(.center)
+                        }
+                        .transition(.scale.combined(with: .opacity))
+                    }
+                }
+                .navigationTitle("Change Password")
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .navigationBarTrailing) {
+                        if !showSuccessMessage {
+                            Button("Cancel") {
+                                showChangePassword = false
+                            }
+                        }
+                    }
+                }
+                .animation(.easeInOut, value: showSuccessMessage)
+            }
+        }
+        .alert(isPresented: $showAlert) {
+            Alert(
+                title: Text(alertTitle),
+                message: Text(alertMessage),
+                dismissButton: .default(Text("OK")) {
+                    if alertTitle == "Success" {
+                        showChangeEmail = false
+                        showChangePassword = false
+                    }
+                }
+            )
+        }
     }
 
     private var headerView: some View {
@@ -458,6 +656,165 @@ struct SettingsView: View {
             return "Email"
         default:
             return "Unknown"
+        }
+    }
+
+    private func changeEmail() async {
+        guard let user = Auth.auth().currentUser else { return }
+        
+        // Basic email validation
+        guard isValidEmail(newEmail) else {
+            alertTitle = "Invalid Email"
+            alertMessage = "Please enter a valid email address"
+            showAlert = true
+            return
+        }
+        
+        do {
+            // Create credentials for reauthentication
+            let credential = EmailAuthProvider.credential(
+                withEmail: user.email ?? "",
+                password: currentPassword
+            )
+            
+            // Reauthenticate
+            try await user.reauthenticate(with: credential)
+            
+            // Update email
+            try await user.updateEmail(to: newEmail)
+            
+            // Update successful
+            alertTitle = "Success"
+            alertMessage = "Email updated successfully"
+            showAlert = true
+            
+            // Clear form
+            newEmail = ""
+            currentPassword = ""
+            showChangeEmail = false
+            
+        } catch let error as NSError {
+            switch error.code {
+            case AuthErrorCode.wrongPassword.rawValue:
+                alertTitle = "Incorrect Password"
+                alertMessage = "The current password you entered is incorrect"
+            case AuthErrorCode.invalidEmail.rawValue:
+                alertTitle = "Invalid Email"
+                alertMessage = "Please enter a valid email address"
+            case AuthErrorCode.emailAlreadyInUse.rawValue:
+                alertTitle = "Email In Use"
+                alertMessage = "This email is already associated with another account"
+            default:
+                alertTitle = "Error"
+                alertMessage = error.localizedDescription
+            }
+            showAlert = true
+        }
+    }
+
+    private func changePassword() async {
+        // Reset error states
+        currentPasswordError = false
+        newPasswordError = false
+        confirmPasswordError = false
+        
+        // Validate new password
+        guard isValidPassword(newPassword) else {
+            newPasswordError = true
+            newPasswordErrorMessage = "Password must be at least 6 characters long"
+            return
+        }
+        
+        // Check if passwords match
+        guard newPassword == confirmPassword else {
+            confirmPasswordError = true
+            confirmPasswordErrorMessage = "Passwords don't match"
+            return
+        }
+        
+        isProcessing = true
+        
+        do {
+            guard let user = Auth.auth().currentUser,
+                  let email = user.email else {
+                return
+            }
+            
+            let credential = EmailAuthProvider.credential(
+                withEmail: email,
+                password: currentPassword
+            )
+            
+            // Try to reauthenticate first
+            do {
+                try await user.reauthenticate(with: credential)
+            } catch let error as NSError {
+                isProcessing = false
+                if error.domain == AuthErrorDomain {
+                    currentPasswordError = true
+                    currentPasswordErrorMessage = "Current password is incorrect"
+                } else {
+                    alertTitle = "Error"
+                    alertMessage = error.localizedDescription
+                    showAlert = true
+                }
+                return
+            }
+            
+            // If we get here, reauthentication was successful
+            // Now try to update the password
+            try await user.updatePassword(to: newPassword)
+            
+            showSuccessMessage = true
+            
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                showChangePassword = false
+            }
+            
+        } catch let error as NSError {
+            isProcessing = false
+            if error.domain == AuthErrorDomain {
+                switch error.code {
+                case 17026: // Weak password error code
+                    newPasswordError = true
+                    newPasswordErrorMessage = "Please choose a stronger password"
+                default:
+                    alertTitle = "Error"
+                    alertMessage = error.localizedDescription
+                    showAlert = true
+                }
+            }
+        }
+        
+        isProcessing = false
+    }
+
+    // Add these helper functions
+    private func isValidEmail(_ email: String) -> Bool {
+        let emailRegEx = "[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,64}"
+        let emailPred = NSPredicate(format:"SELF MATCHES %@", emailRegEx)
+        return emailPred.evaluate(with: email)
+    }
+
+    private func isValidPassword(_ password: String) -> Bool {
+        return password.count >= 6
+    }
+
+    private func handleForgotPassword() {
+        guard let email = Auth.auth().currentUser?.email else { return }
+        
+        authManager.resetPassword(email: email) { result in
+            switch result {
+            case .success:
+                alertTitle = "Password Reset Email Sent"
+                alertMessage = "Please check your email for instructions to reset your password"
+                showAlert = true
+                showChangePassword = false
+            case .failure(let error):
+                alertTitle = "Error"
+                alertMessage = "Failed to send password reset email: \(error.localizedDescription)"
+                showAlert = true
+            }
         }
     }
 }
