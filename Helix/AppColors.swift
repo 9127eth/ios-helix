@@ -9,7 +9,7 @@ import SwiftUI
 struct AppColors {
     static let background = Color("backgroundColor")
     static let foreground = Color("foregroundColor")
-    static let primary = Color("primaryColor")
+    static let primary = Color("primaryThemeColor")
     static let primaryText = Color("primaryTextColor")
     static let cardGridBackground = Color("cardGridBackgroundColor")
     static let bodyPrimaryText = Color("bodyPrimaryTextColor")
@@ -30,7 +30,7 @@ struct AppColors {
     
     static let tertColor = Color("tertColor")
     
-    static let secondary = Color("secondaryColor")
+    static let secondary = Color("secondaryThemeColor")
     
     static let bodySecondaryText = Color(UIColor.systemGray)  // System dark gray
     

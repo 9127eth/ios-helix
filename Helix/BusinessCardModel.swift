@@ -352,7 +352,7 @@ struct BusinessCard: Identifiable, Codable {
 }
 
 struct WebLink: Identifiable, Codable, Equatable {
-    let id = UUID()
+    var id = UUID()
     var url: String
     var displayText: String
     

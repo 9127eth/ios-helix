@@ -97,8 +97,7 @@ struct ContentView: View {
         .fullScreenCover(isPresented: $showCreateCard) {
             CreateBusinessCardView(showCreateCard: $showCreateCard)
         }
-        .onAppear(perform: fetchBusinessCards)
-        .onChange(of: showCreateCard) { newValue in
+        .onChange(of: showCreateCard) { oldValue, newValue in
             if !newValue {
                 fetchBusinessCards()
             }
