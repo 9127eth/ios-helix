@@ -695,12 +695,12 @@ struct SettingsView: View {
             // Reauthenticate
             try await user.reauthenticate(with: credential)
             
-            // Update email
-            try await user.updateEmail(to: newEmail)
+            // Send verification email before updating
+            try await user.sendEmailVerification(beforeUpdatingEmail: newEmail)
             
-            // Update successful
-            alertTitle = "Success"
-            alertMessage = "Email updated successfully"
+            // Show success message
+            alertTitle = "Verification Email Sent"
+            alertMessage = "Please check your email at \(newEmail) to verify and complete the email change"
             showAlert = true
             
             // Clear form

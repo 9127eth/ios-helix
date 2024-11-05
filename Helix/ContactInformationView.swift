@@ -47,7 +47,7 @@ struct ContactInformationView: View {
                 .focused($focusedField, equals: .email)
                 .keyboardType(.emailAddress)
                 .onSubmit { focusedField = nil }
-                .onChange(of: businessCard.email) { newValue in
+                .onChange(of: businessCard.email) { oldValue, newValue in
                     if let email = newValue, !email.isEmpty {
                         isEmailValid = isValidEmail(email)
                         showEmailError = !isEmailValid
@@ -93,7 +93,7 @@ struct PhoneNumberTextField: View {
     
     private static func initializeCountries() -> (countries: [CountryInfo], defaultCountry: CountryInfo) {
         let phoneUtil = NBPhoneNumberUtil.sharedInstance()
-        let allRegions = Locale.isoRegionCodes
+        let allRegions = Locale.Region.isoRegions.map(\.identifier)
         let countryList = allRegions.compactMap { regionCode -> CountryInfo? in
             guard let name = (Locale.current as NSLocale).displayName(forKey: .countryCode, value: regionCode),
                   let code = phoneUtil?.getCountryCode(forRegion: regionCode) else {
@@ -140,7 +140,7 @@ struct PhoneNumberTextField: View {
                         RoundedRectangle(cornerRadius: 8)
                             .stroke(colorScheme == .dark ? Color.gray.opacity(0.3) : Color.clear, lineWidth: 1)
                     )
-                    .onChange(of: localPhoneNumber) { _ in
+                    .onChange(of: localPhoneNumber) { oldValue, newValue in
                         validatePhoneNumber()
                     }
             }
@@ -151,7 +151,7 @@ struct PhoneNumberTextField: View {
                     .font(.caption)
             }
         }
-        .onChange(of: selectedCountry) { _ in
+        .onChange(of: selectedCountry) { oldValue, newValue in
             validatePhoneNumber()
         }
         .onAppear {

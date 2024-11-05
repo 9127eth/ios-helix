@@ -162,7 +162,7 @@ struct EditBusinessCardView: View {
             return
         }
 
-        Task {
+        Task { @MainActor in
             do {
                 // If the document URL was cleared, delete the old document
                 if businessCard.cvUrl != nil && editedCard.cvUrl == nil {
@@ -176,12 +176,14 @@ struct EditBusinessCardView: View {
                     let cardRef = db.collection("users").document(userId)
                         .collection("businessCards").document(cardId)
                     
-                    try await cardRef.updateData([
-                        "cvUrl": FieldValue.delete(),
-                        "cvHeader": FieldValue.delete(),
-                        "cvDescription": FieldValue.delete(),
-                        "cvDisplayText": FieldValue.delete()
-                    ])
+                    await MainActor.run {
+                        cardRef.updateData([
+                            "cvUrl": FieldValue.delete(),
+                            "cvHeader": FieldValue.delete(),
+                            "cvDescription": FieldValue.delete(),
+                            "cvDisplayText": FieldValue.delete()
+                        ])
+                    }
                 }
 
                 // If a new document is selected, upload it
@@ -201,8 +203,10 @@ struct EditBusinessCardView: View {
                 businessCard = editedCard // Update the original card
                 presentationMode.wrappedValue.dismiss()
             } catch {
-                saveErrorMessage = error.localizedDescription
-                showingSaveError = true
+                await MainActor.run {
+                    saveErrorMessage = error.localizedDescription
+                    showingSaveError = true
+                }
             }
         }
     }
@@ -291,7 +295,7 @@ struct EditBusinessCardView: View {
     }
     
     private func deleteBusinessCard() {
-        Task {
+        Task { @MainActor in
             do {
                 let db = Firestore.firestore()
                 let userRef = db.collection("users").document(Auth.auth().currentUser!.uid)
@@ -299,10 +303,12 @@ struct EditBusinessCardView: View {
                 // Check if the card being deleted is the primary card
                 if editedCard.isPrimary {
                     // Update the user document to set primaryCardPlaceholder to true
-                    try await userRef.updateData([
-                        "primaryCardPlaceholder": true,
-                        "primaryCardId": FieldValue.delete()
-                    ])
+                    await MainActor.run {
+                        userRef.updateData([
+                            "primaryCardPlaceholder": true,
+                            "primaryCardId": FieldValue.delete()
+                        ])
+                    }
                 }
                 
                 try await BusinessCard.delete(editedCard)
@@ -330,8 +336,7 @@ struct EditBusinessCardView: View {
     }
     
     private func deleteDocumentIfNeeded() async throws {
-        guard let userId = Auth.auth().currentUser?.uid,
-              let originalDocUrl = businessCard.cvUrl,
+        guard let originalDocUrl = businessCard.cvUrl,
               let url = URL(string: originalDocUrl) else {
             return
         }

@@ -114,9 +114,12 @@ class AuthenticationManager: NSObject, ObservableObject {
             throw NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "Invalid state: A login callback was received, but no login request was sent."])
         }
         
-        let credential = OAuthProvider.credential(withProviderID: "apple.com",
-                                                  idToken: idTokenString,
-                                                  rawNonce: nonce)
+        let credential = OAuthProvider.credential(
+            providerID: AuthProviderID.apple,
+            idToken: idTokenString,
+            rawNonce: nonce,
+            accessToken: nil
+        )
         
         let authResult = try await Auth.auth().signIn(with: credential)
         let user = authResult.user
@@ -331,9 +334,12 @@ extension AuthenticationManager: ASAuthorizationControllerDelegate {
                 return
             }
             
-            let credential = OAuthProvider.credential(withProviderID: "apple.com",
-                                                      idToken: idTokenString,
-                                                      rawNonce: nonce)
+            let credential = OAuthProvider.credential(
+                providerID: AuthProviderID.apple,
+                idToken: idTokenString,
+                rawNonce: nonce,
+                accessToken: nil
+            )
             
             Auth.auth().signIn(with: credential) { (authResult, error) in
                 if let error = error {

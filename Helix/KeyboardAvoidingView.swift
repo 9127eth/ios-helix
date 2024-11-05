@@ -19,7 +19,7 @@ struct KeyboardAvoidingView<Content: View>: View {
         GeometryReader { geometry in
             content
                 .padding(.bottom, max(keyboardHeight - geometry.safeAreaInsets.bottom, 0))
-                .animation(.easeOut(duration: 0.16))
+                .animation(.easeOut(duration: 0.16), value: keyboardHeight)
                 .dismissKeyboardOnTap()
                 .onAppear {
                     setupKeyboardObservers(geometry: geometry)
@@ -28,9 +28,11 @@ struct KeyboardAvoidingView<Content: View>: View {
     }
 
     private func setupKeyboardObservers(geometry: GeometryProxy) {
+        let safeAreaInsets = geometry.safeAreaInsets.bottom
+        
         NotificationCenter.default.addObserver(forName: UIResponder.keyboardWillShowNotification, object: nil, queue: .main) { notification in
             guard let keyboardFrame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect else { return }
-            let keyboardHeight = keyboardFrame.height - geometry.safeAreaInsets.bottom
+            let keyboardHeight = keyboardFrame.height - safeAreaInsets
             self.keyboardHeight = max(0, keyboardHeight)
             print("Keyboard shown, height: \(self.keyboardHeight)")
         }

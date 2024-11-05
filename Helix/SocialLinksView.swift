@@ -107,9 +107,15 @@ struct SocialLinksView: View {
             updateVisibleLinkTypes()
             updateOffsets()
         }
+        #if compiler(>=5.9)  // iOS 17+
+        .onChange(of: visibleLinkTypes) { oldTypes, newTypes in
+            updateOffsets()
+        }
+        #else
         .onChange(of: visibleLinkTypes) { _ in
             updateOffsets()
         }
+        #endif
     }
 
     private func binding(for linkType: SocialLinkType) -> Binding<String> {

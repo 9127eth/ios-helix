@@ -103,9 +103,15 @@ struct ProfileImageView: View {
         .sheet(isPresented: $showImagePicker) {
             ImagePicker(image: $inputImage)
         }
+        #if compiler(>=5.9)  // iOS 17+
+        .onChange(of: inputImage) { oldValue, newValue in
+            uploadImage()
+        }
+        #else
         .onChange(of: inputImage) { _ in
             uploadImage()
         }
+        #endif
     }
     
     private func uploadImage() {

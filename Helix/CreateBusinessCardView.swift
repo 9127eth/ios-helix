@@ -239,7 +239,7 @@ struct CreateBusinessCardView: View {
             return
         }
 
-        Task {
+        Task { @MainActor in
             do {
                 // Upload the document if one is selected
                 if let documentURL = selectedDocument {
@@ -265,7 +265,7 @@ struct CreateBusinessCardView: View {
                     var cardData = self.businessCard
                     cardData.isPrimary = primaryCardPlaceholder
                     cardData.isActive = isPro || primaryCardPlaceholder
-                    cardData.isPro = isPro  // Add this line
+                    cardData.isPro = isPro
                     
                     if primaryCardPlaceholder {
                         cardData.cardSlug = username
@@ -282,22 +282,28 @@ struct CreateBusinessCardView: View {
                     cardDict["createdAt"] = FieldValue.serverTimestamp()
                     cardDict["updatedAt"] = FieldValue.serverTimestamp()
                     
-                    try await businessCardsRef.document(cardData.cardSlug).setData(cardDict)
+                    await MainActor.run {
+                        businessCardsRef.document(cardData.cardSlug).setData(cardDict)
+                    }
                     
                     print("Business card successfully added!")
                     if primaryCardPlaceholder {
-                        try await userRef.updateData([
-                            "primaryCardId": cardData.cardSlug,
-                            "primaryCardPlaceholder": false
-                        ])
+                        await MainActor.run {
+                            userRef.updateData([
+                                "primaryCardId": cardData.cardSlug,
+                                "primaryCardPlaceholder": false
+                            ])
+                        }
                     }
                     self.presentationMode.wrappedValue.dismiss()
                 } else {
                     print("Error fetching user document")
                 }
             } catch {
-                showAlert = true
-                alertMessage = "Error saving business card: \(error.localizedDescription)"
+                await MainActor.run {
+                    showAlert = true
+                    alertMessage = "Error saving business card: \(error.localizedDescription)"
+                }
             }
         }
     }

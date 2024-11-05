@@ -96,15 +96,15 @@ struct DocumentView: View {
                     .padding(.leading, 8)
             }
             
-            if let cvUrl = businessCard.cvUrl {
+            if businessCard.cvUrl != nil {
                 HStack(spacing: 20) {
                     Button("View Current Document") {
                         showDocumentPreview = true
                     }
                     .foregroundColor(.blue)
-                    .padding(.leading, 8) // Added padding to align with "Choose File" button
+                    .padding(.leading, 8)
                     
-                    Spacer() // Added spacer to push the Delete button to the right
+                    Spacer()
                     
                     Button("Remove") {
                         shouldDeleteDocument = true

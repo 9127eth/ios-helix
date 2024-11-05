@@ -370,7 +370,7 @@ class NFCWriter: NSObject, NFCNDEFReaderSessionDelegate, ObservableObject {
         }
         
         session.connect(to: tag) { error in
-            if let error = error {
+            if error != nil {
                 session.invalidate()
                 return
             }

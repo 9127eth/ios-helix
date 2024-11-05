@@ -108,9 +108,9 @@ struct WebLinksView: View {
 
         }
         .padding(.top, showHeader ? 0 : 16)
-        .animation(.none)
+        .animation(.none, value: showHeader)
         .onAppear(perform: loadExistingLinks)
-        .onChange(of: linkInputs) { _ in
+        .onChange(of: linkInputs) { oldValue, newValue in
             updateBusinessCard()
             updateOffsets()
         }
