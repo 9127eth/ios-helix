@@ -83,16 +83,10 @@ struct AuthenticationView: View {
                 .padding(.bottom, 15)
                 .opacity(opacity(for: 0, geometry: geometry))
             
-            Text("Helping people create memorable connections.")
+            Text("A business card that creates memorable connections.")
                 .font(.title2)
                 .foregroundColor(AppColors.bodyPrimaryText)
                 .opacity(opacity(for: 120, geometry: geometry))
-            
-            Text("Empower your personal brand with customizable digital business cards.")
-                .font(.subheadline)
-                .foregroundColor(AppColors.bodyPrimaryText)
-                .multilineTextAlignment(.center)
-                .opacity(opacity(for: 170, geometry: geometry))
             
             Text("Try it free, no credit card required.")
                 .font(.caption)

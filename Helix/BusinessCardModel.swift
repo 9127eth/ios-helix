@@ -351,13 +351,12 @@ struct BusinessCard: Identifiable, Codable {
     }
 }
 
-struct WebLink: Identifiable, Codable, Equatable {
-    var id = UUID()
+struct WebLink: Codable, Equatable {
     var url: String
     var displayText: String
     
     static func == (lhs: WebLink, rhs: WebLink) -> Bool {
-        return lhs.id == rhs.id && lhs.url == rhs.url && lhs.displayText == rhs.displayText
+        return lhs.url == rhs.url && lhs.displayText == rhs.displayText
     }
 }
 

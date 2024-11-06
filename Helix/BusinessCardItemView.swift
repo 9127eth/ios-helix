@@ -329,13 +329,17 @@ struct BusinessCardItemView: View {
 
         if let lastName = card.lastName {
             result += AttributedString(" \(lastName)")
-            result[result.range(of: lastName)!].font = .system(size: 14).bold()
+            if let range = result.range(of: lastName) {
+                result[range].font = .system(size: 14).bold()
+            }
         }
 
         if let credentials = card.credentials, !credentials.isEmpty {
-            result += AttributedString(", \(credentials)")
-            let credentialsRange = result.range(of: ", \(credentials)")!
-            result[credentialsRange].font = .system(size: 14)
+            let credentialsText = ", \(credentials)"
+            result += AttributedString(credentialsText)
+            if let range = result.range(of: credentialsText) {
+                result[range].font = .system(size: 14)
+            }
         }
 
         return result
