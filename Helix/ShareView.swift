@@ -6,6 +6,7 @@
 //
 import SwiftUI
 import Photos
+import SafariServices
 
 struct ShareView: View {
     let card: BusinessCard
@@ -15,6 +16,7 @@ struct ShareView: View {
     @State private var selectedFormat: ImageFormat = .png
     @State private var noBackground: Bool = false
     @State private var showCopiedCheckmark = false
+    @State private var showPreview = false
     
     enum ImageFormat: String, CaseIterable {
         case png = "PNG"
@@ -82,7 +84,7 @@ struct ShareView: View {
                             }
                             .frame(maxWidth: .infinity)
                             .frame(height: 44)
-                            .background(AppColors.cardDepthDefault)
+                            .background(AppColors.primary)
                             .foregroundColor(.black)
                             .cornerRadius(22)
                         }
@@ -113,21 +115,24 @@ struct ShareView: View {
                                     Spacer()
                                 }
                                 .padding()
-                                .background(Color.white)
+                                .background(AppColors.inputFieldBackground)
                             }
                             
                             Button(action: {
-                                // Implement view in browser functionality
+                                showPreview = true
                             }) {
                                 HStack {
-                                    Image("previewCard")
+                                    Image("browser")
                                     Text("View in Browser")
                                         .font(.subheadline)
                                         .foregroundColor(AppColors.foreground)
                                     Spacer()
                                 }
                                 .padding()
-                                .background(Color.white)
+                                .background(AppColors.inputFieldBackground)
+                            }
+                            .sheet(isPresented: $showPreview) {
+                                PreviewView(card: card, username: username, isPresented: $showPreview)
                             }
                             
                             DisclosureGroup {
@@ -170,16 +175,13 @@ struct ShareView: View {
                                         .foregroundColor(AppColors.foreground)
                                     Spacer()
                                 }
-                                .padding(.horizontal)
-                                .background(Color.white)
+                                .padding()
+                                .background(AppColors.inputFieldBackground)
                             }
                             .padding(.trailing, 12)
-                            
-                            // Add padding at the bottom of the list
-                            Spacer()
-                                .frame(height: 16)  // Adjust this value as needed
                         }
-                        .background(Color.white)
+                        .padding(.bottom, 8)
+                        .background(AppColors.inputFieldBackground)
                         .cornerRadius(10)
                     }
                     .frame(maxWidth: .infinity)
