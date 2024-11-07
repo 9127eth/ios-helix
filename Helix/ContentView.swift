@@ -163,11 +163,14 @@ struct ContentView: View {
         print("Fetching business cards for user: \(userId)")
         errorMessage = nil
         
-        let db = Firestore.firestore()
-        let userRef = db.collection("users").document(userId)
-        
         Task {
             do {
+                // Add a small delay to allow server timestamps to resolve
+                try await Task.sleep(nanoseconds: 500_000_000) // 0.5 seconds
+                
+                let db = Firestore.firestore()
+                let userRef = db.collection("users").document(userId)
+                
                 // Force fetch the latest user data from the server
                 let userDocument = try await userRef.getDocument(source: .server)
                 guard let userData = userDocument.data(),

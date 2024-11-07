@@ -138,8 +138,11 @@ struct BusinessCard: Identifiable, Codable {
             createdAt = date
         } else if let timestampDouble = try? container.decode(Double.self, forKey: .createdAt) {
             createdAt = Date(timeIntervalSince1970: timestampDouble)
+        } else if (try? container.decodeNil(forKey: .createdAt)) ?? false {
+            // Handle null server timestamp
+            createdAt = Date()
         } else {
-            throw DecodingError.dataCorruptedError(forKey: .createdAt, in: container, debugDescription: "Invalid date format for createdAt")
+            createdAt = Date()
         }
         
         // Handle updatedAt with the same robust timestamp handling
@@ -154,8 +157,11 @@ struct BusinessCard: Identifiable, Codable {
             updatedAt = date
         } else if let timestampDouble = try? container.decode(Double.self, forKey: .updatedAt) {
             updatedAt = Date(timeIntervalSince1970: timestampDouble)
+        } else if (try? container.decodeNil(forKey: .updatedAt)) ?? false {
+            // Handle null server timestamp
+            updatedAt = Date()
         } else {
-            throw DecodingError.dataCorruptedError(forKey: .updatedAt, in: container, debugDescription: "Invalid date format for updatedAt")
+            updatedAt = Date()
         }
     }
 
