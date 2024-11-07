@@ -79,6 +79,12 @@ struct CreateBusinessCardView: View {
                                 showAboutMe: false
                             )
                             
+                            NextSectionIndicator(
+                                currentStep: currentStep, 
+                                steps: steps,
+                                action: handleNextButton
+                            )
+                            
                             VStack(spacing: 12) {
                                 SaveAndCloseButtonView(action: saveBusinessCard)
                                 CancelButtonView(action: { showCancelConfirmation = true })
@@ -86,49 +92,95 @@ struct CreateBusinessCardView: View {
                             .padding(.top, 24)
                         }
                     case 1:
-                        VStack {
+                        VStack(spacing: 24) {
                             ProfessionalInformationView(businessCard: $businessCard)
-                            SaveAndCloseButtonView(action: saveBusinessCard)
-                                .padding(.top, 16)
-                            CancelButtonView(action: { showCancelConfirmation = true })
+                            
+                            NextSectionIndicator(
+                                currentStep: currentStep, 
+                                steps: steps,
+                                action: handleNextButton
+                            )
+                            
+                            VStack(spacing: 12) {
+                                SaveAndCloseButtonView(action: saveBusinessCard)
+                                CancelButtonView(action: { showCancelConfirmation = true })
+                            }
+                            .padding(.top, 24)
                         }
                     case 2:
-                        VStack {
-                            DescriptionView(businessCard: $businessCard, showDescriptionError: $showDescriptionError)
-                            SaveAndCloseButtonView(action: saveBusinessCard)
-                                .padding(.top, 16)
-                            CancelButtonView(action: { showCancelConfirmation = true })
+                        VStack(spacing: 24) {
+                            DescriptionView(
+                                businessCard: $businessCard,
+                                showDescriptionError: $showDescriptionError
+                            )
+                            
+                            NextSectionIndicator(
+                                currentStep: currentStep, 
+                                steps: steps,
+                                action: handleNextButton
+                            )
+                            
+                            VStack(spacing: 12) {
+                                SaveAndCloseButtonView(action: saveBusinessCard)
+                                CancelButtonView(action: { showCancelConfirmation = true })
+                            }
+                            .padding(.top, 24)
                         }
                     case 3:
-                        VStack {
+                        VStack(spacing: 24) {
                             ContactInformationView(
                                 businessCard: $businessCard,
                                 showHeader: true,
                                 isPhoneNumberValid: $isPhoneNumberValid
                             )
-                            SaveAndCloseButtonView(action: saveBusinessCard)
-                                .padding(.top, 16)
-                            CancelButtonView(action: { showCancelConfirmation = true })
+                            
+                            NextSectionIndicator(
+                                currentStep: currentStep, 
+                                steps: steps,
+                                action: handleNextButton
+                            )
+                            
+                            VStack(spacing: 12) {
+                                SaveAndCloseButtonView(action: saveBusinessCard)
+                                CancelButtonView(action: { showCancelConfirmation = true })
+                            }
+                            .padding(.top, 24)
                         }
                     case 4:
-                        VStack {
+                        VStack(spacing: 24) {
                             SocialLinksView(businessCard: $businessCard, showHeader: true)
-                            SaveAndCloseButtonView(action: saveBusinessCard)
-                                .padding(.top, 16)
-                            CancelButtonView(action: { showCancelConfirmation = true })
+                            
+                            NextSectionIndicator(
+                                currentStep: currentStep, 
+                                steps: steps,
+                                action: handleNextButton
+                            )
+                            
+                            VStack(spacing: 12) {
+                                SaveAndCloseButtonView(action: saveBusinessCard)
+                                CancelButtonView(action: { showCancelConfirmation = true })
+                            }
+                            .padding(.top, 24)
                         }
                     case 5:
-                        VStack {
+                        VStack(spacing: 24) {
                             WebLinksView(businessCard: $businessCard)
-                            SaveAndCloseButtonView(action: saveBusinessCard)
-                                .padding(.top, 16)
-                            CancelButtonView(action: { showCancelConfirmation = true })
+                            
+                            NextSectionIndicator(
+                                currentStep: currentStep, 
+                                steps: steps,
+                                action: handleNextButton
+                            )
+                            
+                            VStack(spacing: 12) {
+                                SaveAndCloseButtonView(action: saveBusinessCard)
+                                CancelButtonView(action: { showCancelConfirmation = true })
+                            }
+                            .padding(.top, 24)
                         }
                     case 6:
-                        VStack {
+                        VStack(spacing: 24) {
                             ProfileImageView(businessCard: $businessCard, isCreating: true)
-                            
-                            // About Me Section
                             DisclosureGroup(isExpanded: $isAboutMeExpanded) {
                                 VStack(alignment: .leading, spacing: 8) {
                                     TextEditor(text: Binding(
@@ -153,8 +205,7 @@ struct CreateBusinessCardView: View {
                             }
                             .padding(.horizontal)
                             .padding(.top, 16)
-                            
-                            // Add Document Section
+
                             DisclosureGroup(isExpanded: $isAddDocumentExpanded) {
                                 DocumentView(
                                     businessCard: $businessCard,
@@ -169,19 +220,13 @@ struct CreateBusinessCardView: View {
                             }
                             .padding(.horizontal)
                             .padding(.top, 16)
-                            
 
-                            SaveAndCloseButtonView(action: saveBusinessCard)
-                                .padding(.top, 16)
-                            CancelButtonView(action: { showCancelConfirmation = true })
+                            VStack(spacing: 12) {
+                                SaveAndCloseButtonView(action: saveBusinessCard)
+                                CancelButtonView(action: { showCancelConfirmation = true })
+                            }
+                            .padding(.top, 24)
                         }
-                    case 7:
-                        DocumentView(
-                            businessCard: $businessCard,
-                            showHeader: false,
-                            isPro: $isPro,
-                            selectedDocument: $selectedDocument // Pass the binding
-                        )
                     default:
                         EmptyView()
                     }
@@ -510,6 +555,27 @@ struct SaveAndCloseButtonView: View {
                 )
         }
         .padding(.horizontal)
+    }
+}
+
+struct NextSectionIndicator: View {
+    let currentStep: Int
+    let steps: [String]
+    let action: () -> Void
+    
+    var body: some View {
+        if currentStep < steps.count - 1 {
+            Button(action: action) {
+                HStack {
+                    Text("Next: \(steps[currentStep + 1])")
+                        .font(.subheadline)
+                        .foregroundColor(.blue)
+                    Image(systemName: "chevron.right")
+                        .foregroundColor(.blue)
+                }
+            }
+            .padding(.bottom, 12)
+        }
     }
 }
 
