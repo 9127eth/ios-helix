@@ -25,6 +25,7 @@ struct EditBusinessCardView: View {
     @State private var showDescriptionError = false
     @State private var isPro: Bool = false
     @State private var selectedDocument: URL?
+    @State private var isPhoneNumberValid: Bool = true
     
     let sections = ["Card Label", "Basic Information", "Professional Information", "Contact Information", "Social Links", "Web Links", "Profile Image", "Custom Header/Message", "Document"]
     
@@ -122,7 +123,11 @@ struct EditBusinessCardView: View {
         case "Professional Information":
             return AnyView(ProfessionalInformationView(businessCard: card, showHeader: false))
         case "Contact Information":
-            return AnyView(ContactInformationView(businessCard: card, showHeader: false))
+            return AnyView(ContactInformationView(
+                businessCard: card,
+                showHeader: false,
+                isPhoneNumberValid: $isPhoneNumberValid
+            ))
         case "Social Links":
             return AnyView(SocialLinksView(businessCard: card, showHeader: false))
         case "Web Links":
@@ -146,13 +151,16 @@ struct EditBusinessCardView: View {
     private func saveChanges() {
         showFirstNameError = editedCard.firstName.isEmpty
         showDescriptionError = editedCard.description.isEmpty
-
+        
         var missingFields: [String] = []
         if showFirstNameError {
             missingFields.append("First Name")
         }
         if showDescriptionError {
             missingFields.append("Card Label")
+        }
+        if let phoneNumber = editedCard.phoneNumber, !phoneNumber.isEmpty && !isPhoneNumberValid {
+            missingFields.append("Valid Phone Number")
         }
 
         if !missingFields.isEmpty {

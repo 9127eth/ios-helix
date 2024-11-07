@@ -21,10 +21,12 @@ struct CreateBusinessCardView: View {
     @State private var showAlert = false
     @State private var alertMessage = ""
     @State private var selectedDocument: URL?
-    @State private var isPro: Bool = false  // Add this line
+    @State private var isPro: Bool = false
     @State private var isAboutMeExpanded = false
     @State private var isAddDocumentExpanded = false
     @State private var keyboardHeight: CGFloat = 0
+    @State private var isPhoneNumberValid = true
+    @State private var showPhoneNumberError = false
 
     let steps = ["Basic Information", "Professional Information", "Description", "Contact Information", "Social Links", "Web Links", "Profile Image"]
 
@@ -99,7 +101,11 @@ struct CreateBusinessCardView: View {
                         }
                     case 3:
                         VStack {
-                            ContactInformationView(businessCard: $businessCard)
+                            ContactInformationView(
+                                businessCard: $businessCard,
+                                showHeader: true,
+                                isPhoneNumberValid: $isPhoneNumberValid
+                            )
                             SaveAndCloseButtonView(action: saveBusinessCard)
                                 .padding(.top, 16)
                             CancelButtonView(action: { showCancelConfirmation = true })
@@ -200,7 +206,11 @@ struct CreateBusinessCardView: View {
             Text("Your progress will be lost if you cancel now.")
         }
         .alert(isPresented: $showAlert) {
-            Alert(title: Text("Error"), message: Text(alertMessage), dismissButton: .default(Text("OK")))
+            Alert(
+                title: Text("Required Fields"),
+                message: Text(alertMessage),
+                dismissButton: .default(Text("OK"))
+            )
         }
         .dismissKeyboardOnTap()
         .onAppear {
@@ -349,6 +359,15 @@ struct CreateBusinessCardView: View {
                 currentStep += 1
                 showDescriptionError = false
             }
+        case 3: // Contact Information step
+            if let phoneNumber = businessCard.phoneNumber, !phoneNumber.isEmpty && !isPhoneNumberValid {
+                showPhoneNumberError = true
+                showAlert = true
+                alertMessage = "Please enter a valid phone number"
+            } else {
+                currentStep += 1
+                showPhoneNumberError = false
+            }
         default:
             currentStep += 1
         }
@@ -361,6 +380,9 @@ struct CreateBusinessCardView: View {
         }
         if businessCard.description.isEmpty {
             missingFields.append("Card Label")
+        }
+        if let phoneNumber = businessCard.phoneNumber, !phoneNumber.isEmpty && !isPhoneNumberValid {
+            missingFields.append("Valid Phone Number")
         }
         return missingFields
     }

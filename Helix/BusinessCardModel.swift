@@ -126,28 +126,34 @@ struct BusinessCard: Identifiable, Codable {
         threadsUrl = try container.decodeIfPresent(String.self, forKey: .threadsUrl)
         webLinks = try container.decodeIfPresent([WebLink].self, forKey: .webLinks)
 
-        // Handle Timestamp, Date, Double, and Int values for createdAt
+        // Handle createdAt with more robust timestamp handling
         if let timestamp = try? container.decode(Timestamp.self, forKey: .createdAt) {
+            createdAt = timestamp.dateValue()
+        } else if let timestampDict = try? container.decode([String: Int64].self, forKey: .createdAt),
+                  let seconds = timestampDict["seconds"],
+                  let nanoseconds = Int32(exactly: timestampDict["nanoseconds"] ?? 0) {
+            let timestamp = Timestamp(seconds: seconds, nanoseconds: nanoseconds)
             createdAt = timestamp.dateValue()
         } else if let date = try? container.decode(Date.self, forKey: .createdAt) {
             createdAt = date
         } else if let timestampDouble = try? container.decode(Double.self, forKey: .createdAt) {
             createdAt = Date(timeIntervalSince1970: timestampDouble)
-        } else if let timestampInt = try? container.decode(Int.self, forKey: .createdAt) {
-            createdAt = Date(timeIntervalSince1970: Double(timestampInt))
         } else {
             throw DecodingError.dataCorruptedError(forKey: .createdAt, in: container, debugDescription: "Invalid date format for createdAt")
         }
-
-        // Handle Timestamp, Date, Double, and Int values for updatedAt
+        
+        // Handle updatedAt with the same robust timestamp handling
         if let timestamp = try? container.decode(Timestamp.self, forKey: .updatedAt) {
+            updatedAt = timestamp.dateValue()
+        } else if let timestampDict = try? container.decode([String: Int64].self, forKey: .updatedAt),
+                  let seconds = timestampDict["seconds"],
+                  let nanoseconds = Int32(exactly: timestampDict["nanoseconds"] ?? 0) {
+            let timestamp = Timestamp(seconds: seconds, nanoseconds: nanoseconds)
             updatedAt = timestamp.dateValue()
         } else if let date = try? container.decode(Date.self, forKey: .updatedAt) {
             updatedAt = date
         } else if let timestampDouble = try? container.decode(Double.self, forKey: .updatedAt) {
             updatedAt = Date(timeIntervalSince1970: timestampDouble)
-        } else if let timestampInt = try? container.decode(Int.self, forKey: .updatedAt) {
-            updatedAt = Date(timeIntervalSince1970: Double(timestampInt))
         } else {
             throw DecodingError.dataCorruptedError(forKey: .updatedAt, in: container, debugDescription: "Invalid date format for updatedAt")
         }

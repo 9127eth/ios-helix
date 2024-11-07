@@ -10,15 +10,19 @@ import libPhoneNumber
 
 struct ContactInformationView: View {
     @Binding var businessCard: BusinessCard
-    @State private var isPhoneNumberValid = false
     @State private var isEmailValid = true
     @State private var showEmailError = false
+    @State private var showPhoneNumberError = false
     @FocusState private var focusedField: Field?
     var showHeader: Bool
+    @Binding var isPhoneNumberValid: Bool
     
-    init(businessCard: Binding<BusinessCard>, showHeader: Bool = true) {
+    init(businessCard: Binding<BusinessCard>, 
+         showHeader: Bool = true,
+         isPhoneNumberValid: Binding<Bool> = .constant(true)) {
         self._businessCard = businessCard
         self.showHeader = showHeader
+        self._isPhoneNumberValid = isPhoneNumberValid
     }
     
     enum Field: Hashable {
@@ -36,9 +40,16 @@ struct ContactInformationView: View {
             PhoneNumberTextField(phoneNumber: Binding(
                 get: { businessCard.phoneNumber ?? "" },
                 set: { businessCard.phoneNumber = $0.isEmpty ? nil : $0 }
-            ), isValid: $isPhoneNumberValid)
+            ), isValid: $isPhoneNumberValid, showError: $showPhoneNumberError)
                 .focused($focusedField, equals: .phoneNumber)
-                .onSubmit { focusedField = .email }
+                .onSubmit {
+                    if !isPhoneNumberValid {
+                        showPhoneNumberError = true
+                    } else {
+                        showPhoneNumberError = false
+                        focusedField = .email
+                    }
+                }
             
             CustomTextField(title: "Email", text: Binding(
                 get: { businessCard.email ?? "" },
@@ -76,8 +87,9 @@ struct ContactInformationView: View {
 struct PhoneNumberTextField: View {
     @Binding var phoneNumber: String
     @Binding var isValid: Bool
+    @Binding var showError: Bool
     @State private var selectedCountry: CountryInfo
-    @State private var localPhoneNumber: String = ""
+    @State private var localPhoneNumber = ""
     @Environment(\.colorScheme) var colorScheme
     
     private static let phoneUtil = NBPhoneNumberUtil.sharedInstance()
@@ -85,25 +97,11 @@ struct PhoneNumberTextField: View {
     private let countries: [CountryInfo] = Self.countriesData.countries
     private let defaultCountry: CountryInfo = Self.countriesData.defaultCountry
     
-    init(phoneNumber: Binding<String>, isValid: Binding<Bool>) {
+    init(phoneNumber: Binding<String>, isValid: Binding<Bool>, showError: Binding<Bool>) {
         self._phoneNumber = phoneNumber
         self._isValid = isValid
+        self._showError = showError
         self._selectedCountry = State(initialValue: defaultCountry)
-    }
-    
-    private static func initializeCountries() -> (countries: [CountryInfo], defaultCountry: CountryInfo) {
-        let phoneUtil = NBPhoneNumberUtil.sharedInstance()
-        let allRegions = Locale.Region.isoRegions.map(\.identifier)
-        let countryList = allRegions.compactMap { regionCode -> CountryInfo? in
-            guard let name = (Locale.current as NSLocale).displayName(forKey: .countryCode, value: regionCode),
-                  let code = phoneUtil?.getCountryCode(forRegion: regionCode) else {
-                return nil
-            }
-            return CountryInfo(code: regionCode, name: name, prefix: code.stringValue)
-        }.sorted { $0.name < $1.name }
-        
-        let defaultCountry = countryList.first(where: { $0.code == "US" }) ?? countryList[0]
-        return (countries: countryList, defaultCountry: defaultCountry)
     }
     
     var body: some View {
@@ -145,7 +143,7 @@ struct PhoneNumberTextField: View {
                     }
             }
 
-            if !isValid && !localPhoneNumber.isEmpty {
+            if !isValid && !localPhoneNumber.isEmpty && showError {
                 Text("Invalid phone number format")
                     .foregroundColor(.red)
                     .font(.caption)
@@ -157,6 +155,21 @@ struct PhoneNumberTextField: View {
         .onAppear {
             parseInitialPhoneNumber()
         }
+    }
+    
+    private static func initializeCountries() -> (countries: [CountryInfo], defaultCountry: CountryInfo) {
+        let phoneUtil = NBPhoneNumberUtil.sharedInstance()
+        let allRegions = Locale.Region.isoRegions.map(\.identifier)
+        let countryList = allRegions.compactMap { regionCode -> CountryInfo? in
+            guard let name = (Locale.current as NSLocale).displayName(forKey: .countryCode, value: regionCode),
+                  let code = phoneUtil?.getCountryCode(forRegion: regionCode) else {
+                return nil
+            }
+            return CountryInfo(code: regionCode, name: name, prefix: code.stringValue)
+        }.sorted { $0.name < $1.name }
+        
+        let defaultCountry = countryList.first(where: { $0.code == "US" }) ?? countryList[0]
+        return (countries: countryList, defaultCountry: defaultCountry)
     }
     
     private func parseInitialPhoneNumber() {
