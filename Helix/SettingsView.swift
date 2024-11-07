@@ -61,6 +61,8 @@ struct SettingsView: View {
     @State private var newPasswordErrorMessage = ""
     @State private var confirmPasswordError = false
     @State private var confirmPasswordErrorMessage = ""
+    @State private var showingPrivacyPolicy = false
+    @State private var showingTerms = false
 
     var body: some View {
         ScrollView {
@@ -320,6 +322,36 @@ struct SettingsView: View {
                     .background(Color(UIColor.secondarySystemGroupedBackground))
                     .cornerRadius(8)
                     .padding(.bottom, 20)
+
+                    VStack(spacing: 8) {
+                        Text("Version 1.1.7")
+                            .font(.footnote)
+                            .foregroundColor(.gray)
+                        
+                        HStack(spacing: 4) {
+                            Button(action: {
+                                showingPrivacyPolicy = true
+                            }) {
+                                Text("Privacy")
+                                    .font(.footnote)
+                                    .foregroundColor(AppColors.bodyPrimaryText)
+                            }
+                            
+                            Text("&")
+                                .font(.footnote)
+                                .foregroundColor(.gray)
+                            
+                            Button(action: {
+                                showingTerms = true
+                            }) {
+                                Text("Terms")
+                                    .font(.footnote)
+                                    .foregroundColor(AppColors.bodyPrimaryText)
+                            }
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.top, 20)
+                    }
                 }
             }
             .padding()
@@ -510,6 +542,12 @@ struct SettingsView: View {
                     }
                 }
             )
+        }
+        .sheet(isPresented: $showingPrivacyPolicy) {
+            SafariView(url: URL(string: "https://www.helixcard.app/privacy-policy")!)
+        }
+        .sheet(isPresented: $showingTerms) {
+            SafariView(url: URL(string: "https://www.helixcard.app/terms-of-service")!)
         }
     }
 
