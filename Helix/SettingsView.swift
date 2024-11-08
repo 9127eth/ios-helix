@@ -114,6 +114,8 @@ struct SettingsView: View {
                             Spacer()
                             Text(Auth.auth().currentUser?.email ?? "Not available")
                                 .foregroundColor(AppColors.foreground)
+                                .minimumScaleFactor(0.5)
+                                .lineLimit(1)
                         }
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.vertical, 10)
@@ -235,7 +237,7 @@ struct SettingsView: View {
                             HStack {
                                 Image("subscription")
                                     .foregroundColor(AppColors.foreground)
-                                Text("Current Subscription")
+                                Text("Current Subscription:")
                                     .foregroundColor(AppColors.foreground)
                                 Spacer()
                                 Text(isPro ? "Helix Pro \(subscriptionPlanType)" : "Free Plan")

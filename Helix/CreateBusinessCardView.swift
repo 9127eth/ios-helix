@@ -89,7 +89,7 @@ struct CreateBusinessCardView: View {
                                 SaveAndCloseButtonView(action: saveBusinessCard)
                                 CancelButtonView(action: { showCancelConfirmation = true })
                             }
-                            .padding(.top, 24)
+                            .padding(.top, 8)
                         }
                     case 1:
                         VStack(spacing: 24) {
@@ -105,7 +105,7 @@ struct CreateBusinessCardView: View {
                                 SaveAndCloseButtonView(action: saveBusinessCard)
                                 CancelButtonView(action: { showCancelConfirmation = true })
                             }
-                            .padding(.top, 24)
+                            .padding(.top, 8)
                         }
                     case 2:
                         VStack(spacing: 24) {
@@ -124,7 +124,7 @@ struct CreateBusinessCardView: View {
                                 SaveAndCloseButtonView(action: saveBusinessCard)
                                 CancelButtonView(action: { showCancelConfirmation = true })
                             }
-                            .padding(.top, 24)
+                            .padding(.top, 8)
                         }
                     case 3:
                         VStack(spacing: 24) {
@@ -144,7 +144,7 @@ struct CreateBusinessCardView: View {
                                 SaveAndCloseButtonView(action: saveBusinessCard)
                                 CancelButtonView(action: { showCancelConfirmation = true })
                             }
-                            .padding(.top, 24)
+                            .padding(.top, 8)
                         }
                     case 4:
                         VStack(spacing: 24) {
@@ -160,7 +160,7 @@ struct CreateBusinessCardView: View {
                                 SaveAndCloseButtonView(action: saveBusinessCard)
                                 CancelButtonView(action: { showCancelConfirmation = true })
                             }
-                            .padding(.top, 24)
+                            .padding(.top, 8)
                         }
                     case 5:
                         VStack(spacing: 24) {
@@ -176,7 +176,7 @@ struct CreateBusinessCardView: View {
                                 SaveAndCloseButtonView(action: saveBusinessCard)
                                 CancelButtonView(action: { showCancelConfirmation = true })
                             }
-                            .padding(.top, 24)
+                            .padding(.top, 8)
                         }
                     case 6:
                         VStack(spacing: 24) {
@@ -228,7 +228,7 @@ struct CreateBusinessCardView: View {
                                 SaveAndCloseButtonView(action: saveBusinessCard)
                                 CancelButtonView(action: { showCancelConfirmation = true })
                             }
-                            .padding(.top, 24)
+                            .padding(.top, 8)
                         }
                     default:
                         EmptyView()
@@ -577,7 +577,7 @@ struct NextSectionIndicator: View {
                         .foregroundColor(.blue)
                 }
             }
-            .padding(.bottom, 12)
+            .padding(.bottom, 8)
         }
     }
 }
