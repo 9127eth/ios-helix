@@ -55,6 +55,8 @@ struct BusinessCard: Identifiable, Codable {
     var webLinks: [WebLink]?
     var cardDepthColor: String?  // Store hex color string
     
+    var theme: String = "classic"  // Default theme
+    
     init(cardSlug: String, firstName: String) {
         self.cardSlug = cardSlug
         self.firstName = firstName
@@ -68,7 +70,7 @@ struct BusinessCard: Identifiable, Codable {
     }
 
     enum CodingKeys: String, CodingKey {
-        case id, cardSlug, isPrimary, firstName, middleName, lastName, prefix, credentials, pronouns, description, jobTitle, company, phoneNumber, email, aboutMe, customMessage, customMessageHeader, cvUrl, cvHeader, cvDescription, cvDisplayText, imageUrl, isActive, createdAt, updatedAt, customSlug, isPro, linkedIn, twitter, facebookUrl, instagramUrl, tiktokUrl, youtubeUrl, discordUrl, twitchUrl, snapchatUrl, telegramUrl, whatsappUrl, threadsUrl, webLinks
+        case id, cardSlug, isPrimary, firstName, middleName, lastName, prefix, credentials, pronouns, description, jobTitle, company, phoneNumber, email, aboutMe, customMessage, customMessageHeader, cvUrl, cvHeader, cvDescription, cvDisplayText, imageUrl, isActive, createdAt, updatedAt, customSlug, isPro, linkedIn, twitter, facebookUrl, instagramUrl, tiktokUrl, youtubeUrl, discordUrl, twitchUrl, snapchatUrl, telegramUrl, whatsappUrl, threadsUrl, webLinks, cardDepthColor, theme
     }
 
     var name: String {
@@ -125,6 +127,8 @@ struct BusinessCard: Identifiable, Codable {
         whatsappUrl = try container.decodeIfPresent(String.self, forKey: .whatsappUrl)
         threadsUrl = try container.decodeIfPresent(String.self, forKey: .threadsUrl)
         webLinks = try container.decodeIfPresent([WebLink].self, forKey: .webLinks)
+        cardDepthColor = try container.decodeIfPresent(String.self, forKey: .cardDepthColor)
+        theme = try container.decodeIfPresent(String.self, forKey: .theme) ?? "classic"
 
         // Handle createdAt with more robust timestamp handling
         if let timestamp = try? container.decode(Timestamp.self, forKey: .createdAt) {
@@ -205,6 +209,8 @@ struct BusinessCard: Identifiable, Codable {
         try container.encodeIfPresent(whatsappUrl, forKey: .whatsappUrl)
         try container.encodeIfPresent(threadsUrl, forKey: .threadsUrl)
         try container.encodeIfPresent(webLinks, forKey: .webLinks)
+        try container.encodeIfPresent(cardDepthColor, forKey: .cardDepthColor)
+        try container.encode(theme, forKey: .theme)
         
         // Encode createdAt and updatedAt as Firestore Timestamps
         let timestampCreatedAt = Timestamp(date: createdAt)

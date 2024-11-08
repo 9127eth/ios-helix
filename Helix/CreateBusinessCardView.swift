@@ -181,6 +181,9 @@ struct CreateBusinessCardView: View {
                     case 6:
                         VStack(spacing: 24) {
                             ProfileImageView(businessCard: $businessCard, isCreating: true)
+                            
+                            CardThemeView(businessCard: $businessCard)
+                            
                             DisclosureGroup(isExpanded: $isAboutMeExpanded) {
                                 VStack(alignment: .leading, spacing: 8) {
                                     TextEditor(text: Binding(

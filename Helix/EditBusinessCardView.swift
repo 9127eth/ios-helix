@@ -27,7 +27,7 @@ struct EditBusinessCardView: View {
     @State private var selectedDocument: URL?
     @State private var isPhoneNumberValid: Bool = true
     
-    let sections = ["Card Label", "Basic Information", "Professional Information", "Contact Information", "Social Links", "Web Links", "Profile Image", "Custom Header/Message", "Document"]
+    let sections = ["Card Label", "Card Theme", "Basic Information", "Professional Information", "Contact Information", "Social Links", "Web Links", "Profile Image", "Custom Header/Message", "Document"]
     
     var body: some View {
         NavigationView {
@@ -118,6 +118,8 @@ struct EditBusinessCardView: View {
         switch section {
         case "Card Label":
             return AnyView(DescriptionView(businessCard: card, showHeader: false, showDescriptionError: $showDescriptionError))
+        case "Card Theme":
+            return AnyView(CardThemeView(businessCard: card, showHeader: false))
         case "Basic Information":
             return AnyView(BasicInformationView(businessCard: card, showHeader: false, showFirstNameError: $showFirstNameError))
         case "Professional Information":

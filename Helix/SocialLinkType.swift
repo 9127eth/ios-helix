@@ -11,7 +11,7 @@ enum SocialLinkType: String, CaseIterable {
     var displayName: String {
         switch self {
         case .linkedIn: return "LinkedIn"
-        case .twitter: return "Twitter"
+        case .twitter: return "X/Twitter"
         case .facebook: return "Facebook"
         case .instagram: return "Instagram"
         case .tiktok: return "TikTok"
