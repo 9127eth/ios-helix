@@ -408,17 +408,34 @@ struct CreateBusinessCardView: View {
                 showDescriptionError = false
             }
         case 3: // Contact Information step
+            var hasError = false
+            
             if let phoneNumber = businessCard.phoneNumber, !phoneNumber.isEmpty && !isPhoneNumberValid {
                 showPhoneNumberError = true
                 showAlert = true
                 alertMessage = "Please enter a valid phone number"
-            } else {
+                hasError = true
+            }
+            
+            if let email = businessCard.email, !email.isEmpty && !isValidEmail(email) {
+                showAlert = true
+                alertMessage = "Please enter a valid email address"
+                hasError = true
+            }
+            
+            if !hasError {
                 currentStep += 1
                 showPhoneNumberError = false
             }
         default:
             currentStep += 1
         }
+    }
+
+    private func isValidEmail(_ email: String) -> Bool {
+        let emailRegEx = "[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,64}"
+        let emailPred = NSPredicate(format:"SELF MATCHES %@", emailRegEx)
+        return emailPred.evaluate(with: email)
     }
 
     private func validateRequiredFields() -> [String] {
@@ -431,6 +448,12 @@ struct CreateBusinessCardView: View {
         }
         if let phoneNumber = businessCard.phoneNumber, !phoneNumber.isEmpty && !isPhoneNumberValid {
             missingFields.append("Valid Phone Number")
+        }
+        if let email = businessCard.email, !email.isEmpty {
+            let isValid = isValidEmail(email)
+            if !isValid {
+                missingFields.append("Valid Email Address")
+            }
         }
         return missingFields
     }

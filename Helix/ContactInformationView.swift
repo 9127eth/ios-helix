@@ -61,14 +61,12 @@ struct ContactInformationView: View {
                 .onChange(of: businessCard.email) { oldValue, newValue in
                     if let email = newValue, !email.isEmpty {
                         isEmailValid = isValidEmail(email)
-                        showEmailError = !isEmailValid
                     } else {
                         isEmailValid = true
-                        showEmailError = false
                     }
                 }
             
-            if showEmailError {
+            if showEmailError && !isEmailValid {
                 Text("Invalid email format")
                     .foregroundColor(.red)
                     .font(.caption)

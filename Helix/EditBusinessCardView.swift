@@ -164,6 +164,11 @@ struct EditBusinessCardView: View {
         if let phoneNumber = editedCard.phoneNumber, !phoneNumber.isEmpty && !isPhoneNumberValid {
             missingFields.append("Valid Phone Number")
         }
+        if let email = editedCard.email, !email.isEmpty {
+            if !isValidEmail(email) {
+                missingFields.append("Valid Email Address")
+            }
+        }
 
         if !missingFields.isEmpty {
             let fieldList = missingFields.joined(separator: " and ")
@@ -363,6 +368,12 @@ struct EditBusinessCardView: View {
             
             try await documentRef.delete()
         }
+    }
+    
+    private func isValidEmail(_ email: String) -> Bool {
+        let emailRegEx = "[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,64}"
+        let emailPred = NSPredicate(format:"SELF MATCHES %@", emailRegEx)
+        return emailPred.evaluate(with: email)
     }
     
     init(businessCard: Binding<BusinessCard>, username: String) {

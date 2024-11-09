@@ -1,7 +1,7 @@
 {
   "images" : [
     {
-      "filename" : "Helix iOS Logo.png",
+      "filename" : "1.png",
       "idiom" : "universal",
       "platform" : "ios",
       "size" : "1024x1024"
@@ -13,7 +13,7 @@
           "value" : "dark"
         }
       ],
-      "filename" : "Helix ios dark logo.png",
+      "filename" : "2.png",
       "idiom" : "universal",
       "platform" : "ios",
       "size" : "1024x1024"
