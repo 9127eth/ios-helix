@@ -140,7 +140,7 @@ struct BusinessCardGridView: View {
             
             HStack(spacing: 8) {
                 Image("calendar")
-                    .foregroundColor(AppColors.tertColor)
+                    .foregroundColor(AppColors.cardDepthDefault)
                 Text("It's \(formattedDate())")
                     .font(.subheadline)
                     .foregroundColor(.gray)
