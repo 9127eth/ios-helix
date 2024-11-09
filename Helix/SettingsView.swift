@@ -182,6 +182,7 @@ struct SettingsView: View {
                             .frame(height: 1)
                             .padding(.vertical, 12)
                             .padding(.horizontal, 16)
+                            .background(Color(AppColors.inputFieldBackground))
 
                         // Sign out button
                         Button(action: {

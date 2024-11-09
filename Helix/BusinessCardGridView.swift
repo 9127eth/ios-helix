@@ -127,8 +127,9 @@ struct BusinessCardGridView: View {
                     .foregroundColor(AppColors.helixPro)
                     .padding(.vertical, 6)
                     .padding(.horizontal, 12)
-                    .background(Color.gray.opacity(0.15))  // Changed to gray with opacity
+                    .background(Color.gray.opacity(0.10))  // Increased from 0.15 to 0.25 for darker gray
                     .cornerRadius(16)
+                    .shadow(color: Color.black.opacity(0.2), radius: 2, x: 0, y: 1)  // Added subtle shadow
                 }
                 .padding(.bottom, 5)
             }

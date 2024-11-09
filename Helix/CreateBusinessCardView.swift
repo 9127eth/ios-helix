@@ -192,6 +192,7 @@ struct CreateBusinessCardView: View {
                                     ))
                                     .frame(height: 100)
                                     .padding(8)
+                                    .scrollContentBackground(.hidden)
                                     .background(AppColors.inputFieldBackground)
                                     .cornerRadius(8)
                                     .overlay(

@@ -46,6 +46,16 @@ struct SubscriptionView: View {
                             }
                         }
                         
+                        // Plan Toggle
+                        if !isPro {
+                            Picker("Plan", selection: $selectedPlan) {
+                                Text("Yearly").tag(PlanType.yearly)
+                                Text("Monthly").tag(PlanType.monthly)
+                            }
+                            .pickerStyle(SegmentedPickerStyle())
+                            .padding(.horizontal)
+                        }
+                        
                         // Pro Plan
                         PlanCard(
                             title: "Helix Pro",
@@ -64,16 +74,6 @@ struct SubscriptionView: View {
                                 }
                             }
                         )
-                        
-                        // Plan Toggle
-                        if !isPro {
-                            Picker("Plan", selection: $selectedPlan) {
-                                Text("Yearly").tag(PlanType.yearly)
-                                Text("Monthly").tag(PlanType.monthly)
-                            }
-                            .pickerStyle(SegmentedPickerStyle())
-                            .padding(.horizontal)
-                        }
                         
                         // Free Plan
                         PlanCard(
