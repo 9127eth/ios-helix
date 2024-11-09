@@ -57,7 +57,13 @@ class AuthenticationManager: NSObject, ObservableObject {
     func signUpWithEmail(email: String, password: String) async throws -> User {
         let authResult = try await Auth.auth().createUser(withEmail: email, password: password)
         let user = authResult.user
+        
+        // Create user document first
         try await createUserDocument(for: user)
+        
+        // Send verification email but don't enforce it
+        try? await user.sendEmailVerification()
+        
         return user
     }
     

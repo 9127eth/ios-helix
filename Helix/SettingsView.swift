@@ -121,7 +121,38 @@ struct SettingsView: View {
                         .padding(.vertical, 10)
                         .padding(.horizontal, 16)
                         .background(AppColors.inputFieldBackground)
-
+                        
+                        // Add verification status right after email
+                   if let user = Auth.auth().currentUser, !user.isEmailVerified {
+                            Button(action: {
+                                Task {
+                                    do {
+                                        try await user.sendEmailVerification()
+                                        alertTitle = "Verification Email Sent"
+                                        alertMessage = "Please check your email to verify your account"
+                                        showAlert = true
+                                    } catch {
+                                        alertTitle = "Error"
+                                        alertMessage = error.localizedDescription
+                                        showAlert = true
+                                    }
+                                }
+                            }) {
+                                HStack {
+                                    Image(systemName: "exclamationmark.triangle")
+                                        .foregroundColor(.yellow)
+                                    Text("Please verify your email")
+                                        .foregroundColor(AppColors.foreground)
+                                    Spacer()
+                                    Image(systemName: "chevron.right")
+                                        .foregroundColor(AppColors.foreground)
+                                }
+                                .padding(.vertical, 10)
+                                .padding(.horizontal, 16)
+                                .background(AppColors.inputFieldBackground)
+                            }
+                        }
+                        
                         // Sign-in method display
                         HStack {
                             Image(systemName: "person.circle")
