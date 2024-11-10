@@ -151,54 +151,36 @@ struct EditBusinessCardView: View {
     }
     
     private func saveChanges() {
-        showFirstNameError = editedCard.firstName.isEmpty
-        showDescriptionError = editedCard.description.isEmpty
-        
-        var missingFields: [String] = []
-        if showFirstNameError {
-            missingFields.append("First Name")
-        }
-        if showDescriptionError {
-            missingFields.append("Card Label")
-        }
-        if let phoneNumber = editedCard.phoneNumber, !phoneNumber.isEmpty && !isPhoneNumberValid {
-            missingFields.append("Valid Phone Number")
-        }
-        if let email = editedCard.email, !email.isEmpty {
-            if !isValidEmail(email) {
-                missingFields.append("Valid Email Address")
-            }
-        }
-
-        if !missingFields.isEmpty {
-            let fieldList = missingFields.joined(separator: " and ")
-            saveErrorMessage = "Please fill out the following required field\(missingFields.count > 1 ? "s" : ""): \(fieldList)."
-            showingSaveError = true
-            return
-        }
-
         Task { @MainActor in
             do {
-                // If the document URL was cleared, delete the old document
-                if businessCard.cvUrl != nil && editedCard.cvUrl == nil {
-                    try await deleteDocumentIfNeeded()
-                    
-                    // Update Firestore document to remove CV-related fields
-                    guard let userId = Auth.auth().currentUser?.uid,
-                          let cardId = editedCard.id else { return }
-                    
-                    let db = Firestore.firestore()
-                    let cardRef = db.collection("users").document(userId)
-                        .collection("businessCards").document(cardId)
-                    
-                    await MainActor.run {
-                        cardRef.updateData([
-                            "cvUrl": FieldValue.delete(),
-                            "cvHeader": FieldValue.delete(),
-                            "cvDescription": FieldValue.delete(),
-                            "cvDisplayText": FieldValue.delete()
-                        ])
-                    }
+                guard let userId = Auth.auth().currentUser?.uid,
+                      let cardId = editedCard.id else { return }
+                
+                let db = Firestore.firestore()
+                let cardRef = db.collection("users").document(userId)
+                    .collection("businessCards").document(cardId)
+                
+                // Convert empty strings to nil for optional fields
+                var updates = try editedCard.asDictionary()
+                
+                // Handle optional fields
+                updates["middleName"] = editedCard.middleName?.isEmpty ?? true ? "" : editedCard.middleName
+                updates["lastName"] = editedCard.lastName?.isEmpty ?? true ? "" : editedCard.lastName
+                updates["prefix"] = editedCard.prefix?.isEmpty ?? true ? "" : editedCard.prefix
+                updates["credentials"] = editedCard.credentials?.isEmpty ?? true ? "" : editedCard.credentials
+                updates["pronouns"] = editedCard.pronouns?.isEmpty ?? true ? "" : editedCard.pronouns
+                updates["phoneNumber"] = editedCard.phoneNumber?.isEmpty ?? true ? "" : editedCard.phoneNumber
+                updates["email"] = editedCard.email?.isEmpty ?? true ? "" : editedCard.email
+                updates["aboutMe"] = editedCard.aboutMe?.isEmpty ?? true ? "" : editedCard.aboutMe
+                updates["customMessage"] = editedCard.customMessage?.isEmpty ?? true ? "" : editedCard.customMessage
+                updates["customMessageHeader"] = editedCard.customMessageHeader?.isEmpty ?? true ? "" : editedCard.customMessageHeader
+                
+                // Handle CV-related fields
+                if editedCard.cvUrl == nil {
+                    updates["cvUrl"] = FieldValue.delete()
+                    updates["cvHeader"] = FieldValue.delete()
+                    updates["cvDescription"] = FieldValue.delete()
+                    updates["cvDisplayText"] = FieldValue.delete()
                 }
 
                 // If a new document is selected, upload it
@@ -209,19 +191,18 @@ struct EditBusinessCardView: View {
 
                 // Handle social links
                 for linkType in SocialLinkType.allCases {
-                    if editedCard.socialLinkValue(for: linkType) == nil {
+                    if editedCard.socialLinkValue(for: linkType) == nil || editedCard.socialLinkValue(for: linkType)?.isEmpty ?? true {
                         editedCard.removeSocialLink(linkType)
+                        updates["\(linkType.rawValue)Url"] = FieldValue.delete()
                     }
                 }
 
-                try await BusinessCard.saveChanges(editedCard)
-                businessCard = editedCard // Update the original card
+                try await cardRef.updateData(updates)
+                businessCard = editedCard
                 presentationMode.wrappedValue.dismiss()
             } catch {
-                await MainActor.run {
-                    saveErrorMessage = error.localizedDescription
-                    showingSaveError = true
-                }
+                saveErrorMessage = error.localizedDescription
+                showingSaveError = true
             }
         }
     }
@@ -383,3 +364,4 @@ struct EditBusinessCardView: View {
         self.username = username
     }
 }
+
