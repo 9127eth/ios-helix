@@ -129,25 +129,6 @@ struct CreateBusinessCardView: View {
                         }
                     case 3:
                         VStack(spacing: 24) {
-                            DescriptionView(
-                                businessCard: $businessCard,
-                                showDescriptionError: $showDescriptionError
-                            )
-                            
-                            NextSectionIndicator(
-                                currentStep: currentStep, 
-                                steps: steps,
-                                action: handleNextButton
-                            )
-                            
-                            VStack(spacing: 12) {
-                                SaveAndCloseButtonView(action: saveBusinessCard)
-                                CancelButtonView(action: { showCancelConfirmation = true })
-                            }
-                            .padding(.top, 8)
-                        }
-                    case 4:
-                        VStack(spacing: 24) {
                             ContactInformationView(
                                 businessCard: $businessCard,
                                 showHeader: true,
@@ -166,7 +147,7 @@ struct CreateBusinessCardView: View {
                             }
                             .padding(.top, 8)
                         }
-                    case 5:
+                    case 4:
                         VStack(spacing: 24) {
                             SocialLinksView(businessCard: $businessCard, showHeader: true)
                             
@@ -182,7 +163,7 @@ struct CreateBusinessCardView: View {
                             }
                             .padding(.top, 8)
                         }
-                    case 6:
+                    case 5:
                         VStack(spacing: 24) {
                             WebLinksView(businessCard: $businessCard)
                             
@@ -198,7 +179,7 @@ struct CreateBusinessCardView: View {
                             }
                             .padding(.top, 8)
                         }
-                    case 7:
+                    case 6:
                         VStack(spacing: 24) {
                             ProfileImageView(businessCard: $businessCard, isCreating: true)
                             
@@ -427,13 +408,6 @@ struct CreateBusinessCardView: View {
             } else {
                 currentStep += 1
                 showFirstNameError = false
-            }
-        case 2:
-            if businessCard.description.isEmpty {
-                showDescriptionError = true
-            } else {
-                currentStep += 1
-                showDescriptionError = false
             }
         case 3: // Contact Information step
             var hasError = false
