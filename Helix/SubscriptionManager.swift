@@ -12,7 +12,8 @@ import FirebaseAuth
 class SubscriptionManager: ObservableObject {
     @Published var products: [Product] = []
     @Published var purchasedSubscriptions: [Product] = []
-    private var productIds = ["001", "002"] // Updated product IDs
+    @Published var isLifetime: Bool = false
+    private var productIds = ["001", "002", "003"] // Added lifetime product ID
     
     init() {
         Task {
@@ -36,6 +37,13 @@ class SubscriptionManager: ObservableObject {
     func updatePurchasedSubscriptions() async {
         for await result in Transaction.currentEntitlements {
             guard case .verified(let transaction) = result else {
+                continue
+            }
+            
+            if transaction.productID == "003" {
+                isLifetime = true
+                purchasedSubscriptions.removeAll() // Clear other subscriptions
+                await updateFirebaseProStatus(true, isLifetime: true)
                 continue
             }
             
@@ -65,7 +73,7 @@ class SubscriptionManager: ObservableObject {
         }
     }
     
-    func updateFirebaseProStatus(_ isPro: Bool) async {
+    func updateFirebaseProStatus(_ isPro: Bool, isLifetime: Bool = false) async {
         guard let userId = Auth.auth().currentUser?.uid else {
             print("No authenticated user found")
             return
@@ -73,12 +81,21 @@ class SubscriptionManager: ObservableObject {
         
         let db = Firestore.firestore()
         do {
+            let userDoc = try await db.collection("users").document(userId).getDocument()
+            let isLifetime = userDoc.data()?["isLifetime"] as? Bool ?? false
+            
+            if isLifetime {
+                return
+            }
+            
             // Start a batch write
             let batch = db.batch()
-            
-            // 1. Update user's pro status
             let userRef = db.collection("users").document(userId)
-            batch.updateData(["isPro": isPro], forDocument: userRef)
+            
+            batch.updateData([
+                "isPro": isPro,
+                "isLifetime": false
+            ], forDocument: userRef)
             
             // 2. Get all user's business cards
             let cardsSnapshot = try await userRef.collection("businessCards").getDocuments()
@@ -114,13 +131,20 @@ class SubscriptionManager: ObservableObject {
                 continue
             }
             
+            if transaction.productID == "003" {
+                isLifetime = true
+                purchasedSubscriptions.removeAll()
+                await updateFirebaseProStatus(true, isLifetime: true)
+                continue
+            }
+            
             if let product = products.first(where: { $0.id == transaction.productID }) {
                 purchasedSubscriptions.append(product)
             }
         }
         
         // Update Firebase status
-        if !purchasedSubscriptions.isEmpty {
+        if !purchasedSubscriptions.isEmpty || isLifetime {
             await updateFirebaseProStatus(true)
         }
     }

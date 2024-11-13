@@ -47,6 +47,9 @@ class AppDelegate: NSObject, UIApplicationDelegate {
     }
     
     private func handleVerifiedTransaction(_ transaction: StoreKit.Transaction) async {
+        // Check if this is the lifetime purchase
+        let isLifetimePurchase = transaction.productID == "003"
+        
         guard let userId = Auth.auth().currentUser?.uid else {
             print("No authenticated user found when handling transaction")
             return
@@ -54,12 +57,15 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         
         let db = Firestore.firestore()
         do {
-            // Update user's pro status in Firestore
             let userRef = db.collection("users").document(userId)
             let batch = db.batch()
             
-            // Set user as pro
-            batch.updateData(["isPro": true], forDocument: userRef)
+            // Update user document
+            let updates: [String: Any] = [
+                "isPro": true,
+                "isLifetime": isLifetimePurchase
+            ]
+            batch.updateData(updates, forDocument: userRef)
             
             // Update all user's business cards
             let cardsSnapshot = try await userRef.collection("businessCards").getDocuments()
@@ -75,7 +81,6 @@ class AppDelegate: NSObject, UIApplicationDelegate {
                 batch.updateData(updateData, forDocument: cardRef)
             }
             
-            // Commit all changes
             try await batch.commit()
             print("Successfully updated user and cards pro status from transaction")
         } catch {

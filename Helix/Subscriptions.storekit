@@ -23,6 +23,11 @@
       "productID" : "002",
       "displayName" : "Monthly Subscription",
       "type" : "RecurringSubscription"
+    },
+    {
+      "productID" : "003",
+      "displayName" : "Lifetime Pro Access",
+      "type" : "NonConsumable"
     }
   ],
   "settings" : {

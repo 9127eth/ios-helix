@@ -12,7 +12,7 @@ import FirebaseAuth
 
 struct SubscriptionView: View {
     @Binding var isPro: Bool
-    @State private var selectedPlan: PlanType = .yearly
+    @State private var selectedPlan: PlanType = .lifetime
     @Environment(\.presentationMode) var presentationMode
     @StateObject private var subscriptionManager = SubscriptionManager()
     @State private var isLoading = true
@@ -21,7 +21,9 @@ struct SubscriptionView: View {
     @State private var currentUserPlan: PlanType?
     
     enum PlanType {
-        case yearly, monthly
+        case lifetime
+        case yearly
+        case monthly
     }
     
     var body: some View {
@@ -49,6 +51,15 @@ struct SubscriptionView: View {
                         // Plan Toggle
                         if !isPro {
                             Picker("Plan", selection: $selectedPlan) {
+                                Text("Lifetime").tag(PlanType.lifetime)
+                                Text("Yearly").tag(PlanType.yearly)
+                                Text("Monthly").tag(PlanType.monthly)
+                            }
+                            .pickerStyle(SegmentedPickerStyle())
+                            .padding(.horizontal)
+                        } else if isPro && !subscriptionManager.isLifetime {
+                            // Show current subscription status without lifetime option
+                            Picker("Plan", selection: $selectedPlan) {
                                 Text("Yearly").tag(PlanType.yearly)
                                 Text("Monthly").tag(PlanType.monthly)
                             }
@@ -59,8 +70,12 @@ struct SubscriptionView: View {
                         // Pro Plan
                         PlanCard(
                             title: "Helix Pro",
-                            price: isPro ? (currentUserPlan == .monthly ? "$2.99/month" : "$12.99/year")
-                                       : (selectedPlan == .monthly ? "$2.99/month" : "$12.99/year"),
+                            price: isPro ? (currentUserPlan == .monthly ? "$2.99/month" : 
+                                           currentUserPlan == .yearly ? "$12.99/year" : 
+                                           "Lifetime Pro") :
+                                           (selectedPlan == .monthly ? "$2.99/month" : 
+                                            selectedPlan == .yearly ? "$12.99/year" : 
+                                            "$19.99 pay once, get Helix Pro forever!"),
                             features: [
                                 "Up to 10 business cards",
                                 "CV/Resume Upload",
@@ -138,7 +153,12 @@ struct SubscriptionView: View {
     private func purchaseSubscription(for planType: PlanType) {
         Task {
             do {
-                let productId = planType == .yearly ? "001" : "002" // Updated product IDs
+                let productId = switch planType {
+                    case .yearly: "001"
+                    case .monthly: "002"
+                    case .lifetime: "003"
+                }
+                
                 if let product = subscriptionManager.products.first(where: { $0.id == productId }) {
                     try await subscriptionManager.purchase(product)
                     isPro = true
@@ -148,8 +168,8 @@ struct SubscriptionView: View {
                     errorMessage = "Product not available for purchase."
                 }
             } catch {
-                print("Failed to purchase subscription: \(error)")
-                errorMessage = "Failed to purchase subscription: \(error.localizedDescription)"
+                print("Failed to purchase: \(error)")
+                errorMessage = "Failed to purchase: \(error.localizedDescription)"
             }
         }
     }
@@ -193,7 +213,7 @@ struct PlanCard: View {
             Button(action: action) {
                 HStack {
                     if title == "Helix Pro" && !isCurrentPlan {
-                        Image("lightning")
+                        Image("lightening")
                     }
                     Text(buttonText)
                 }
