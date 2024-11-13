@@ -75,7 +75,8 @@ struct CreateBusinessCardView: View {
                         VStack(spacing: 24) {
                             DescriptionView(
                                 businessCard: $businessCard,
-                                showDescriptionError: $showDescriptionError
+                                showDescriptionError: $showDescriptionError,
+                                isCreating: true
                             )
                             
                             NextSectionIndicator(
