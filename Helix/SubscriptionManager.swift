@@ -24,6 +24,9 @@ class SubscriptionManager: ObservableObject {
     
     @MainActor
     func loadProducts() async {
+        // Skip if products are already loaded
+        guard products.isEmpty else { return }
+        
         do {
             let storeProducts = try await Product.products(for: productIds)
             products = storeProducts
