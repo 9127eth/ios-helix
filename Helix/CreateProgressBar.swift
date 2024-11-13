@@ -8,7 +8,7 @@
 import SwiftUI
 
 public struct CreateProgressBar: View {
-    let steps = ["Basic Information", "Professional Information", "Description", "Contact Information", "Social Links", "Web Links", "Profile Image"]
+    let steps = ["Card Label", "Basic Information", "Professional Information", "Contact Information", "Social Links", "Web Links", "Profile Image"]
     let currentStep: Int
     
     public init(currentStep: Int) {
@@ -54,9 +54,9 @@ public struct CreateProgressBar: View {
     
     private func iconName(for index: Int) -> String {
         switch index {
-        case 0: return "profile"
-        case 1: return "briefcase"
-        case 2: return "Label"
+        case 0: return "Label"
+        case 1: return "profile"
+        case 2: return "briefcase"
         case 3: return "email"
         case 4: return "social"
         case 5: return "Link"
