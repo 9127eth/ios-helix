@@ -63,6 +63,7 @@ struct SettingsView: View {
     @State private var confirmPasswordErrorMessage = ""
     @State private var showingPrivacyPolicy = false
     @State private var showingTerms = false
+    @State private var showSubscriptionView = false
 
     var body: some View {
         ScrollView {
@@ -255,12 +256,35 @@ struct SettingsView: View {
                     .padding(.bottom, 20)
 
                     // New Subscription Section
-                    Text("Subscription")
-                        .font(.subheadline)
-                        .foregroundColor(.gray)
-                        .padding(.vertical, 10)
-                        .padding(.leading, 16)
-                        .frame(maxWidth: .infinity, alignment: .leading)
+                    HStack {
+                        Text("Subscription")
+                            .font(.subheadline)
+                            .foregroundColor(.gray)
+                        
+                        if !isPro {
+                            Button(action: {
+                                showSubscriptionView = true
+                            }) {
+                                HStack(spacing: 6) {
+                                    Image(systemName: "bolt.fill")
+                                        .resizable()
+                                        .aspectRatio(contentMode: .fit)
+                                        .frame(width: 12, height: 12)
+                                    Text("Get Helix Pro")
+                                        .font(.subheadline)
+                                }
+                                .foregroundColor(AppColors.helixPro)
+                                .padding(.vertical, 6)
+                                .padding(.horizontal, 12)
+                                .background(Color.gray.opacity(0.10))
+                                .cornerRadius(16)
+                                .shadow(color: Color.black.opacity(0.2), radius: 2, x: 0, y: 1)
+                            }
+                        }
+                    }
+                    .padding(.vertical, 10)
+                    .padding(.leading, 16)
+                    .frame(maxWidth: .infinity, alignment: .leading)
 
                     VStack(spacing: 0) {
                         Button(action: {
@@ -582,6 +606,9 @@ struct SettingsView: View {
         }
         .sheet(isPresented: $showingTerms) {
             SafariView(url: URL(string: "https://www.helixcard.app/terms-of-service")!)
+        }
+        .sheet(isPresented: $showSubscriptionView) {
+            SubscriptionView(isPro: $isPro)
         }
     }
 

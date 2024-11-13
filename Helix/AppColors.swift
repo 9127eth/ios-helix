@@ -32,7 +32,7 @@ struct AppColors {
     
     static let secondary = Color("secondaryThemeColor")
     
-    static let bodySecondaryText = Color(UIColor.systemGray)  // System dark gray
+    static let bodySecondaryText = Color(UIColor.systemGray.withAlphaComponent(0.8))  // Make system gray darker
     
     private init() {}
 }
