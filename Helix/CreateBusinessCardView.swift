@@ -448,14 +448,13 @@ struct CreateBusinessCardView: View {
         if businessCard.description.isEmpty {
             missingFields.append("Card Label")
         }
-        if let phoneNumber = businessCard.phoneNumber, !phoneNumber.isEmpty && !isPhoneNumberValid {
-            missingFields.append("Valid Phone Number")
-        }
-        if let email = businessCard.email, !email.isEmpty {
-            let isValid = isValidEmail(email)
-            if !isValid {
-                missingFields.append("Valid Email Address")
+        if let phoneNumber = businessCard.phoneNumber, !phoneNumber.isEmpty {
+            if !isPhoneNumberValid {
+                missingFields.append("Valid Phone Number")
             }
+        }
+        if let email = businessCard.email, !email.isEmpty && !isValidEmail(email) {
+            missingFields.append("Valid Email Address")
         }
         return missingFields
     }

@@ -174,6 +174,7 @@ struct EditBusinessCardView: View {
                 updates["aboutMe"] = editedCard.aboutMe?.isEmpty ?? true ? "" : editedCard.aboutMe
                 updates["customMessage"] = editedCard.customMessage?.isEmpty ?? true ? "" : editedCard.customMessage
                 updates["customMessageHeader"] = editedCard.customMessageHeader?.isEmpty ?? true ? "" : editedCard.customMessageHeader
+                updates["enableTextMessage"] = editedCard.enableTextMessage ?? true
                 
                 // Handle CV-related fields
                 if editedCard.cvUrl == nil {

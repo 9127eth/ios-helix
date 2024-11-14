@@ -39,7 +39,14 @@ struct ContactInformationView: View {
             
             PhoneNumberTextField(phoneNumber: Binding(
                 get: { businessCard.phoneNumber ?? "" },
-                set: { businessCard.phoneNumber = $0.isEmpty ? nil : $0 }
+                set: { 
+                    let newValue = $0.isEmpty ? nil : $0
+                    businessCard.phoneNumber = newValue
+                    if newValue == nil {
+                        isPhoneNumberValid = true
+                        showPhoneNumberError = false
+                    }
+                }
             ), isValid: $isPhoneNumberValid, showError: $showPhoneNumberError)
                 .focused($focusedField, equals: .phoneNumber)
                 .onSubmit {
@@ -50,6 +57,17 @@ struct ContactInformationView: View {
                         focusedField = .email
                     }
                 }
+            
+            if businessCard.phoneNumber?.isEmpty == false {
+                Toggle("Enable \"Send a Text\" button", isOn: Binding(
+                    get: { businessCard.enableTextMessage ?? true },
+                    set: { businessCard.enableTextMessage = $0 }
+                ))
+                .font(.system(size: 14))
+                .foregroundColor(.gray)
+                .padding(.top, 4)
+                .padding(.horizontal, 16)
+            }
             
             CustomTextField(title: "Email", text: Binding(
                 get: { businessCard.email ?? "" },
@@ -104,7 +122,7 @@ struct PhoneNumberTextField: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text("Mobile Number")
+            Text("Phone Number")
                 .font(.system(size: 14, weight: .medium))
                 .foregroundColor(.gray)
             HStack(spacing: 8) {
@@ -186,6 +204,13 @@ struct PhoneNumberTextField: View {
     }
     
     private func validatePhoneNumber() {
+        // If phone number is empty, consider it valid and reset the binding
+        if localPhoneNumber.isEmpty {
+            isValid = true
+            phoneNumber = ""
+            return
+        }
+        
         guard let phoneUtil = Self.phoneUtil else {
             isValid = false
             return

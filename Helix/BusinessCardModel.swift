@@ -57,6 +57,8 @@ struct BusinessCard: Identifiable, Codable {
     
     var theme: String = "classic"  // Default theme
     
+    var enableTextMessage: Bool?
+    
     init(cardSlug: String, firstName: String) {
         self.cardSlug = cardSlug
         self.firstName = firstName
@@ -70,7 +72,7 @@ struct BusinessCard: Identifiable, Codable {
     }
 
     enum CodingKeys: String, CodingKey {
-        case id, cardSlug, isPrimary, firstName, middleName, lastName, prefix, credentials, pronouns, description, jobTitle, company, phoneNumber, email, aboutMe, customMessage, customMessageHeader, cvUrl, cvHeader, cvDescription, cvDisplayText, imageUrl, isActive, createdAt, updatedAt, customSlug, isPro, linkedIn, twitter, facebookUrl, instagramUrl, tiktokUrl, youtubeUrl, discordUrl, twitchUrl, snapchatUrl, telegramUrl, whatsappUrl, threadsUrl, webLinks, cardDepthColor, theme
+        case id, cardSlug, isPrimary, firstName, middleName, lastName, prefix, credentials, pronouns, description, jobTitle, company, phoneNumber, email, aboutMe, customMessage, customMessageHeader, cvUrl, cvHeader, cvDescription, cvDisplayText, imageUrl, isActive, createdAt, updatedAt, customSlug, isPro, linkedIn, twitter, facebookUrl, instagramUrl, tiktokUrl, youtubeUrl, discordUrl, twitchUrl, snapchatUrl, telegramUrl, whatsappUrl, threadsUrl, webLinks, cardDepthColor, theme, enableTextMessage
     }
 
     var name: String {
@@ -129,6 +131,7 @@ struct BusinessCard: Identifiable, Codable {
         webLinks = try container.decodeIfPresent([WebLink].self, forKey: .webLinks)
         cardDepthColor = try container.decodeIfPresent(String.self, forKey: .cardDepthColor)
         theme = try container.decodeIfPresent(String.self, forKey: .theme) ?? "classic"
+        enableTextMessage = try container.decodeIfPresent(Bool.self, forKey: .enableTextMessage)
 
         // Handle createdAt with more robust timestamp handling
         if let timestamp = try? container.decode(Timestamp.self, forKey: .createdAt) {
@@ -211,6 +214,7 @@ struct BusinessCard: Identifiable, Codable {
         try container.encodeIfPresent(webLinks, forKey: .webLinks)
         try container.encodeIfPresent(cardDepthColor, forKey: .cardDepthColor)
         try container.encode(theme, forKey: .theme)
+        try container.encode(enableTextMessage, forKey: .enableTextMessage)
         
         // Encode createdAt and updatedAt as Firestore Timestamps
         let timestampCreatedAt = Timestamp(date: createdAt)
