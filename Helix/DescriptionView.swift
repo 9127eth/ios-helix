@@ -37,7 +37,7 @@ struct DescriptionView: View {
                             .foregroundColor(AppColors.helixPro)
                     }
                     
-                    Text("Let's get a business card created.")
+                    Text("Let's create a business card.")
                         .font(.title2)
                         .fontWeight(.medium)
                         .foregroundColor(AppColors.bodyPrimaryText)
