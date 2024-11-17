@@ -293,7 +293,7 @@ struct SettingsView: View {
                             HStack {
                                 Image("subscription")
                                     .foregroundColor(AppColors.foreground)
-                                Text("Current Subscription:")
+                                Text("Current Plan:")
                                     .foregroundColor(AppColors.foreground)
                                 Spacer()
                                 Text(isPro ? "Helix Pro \(subscriptionPlanType)" : "Free Plan")
