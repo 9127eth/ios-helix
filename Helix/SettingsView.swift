@@ -730,13 +730,17 @@ struct SettingsView: View {
             if let document = document, document.exists {
                 self.isPro = document.data()?["isPro"] as? Bool ?? false
                 
-                // Get subscription type from stripeSubscriptionId or similar field
-                if let subscriptionId = document.data()?["stripeSubscriptionId"] as? String {
-                    // Determine plan type based on subscription ID
-                    if subscriptionId.contains("monthly") {
-                        self.subscriptionPlanType = "Monthly"
-                    } else {
-                        self.subscriptionPlanType = "Yearly"
+                // Get subscription type directly from isProType
+                if let proType = document.data()?["isProType"] as? String {
+                    switch proType {
+                        case "monthly":
+                            self.subscriptionPlanType = "Monthly"
+                        case "yearly":
+                            self.subscriptionPlanType = "Yearly"
+                        case "lifetime":
+                            self.subscriptionPlanType = "Lifetime"
+                        default:
+                            self.subscriptionPlanType = ""
                     }
                 }
             }

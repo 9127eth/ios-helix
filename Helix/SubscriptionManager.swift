@@ -66,7 +66,7 @@ class SubscriptionManager: ObservableObject {
             }
             await transaction.finish()
             await updatePurchasedSubscriptions()
-            await updateFirebaseProStatus(true)
+            await updateFirebaseProStatus(true, isLifetime: product.id == "003", productId: product.id)
         case .userCancelled:
             throw SubscriptionError.userCancelled
         case .pending:
@@ -76,16 +76,27 @@ class SubscriptionManager: ObservableObject {
         }
     }
     
-    func updateFirebaseProStatus(_ isPro: Bool, isLifetime: Bool = false) async {
+    func updateFirebaseProStatus(_ isPro: Bool, isLifetime: Bool = false, productId: String? = nil) async {
         guard let userId = Auth.auth().currentUser?.uid else {
             print("No authenticated user found")
             return
         }
         
+        let proType = if let id = productId {
+            switch id {
+                case "001": "yearly"
+                case "002": "monthly"
+                case "003": "lifetime"
+                default: ""
+            }
+        } else {
+            ""
+        }
+        
         let db = Firestore.firestore()
         do {
             let userDoc = try await db.collection("users").document(userId).getDocument()
-            let isLifetime = userDoc.data()?["isLifetime"] as? Bool ?? false
+            let isLifetime = userDoc.data()?["isProType"] as? String == "lifetime"
             
             if isLifetime {
                 return
@@ -95,31 +106,29 @@ class SubscriptionManager: ObservableObject {
             let batch = db.batch()
             let userRef = db.collection("users").document(userId)
             
-            batch.updateData([
+            var updateData: [String: Any] = [
                 "isPro": isPro,
-                "isLifetime": false
-            ], forDocument: userRef)
+                "isProType": proType
+            ]
             
-            // 2. Get all user's business cards
+            batch.updateData(updateData, forDocument: userRef)
+            
+            // Get all user's business cards
             let cardsSnapshot = try await userRef.collection("businessCards").getDocuments()
             
-            // 3. Update each card
+            // Update each card
             for cardDoc in cardsSnapshot.documents {
                 let cardRef = cardDoc.reference
                 let isPrimary = cardDoc.data()["isPrimary"] as? Bool ?? false
                 
-                // Update both isPro and isActive status
-                var updateData: [String: Any] = ["isPro": isPro]
-                
-                // Only update isActive for non-primary cards
+                var cardUpdateData: [String: Any] = ["isPro": isPro]
                 if !isPrimary {
-                    updateData["isActive"] = isPro
+                    cardUpdateData["isActive"] = isPro
                 }
                 
-                batch.updateData(updateData, forDocument: cardRef)
+                batch.updateData(cardUpdateData, forDocument: cardRef)
             }
             
-            // 4. Commit all changes atomically
             try await batch.commit()
             print("Successfully updated user and cards pro status")
         } catch {

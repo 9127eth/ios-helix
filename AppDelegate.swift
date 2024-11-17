@@ -47,8 +47,12 @@ class AppDelegate: NSObject, UIApplicationDelegate {
     }
     
     private func handleVerifiedTransaction(_ transaction: StoreKit.Transaction) async {
-        // Check if this is the lifetime purchase
-        let isLifetimePurchase = transaction.productID == "003"
+        let proType = switch transaction.productID {
+            case "001": "yearly"
+            case "002": "monthly"
+            case "003": "lifetime"
+            default: ""
+        }
         
         guard let userId = Auth.auth().currentUser?.uid else {
             print("No authenticated user found when handling transaction")
@@ -63,7 +67,7 @@ class AppDelegate: NSObject, UIApplicationDelegate {
             // Update user document
             let updates: [String: Any] = [
                 "isPro": true,
-                "isLifetime": isLifetimePurchase
+                "isProType": proType
             ]
             batch.updateData(updates, forDocument: userRef)
             
