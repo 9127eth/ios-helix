@@ -22,12 +22,12 @@ struct SocialLinksView: View {
                 Text("Social Links")
                     .font(.headline)
                     .padding(.bottom, 8)
-                
-                Text("Make sure to enter the full URL (e.g. \"www.twitter.com/Username\")")
-                    .font(.caption)
-                    .foregroundColor(.gray)
-                    .padding(.bottom, 16)
             }
+            
+            Text("Enter your username or handle for each platform")
+                .font(.caption)
+                .foregroundColor(.gray)
+                .padding(.bottom, 16)
             
             ForEach(visibleLinkTypes.indices, id: \.self) { index in
                 let linkType = visibleLinkTypes[index]
@@ -237,23 +237,35 @@ struct SocialLinkRow: View {
     let linkType: SocialLinkType
     @Binding var value: String
     @Environment(\.colorScheme) var colorScheme
-
+    @State private var handle: String = ""
+    
     var body: some View {
         HStack {
             Image(linkType.iconName)
                 .resizable()
                 .scaledToFit()
                 .frame(width: 24, height: 24)
-            TextField(linkType.displayName, text: $value)
-                .padding(.vertical, 8)
-                .padding(.horizontal, 12)
-                .background(AppColors.inputFieldBackground)
-                .cornerRadius(8)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 8)
-                        .stroke(colorScheme == .dark ? Color.gray.opacity(0.3) : Color.clear, lineWidth: 1)
-                )
-                .shadow(color: Color.black.opacity(0.05), radius: 3, x: 0, y: 1)
+            
+            VStack(alignment: .leading, spacing: 4) {
+                TextField(linkType.placeholder, text: $handle)
+                    .textInputAutocapitalization(.never)
+                    .autocorrectionDisabled()
+                    .onChange(of: handle) { oldValue, newValue in
+                        value = linkType.getFullURL(newValue)
+                    }
+                
+                if !handle.isEmpty {
+                    Text(value)
+                        .font(.caption)
+                        .foregroundColor(.gray)
+                }
+            }
+            .onAppear {
+                // Convert existing URL back to handle on appear
+                if !value.isEmpty {
+                    handle = linkType.formatInput(value)
+                }
+            }
         }
         .padding(.vertical, 8)
         .background(Color.clear)

@@ -25,8 +25,63 @@ enum SocialLinkType: String, CaseIterable {
         }
     }
     
-    var iconName: String {
-        return rawValue
+    var placeholder: String {
+        switch self {
+        case .linkedIn: return "johndoe"
+        case .twitter: return "johndoe"
+        case .facebook: return "johndoe"
+        case .instagram: return "johndoe"
+        case .tiktok: return "johndoe"
+        case .youtube: return "Channel Name or ID"
+        case .discord: return "johndoe#1234"
+        case .twitch: return "johndoe"
+        case .snapchat: return "johndoe"
+        case .telegram: return "johndoe"
+        case .whatsapp: return "+1234567890"
+        case .threads: return "johndoe"
+        }
+    }
+    
+    func formatInput(_ input: String) -> String {
+        var cleanInput = input.trimmingCharacters(in: .whitespacesAndNewlines)
+        
+        // Remove @ symbol if present
+        if cleanInput.hasPrefix("@") {
+            cleanInput.removeFirst()
+        }
+        
+        // Remove URL if user pastes full URL
+        if cleanInput.lowercased().contains(baseURL.lowercased()) {
+            cleanInput = cleanInput.replacingOccurrences(of: baseURL, with: "", options: .caseInsensitive)
+            // Remove any trailing slashes
+            while cleanInput.hasPrefix("/") {
+                cleanInput.removeFirst()
+            }
+            while cleanInput.hasSuffix("/") {
+                cleanInput.removeLast()
+            }
+        }
+        
+        return cleanInput
+    }
+    
+    func getFullURL(_ handle: String) -> String {
+        let formattedHandle = formatInput(handle)
+        switch self {
+        case .whatsapp:
+            // Keep only numbers and plus sign
+            let numbersOnly = formattedHandle.filter { $0.isNumber || $0 == "+" }
+            return baseURL + numbersOnly
+        case .youtube:
+            // Handle both channel names and IDs
+            if formattedHandle.hasPrefix("UC") && formattedHandle.count == 24 {
+                return baseURL + formattedHandle
+            } else {
+                return "https://www.youtube.com/c/" + formattedHandle
+            }
+        default:
+            return baseURL + formattedHandle
+        }
     }
     
     var baseURL: String {
@@ -44,5 +99,9 @@ enum SocialLinkType: String, CaseIterable {
         case .whatsapp: return "https://wa.me/"
         case .threads: return "https://www.threads.net/@"
         }
+    }
+    
+    var iconName: String {
+        return rawValue
     }
 }
