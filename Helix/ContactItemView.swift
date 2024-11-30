@@ -1,4 +1,7 @@
 import SwiftUI
+import FirebaseFirestore
+import FirebaseAuth
+import FirebaseStorage
 
 struct ContactItemView: View {
     let contact: Contact
@@ -91,6 +94,25 @@ struct ContactItemView: View {
     }
     
     private func deleteContact() {
-        // Implementation will be added with Firebase integration
+        guard let userId = Auth.auth().currentUser?.uid,
+              let contactId = contact.id else { return }
+        
+        Task {
+            do {
+                // Delete image if exists
+                if let imageUrl = contact.imageUrl {
+                    try await Contact.deleteImage(url: imageUrl)
+                }
+                
+                // Delete contact document
+                let db = Firestore.firestore()
+                try await db.collection("users").document(userId)
+                    .collection("contacts").document(contactId)
+                    .delete()
+                
+            } catch {
+                print("Error deleting contact: \(error.localizedDescription)")
+            }
+        }
     }
 } 

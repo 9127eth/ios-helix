@@ -210,14 +210,17 @@ struct CreateContactView: View {
         
         // Handle image upload if selected
         if let imageData = selectedImageData {
-            uploadImage(imageData) { result in
-                switch result {
-                case .success(let url):
-                    contact.imageUrl = url
+            // Use Task to handle async operation
+            Task {
+                do {
+                    let imageUrl = try await Contact.uploadImage(imageData)
+                    contact.imageUrl = imageUrl
                     saveContactToFirestore(db, userId)
-                case .failure(let error):
-                    showAlert = true
-                    alertMessage = "Error uploading image: \(error.localizedDescription)"
+                } catch {
+                    await MainActor.run {
+                        showAlert = true
+                        alertMessage = "Error uploading image: \(error.localizedDescription)"
+                    }
                 }
             }
         } else {
@@ -235,11 +238,6 @@ struct CreateContactView: View {
             showAlert = true
             alertMessage = "Error saving contact: \(error.localizedDescription)"
         }
-    }
-    
-    private func uploadImage(_ imageData: Data, completion: @escaping (Result<String, Error>) -> Void) {
-        // Implement your image upload logic here
-        // This should upload to Firebase Storage and return the URL
     }
 }
 
