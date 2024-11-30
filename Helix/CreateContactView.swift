@@ -104,6 +104,18 @@ struct CreateContactView: View {
                             Label("Select Image", systemImage: "photo")
                         }
                     }
+                    .onChange(of: selectedImage) { newValue in
+                        print("Image selected")
+                        Task {
+                            if let data = try? await newValue?.loadTransferable(type: Data.self) {
+                                print("Image data loaded: \(data.count) bytes")
+                                await MainActor.run {
+                                    selectedImageData = data
+                                    print("Image data set to state")
+                                }
+                            }
+                        }
+                    }
                 }
                 
                 // Notes Section

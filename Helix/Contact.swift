@@ -48,7 +48,9 @@ struct Contact: Identifiable, Codable {
     }
     
     static func uploadImage(_ imageData: Data) async throws -> String {
+        print("Starting image upload")
         guard let userId = Auth.auth().currentUser?.uid else {
+            print("No authenticated user found")
             throw NSError(domain: "Contact", code: -1, 
                          userInfo: [NSLocalizedDescriptionKey: "User not authenticated"])
         }
