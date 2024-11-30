@@ -20,6 +20,8 @@ struct MyContactsView: View {
     @State private var showingExportModal = false
     @State private var showingDeleteConfirmation = false
     @State private var isLoading = false
+    @State private var showSubscriptionView = false
+    @Binding var isPro: Bool
     
     enum SortOption {
         case name, dateAdded
@@ -29,29 +31,47 @@ struct MyContactsView: View {
         NavigationView {
             VStack(spacing: 0) {
                 // Header
-                HStack {
+                VStack(alignment: .leading, spacing: 10) {
+                    if !isPro {
+                        Button(action: {
+                            showSubscriptionView = true
+                        }) {
+                            HStack(spacing: 6) {
+                                Image(systemName: "bolt.fill")
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fit)
+                                    .frame(width: 12, height: 12)
+                                Text("Get Helix Pro")
+                                    .font(.subheadline)
+                            }
+                            .foregroundColor(AppColors.helixPro)
+                            .padding(.vertical, 6)
+                            .padding(.horizontal, 12)
+                            .background(Color.gray.opacity(0.10))
+                            .cornerRadius(16)
+                            .shadow(color: Color.black.opacity(0.2), radius: 2, x: 0, y: 1)
+                        }
+                        .padding(.bottom, 5)
+                    }
+                    
                     Text("Contacts")
-                        .font(.title)
+                        .font(.system(size: 60, weight: .bold))
                         .fontWeight(.bold)
                         .foregroundColor(AppColors.bodyPrimaryText)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal)
+                .padding(.top, 40)
+                
+                // Add Contact Button
+                HStack {
                     Spacer()
-                    
-                    if !selectedContacts.isEmpty {
-                        HStack(spacing: 16) {
-                            Button(action: { showingExportModal = true }) {
-                                Image(systemName: "square.and.arrow.up")
-                                    .foregroundColor(AppColors.foreground)
-                            }
-                            
-                            Button(action: { showingDeleteConfirmation = true }) {
-                                Image(systemName: "trash")
-                                    .foregroundColor(.red)
-                            }
-                        }
+                    AddContactButton {
+                        showingAddContact = true
                     }
                 }
-                .padding()
-                .background(AppColors.barMenuBackground)
+                .padding(.horizontal)
+                .padding(.vertical, 16)
                 
                 // Search and filters
                 VStack(spacing: 12) {
@@ -81,6 +101,12 @@ struct MyContactsView: View {
             }
             .background(AppColors.background)
             .navigationBarHidden(true)
+            .sheet(isPresented: $showSubscriptionView) {
+                SubscriptionView(isPro: $isPro)
+            }
+            .sheet(isPresented: $showingAddContact) {
+                CreateContactView()
+            }
         }
         .onAppear {
             fetchContacts()

@@ -130,7 +130,7 @@ struct ContentView: View {
     }
     
     private var contactsTab: some View {
-        MyContactsView()
+        MyContactsView(isPro: $isPro)
             .tabItem {
                 Label {
                     Text("Contacts")
