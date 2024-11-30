@@ -83,6 +83,7 @@ struct ContentView: View {
     private var authenticatedView: some View {
         TabView(selection: $selectedTab) {
             businessCardTab
+            contactsTab
             settingsTab
         }
         .onAppear {
@@ -90,7 +91,7 @@ struct ContentView: View {
             fetchUserProStatus()
             fetchBusinessCards()
         }
-        .accentColor(AppColors.bottomNavIcon) // This sets the selected tab color
+        .accentColor(AppColors.bottomNavIcon)
         .onAppear {
             UITabBar.appearance().unselectedItemTintColor = UIColor(AppColors.bodyPrimaryText)
         }
@@ -128,6 +129,19 @@ struct ContentView: View {
             .tag(0)
     }
     
+    private var contactsTab: some View {
+        MyContactsView()
+            .tabItem {
+                Label {
+                    Text("Contacts")
+                } icon: {
+                    Image("contacts")
+                        .renderingMode(.template)
+                }
+            }
+            .tag(1)
+    }
+    
     private var settingsTab: some View {
         SettingsView(isAuthenticated: $authManager.isAuthenticated)
             .tabItem {
@@ -138,7 +152,7 @@ struct ContentView: View {
                         .renderingMode(.template)
                 }
             }
-            .tag(1)
+            .tag(2)
     }
     
     @ViewBuilder

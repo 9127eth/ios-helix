@@ -1,0 +1,155 @@
+We will be adding a contacts section and it will have its own button on the navigation bar. The icon for that will be in assets named "contacts"
+
+Users need to be able to create, edit and delete a contact. We will add a new contact button in the bottom navigation bar that will be between the cards and settings buttons. 
+
+The top left of the page should have a large ''Contacts" similar to the business card page. 
+
+Users should be able to add a tag to a card. The purpose of the tag would be so people can put people into groups and filter them. A use case here would be like when a user went to a conference so they would tag everyone with they met at that conference and it would be filterable. They would be able to freeform in a new tag, and then it should be available to them as a drop-down for the contact.  The last used tag for a contact should be the default tag for the next contact being created. There should be an indicator that a particular filter is 
+
+We will need a tag manager view, so users would be able to view, rename, or delete unused ones. If a tag is deleted, it should not be removed the contacts. It should just be removed from the list an unable to add to other contacts.
+
+Users should be able to search by name, company.  
+
+Make sure when deleting a tag or a contact there are confirmation modals that marks it cant be undone. 
+
+Users should be able to upload a photo (this will typically be an image of a business card)
+
+When inputting email addresses and phone numbers, the fields should be validated
+
+we need to implement proper error handling for exports and deletions
+
+Users should be able to select all, or multiple contacts for actions to either 1) delete all the selected contacts or 2) add/change a tag to the contact, 3) export as a csv. Filtering by tags or a search should also allow for these actions to be completed.
+
+Exporting as csv: When a user exports as a csv, it should organize the content accordingly as it is stored. It should then provide a pop up confirming where they want the export to be emailed to. It should default to the email the user signed up with, but allow the user to change the email it is sent to. 
+
+When emailing the export file, The email should have a similar style as our email this card template, but the messaging should be appropriate stating their export from Helix is attached. 
+
+When looking at the list of contacts, all that should be visible is the contacts name, position and company. Also for each contact there should be an ellipses menu to the right of it, which would allow a user to edit, share or delete the card. Sharing the contact should open a modal similar to our "email this card" feature that opens a modal and lets a user input an email address to share the contact. The email would just include the name position, company, email and phone number for the contact.
+
+The contact list should be able to be sorted in two ways, alphabetical order based on first name or date recently added
+
+Data Model
+The folder in the user document should be ''Contacts"
+
+I want to add an actions section for each contact that would allow a user to call text or email. I also want an easy way to copy phone number, email address of a contact.
+
+Each contact should have the following optional fields:
+contact ID
+Name
+Phone
+Position
+Company
+address
+Email
+Note
+Tag (will be drop down an an options to create a new tag)
+date added
+date last modified
+Contact source: manual, imported, scanned
+
+Detailed info for tags:
+Here are the logic and business requirements for implementing a separate collection for tags using Firestore, aligned with the use case of a digital business card app:
+
+Business Logic for Tags Collection
+
+	1.	Tags Creation:
+	•	Users should be able to create a new tag when adding or editing a contact.
+	•	Each tag should be unique to the user to prevent duplicate tags (e.g., two “Conference2024” tags for the same user).
+	•	Tags should have a user reference (e.g., username) for multi-user environments.
+	2.	Tag Assignment:
+	•	A user can assign one or more tags to a contact. Tags should be stored as a reference (e.g., tag ID) in the contact object.
+	•	When assigning tags, display a list of existing tags the user has created, with an option to add a new one if it doesn’t already exist.
+	3.	Tag Management:
+	•	Users can rename tags, which automatically updates the associated references for all contacts using that tag.
+	•	Users can delete tags. When a tag is deleted:
+	•	Prompt the user to confirm the deletion.
+	•	Automatically remove the tag from all associated contacts.
+	4.	Filtering by Tags:
+	•	Users can filter their contact list by one or more tags.
+	•	The filter should allow multi-tag selection to display all contacts associated with any of the selected tags.
+	5.	Export by Tags:
+	•	Provide the ability to export contacts filtered by one or more tags. For example, if a user selects the tag “Conference2024,” only contacts associated with that tag will be included in the CSV export.
+
+Firestore Collections and Relationships
+
+Contacts Collection
+
+	•	Each contact document stores the contact details, including a list of tag references (tag IDs).
+
+{
+  "id": "contact1",
+  "name": "John Doe",
+  "email": "john.doe@example.com",
+  "phone": "123-456-7890",
+  "tags": ["tag1", "tag2"], // References to tag IDs
+  "date_added": "2024-11-28",
+  "username": "user123" // Owner of the contact
+}
+
+Tags Collection
+
+	•	Each tag document stores the tag name and a reference to the user who created it.
+
+{
+  "id": "tag1",
+  "name": "Conference2024",
+  "username": "user123" // Owner of the tag
+}
+
+Business Requirements for Operations
+
+Tag CRUD Operations
+
+	1.	Create a Tag:
+	•	When a user adds a new tag, check if a tag with the same name already exists for that user.
+	•	If the tag exists, reuse its ID. If not, create a new tag document in the Tags collection.
+	2.	Read Tags:
+	•	When a user accesses the tag dropdown or filter options, fetch all tags associated with their username.
+	3.	Update a Tag:
+	•	When a user renames a tag, update the name field in the Tags collection.
+	•	Propagate the change to all contacts referencing that tag (not strictly necessary but ensures data consistency if the tag names are visible in the UI).
+	4.	Delete a Tag:
+	•	When a user deletes a tag, remove its reference from all associated contacts in the Contacts collection.
+
+Contact Tagging Workflow
+
+	1.	Assign Tags to a Contact:
+	•	While adding or editing a contact, allow users to select one or more tags from a dropdown.
+	•	Display an option to add a new tag directly from the dropdown. If a new tag is added:
+	•	Create the tag in the Tags collection.
+	•	Add its reference to the contact.
+	2.	Remove Tags from a Contact:
+	•	When editing a contact, allow users to deselect tags from the contact.
+
+Filtering Contacts by Tags
+
+	1.	When a user selects tags to filter, query the Contacts collection:
+	•	Use a Firestore where clause to match any contact whose tags array contains the selected tag IDs.
+
+Error Handling
+
+	1.	Duplicate Tags:
+	•	Prevent duplicate tags by checking the Tags collection for existing tags with the same name before creation.
+	2.	Orphaned Tags:
+	•	Periodically check for unused tags (e.g., tags not referenced by any contact) and prompt users to clean up their tag list if needed.
+	3.	Missing Tags:
+	•	Handle cases where a tag referenced in a contact no longer exists (e.g., if the user deletes a tag but an edge case misses removing it from a contact).
+
+Scenarios and Use Cases
+
+	1.	Scenario: Tagging New Contacts
+	•	User meets attendees at a conference and adds “Conference2024” as a tag while creating new contacts. The tag becomes available in the dropdown for subsequent contacts.
+	2.	Scenario: Filtering for Follow-Up
+	•	User filters contacts by “VIP” and “Conference2024” tags to find high-priority leads from the event.
+	3.	Scenario: Exporting by Tags
+	•	User exports all “VIP” contacts into a CSV file for an email campaign.
+	4.	Scenario: Renaming Tags
+	•	User renames “VIP” to “High Priority,” and all contacts using the “VIP” tag are updated to “High Priority.”
+	5.	Scenario: Cleaning Up Tags
+	•	User deletes an unused tag “Old Event 2023,” and it is removed from the dropdown and all contacts.
+
+Benefits of This Structure
+
+	•	Scalability: Adding tags, filtering, and exporting remain efficient even as the database grows.
+	•	Centralized Management: Tags can be renamed or deleted easily without manually editing every contact.
+	•	Flexibility: The same tag can be reused across multiple contacts, reducing duplication and improving usability.
