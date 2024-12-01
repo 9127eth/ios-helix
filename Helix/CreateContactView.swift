@@ -13,19 +13,9 @@ struct CreateContactView: View {
     @State private var isEmailValid = true
     @State private var selectedImage: PhotosPickerItem?
     @State private var selectedImageData: Data?
-    @State private var availableTags: [Tag] = []
-    @State private var selectedTags: Set<String> = []
-    @State private var newTagName = ""
-    @State private var showingTagInput = false
-    
-    struct Tag: Identifiable, Hashable {
-        let id: String
-        let name: String
-        
-        func hash(into hasher: inout Hasher) {
-            hasher.combine(id)
-        }
-    }
+    @StateObject private var tagManager = TagManager()
+    @State private var selectedTagIds: Set<String> = []
+    @State private var showingTagSheet = false
     
     var body: some View {
         NavigationView {
@@ -84,14 +74,26 @@ struct CreateContactView: View {
                 
                 // Tags Section
                 Section(header: Text("Tags")) {
-                    ForEach(Array(selectedTags), id: \.self) { tagId in
-                        if let tag = availableTags.first(where: { $0.id == tagId }) {
-                            Text(tag.name)
+                    if selectedTagIds.isEmpty {
+                        Text("No tags selected")
+                            .foregroundColor(.gray)
+                    } else {
+                        ForEach(Array(selectedTagIds), id: \.self) { tagId in
+                            if let tag = tagManager.availableTags.first(where: { $0.id == tagId }) {
+                                HStack {
+                                    Text(tag.name)
+                                    Spacer()
+                                    Button(action: { selectedTagIds.remove(tagId) }) {
+                                        Image(systemName: "xmark.circle.fill")
+                                            .foregroundColor(.gray)
+                                    }
+                                }
+                            }
                         }
                     }
                     
-                    Button(action: { showingTagInput.toggle() }) {
-                        Label("Add Tag", systemImage: "tag")
+                    Button(action: { showingTagSheet = true }) {
+                        Label("Manage Tags", systemImage: "tag")
                     }
                 }
                 
@@ -143,12 +145,8 @@ struct CreateContactView: View {
                 }
             }
         }
-        .sheet(isPresented: $showingTagInput) {
-            TagSelectionView(
-                availableTags: availableTags,
-                selectedTags: $selectedTags,
-                newTagName: $newTagName
-            )
+        .sheet(isPresented: $showingTagSheet) {
+            TagSelectionView(tagManager: tagManager, selectedTagIds: $selectedTagIds)
         }
         .alert("Discard Changes?", isPresented: $showCancelConfirmation) {
             Button("Continue Editing", role: .cancel) { }
@@ -164,7 +162,7 @@ struct CreateContactView: View {
             Text(alertMessage)
         }
         .onAppear {
-            fetchTags()
+            tagManager.fetchTags()
         }
     }
     
@@ -187,23 +185,6 @@ struct CreateContactView: View {
         isEmailValid = emailPredicate.evaluate(with: email)
     }
     
-    private func fetchTags() {
-        guard let userId = Auth.auth().currentUser?.uid else { return }
-        let db = Firestore.firestore()
-        
-        db.collection("users").document(userId).collection("tags")
-            .getDocuments { snapshot, error in
-                if let error = error {
-                    print("Error fetching tags: \(error)")
-                    return
-                }
-                
-                availableTags = snapshot?.documents.compactMap { doc in
-                    Tag(id: doc.documentID, name: doc["name"] as? String ?? "")
-                } ?? []
-            }
-    }
-    
     private func saveContact() {
         guard !contact.name.isEmpty else {
             showAlert = true
@@ -216,85 +197,33 @@ struct CreateContactView: View {
         contact.dateAdded = Date()
         contact.dateModified = Date()
         contact.contactSource = .manual
-        contact.tags = Array(selectedTags)
+        contact.tags = Array(selectedTagIds)
+        
+        // Save last used tag
+        if let lastTag = selectedTagIds.first {
+            tagManager.lastUsedTagId = lastTag
+        }
         
         let db = Firestore.firestore()
         
-        // Handle image upload if selected
-        if let imageData = selectedImageData {
-            // Use Task to handle async operation
-            Task {
-                do {
+        Task {
+            do {
+                if let imageData = selectedImageData {
                     let imageUrl = try await Contact.uploadImage(imageData)
                     contact.imageUrl = imageUrl
-                    saveContactToFirestore(db, userId)
-                } catch {
-                    await MainActor.run {
-                        showAlert = true
-                        alertMessage = "Error uploading image: \(error.localizedDescription)"
-                    }
-                }
-            }
-        } else {
-            saveContactToFirestore(db, userId)
-        }
-    }
-    
-    private func saveContactToFirestore(_ db: Firestore, _ userId: String) {
-        do {
-            try db.collection("users").document(userId)
-                .collection("contacts")
-                .addDocument(from: contact)
-            dismiss()
-        } catch {
-            showAlert = true
-            alertMessage = "Error saving contact: \(error.localizedDescription)"
-        }
-    }
-}
-
-struct TagSelectionView: View {
-    let availableTags: [CreateContactView.Tag]
-    @Binding var selectedTags: Set<String>
-    @Binding var newTagName: String
-    @Environment(\.dismiss) var dismiss
-    
-    var body: some View {
-        NavigationView {
-            List {
-                ForEach(availableTags) { tag in
-                    Button(action: {
-                        if selectedTags.contains(tag.id) {
-                            selectedTags.remove(tag.id)
-                        } else {
-                            selectedTags.insert(tag.id)
-                        }
-                    }) {
-                        HStack {
-                            Text(tag.name)
-                            Spacer()
-                            if selectedTags.contains(tag.id) {
-                                Image(systemName: "checkmark")
-                            }
-                        }
-                    }
                 }
                 
-                Section(header: Text("Create New Tag")) {
-                    TextField("Tag Name", text: $newTagName)
-                    Button("Add Tag") {
-                        // Implement add new tag logic
-                    }
-                    .disabled(newTagName.isEmpty)
+                try await db.collection("users").document(userId)
+                    .collection("contacts")
+                    .addDocument(from: contact)
+                
+                await MainActor.run {
+                    dismiss()
                 }
-            }
-            .navigationTitle("Select Tags")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Done") {
-                        dismiss()
-                    }
+            } catch {
+                await MainActor.run {
+                    showAlert = true
+                    alertMessage = "Error saving contact: \(error.localizedDescription)"
                 }
             }
         }

@@ -1,9 +1,11 @@
 import SwiftUI
+import FirebaseFirestore
+import Helix
 
 struct TagFilterButton: View {
     @Binding var selectedTags: Set<String>
+    @StateObject private var tagManager = TagManager()
     @State private var showingTagPicker = false
-    @State private var availableTags: [String] = []
     
     var body: some View {
         Button(action: { showingTagPicker = true }) {
@@ -17,15 +19,10 @@ struct TagFilterButton: View {
             .cornerRadius(8)
         }
         .sheet(isPresented: $showingTagPicker) {
-            TagPickerView(selectedTags: $selectedTags, availableTags: availableTags)
+            TagSelectionView(tagManager: tagManager, selectedTagIds: $selectedTags)
         }
         .onAppear {
-            // Fetch available tags from Firestore
-            fetchAvailableTags()
+            tagManager.fetchTags()
         }
-    }
-    
-    private func fetchAvailableTags() {
-        // Implementation will be added with Firebase integration
     }
 } 
