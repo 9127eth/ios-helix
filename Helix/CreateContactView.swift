@@ -3,6 +3,17 @@ import FirebaseFirestore
 import FirebaseAuth
 import PhotosUI
 
+// Add this enum near the top of the file, after the state variables
+enum Field: Hashable {
+    case name
+    case position
+    case company
+    case phone
+    case email
+    case address
+    case note
+}
+
 struct CreateContactView: View {
     @Environment(\.dismiss) var dismiss
     @State private var contact = Contact(name: "")
@@ -16,6 +27,7 @@ struct CreateContactView: View {
     @StateObject private var tagManager = TagManager()
     @State private var selectedTagIds: Set<String> = []
     @State private var showingTagSheet = false
+    @FocusState private var focusedField: Field?
     
     var body: some View {
         NavigationView {
@@ -23,14 +35,20 @@ struct CreateContactView: View {
                 // Basic Information Section
                 Section(header: Text("Basic Information")) {
                     TextField("Name*", text: $contact.name)
+                        .focused($focusedField, equals: .name)
+                        .onSubmit { focusedField = .position }
                     TextField("Position", text: Binding(
                         get: { contact.position ?? "" },
                         set: { contact.position = $0.isEmpty ? nil : $0 }
                     ))
+                        .focused($focusedField, equals: .position)
+                        .onSubmit { focusedField = .company }
                     TextField("Company", text: Binding(
                         get: { contact.company ?? "" },
                         set: { contact.company = $0.isEmpty ? nil : $0 }
                     ))
+                        .focused($focusedField, equals: .company)
+                        .onSubmit { focusedField = .phone }
                 }
                 
                 // Contact Information Section
@@ -70,6 +88,8 @@ struct CreateContactView: View {
                         get: { contact.address ?? "" },
                         set: { contact.address = $0.isEmpty ? nil : $0 }
                     ))
+                        .focused($focusedField, equals: .address)
+                        .onSubmit { focusedField = .note }
                 }
                 
                 // Tags Section
@@ -164,6 +184,7 @@ struct CreateContactView: View {
         .onAppear {
             tagManager.fetchTags()
         }
+        .dismissKeyboardOnTap()
     }
     
     private func validatePhone(_ phone: String?) {

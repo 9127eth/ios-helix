@@ -26,6 +26,7 @@ struct EditContactView: View {
     @State private var showingCancelConfirmation = false
     @State private var imageToDelete: String? = nil
     @State private var pendingImageData: Data? = nil
+    @FocusState private var focusedField: Field?
     
     init(contact: Binding<Contact>) {
         self._contact = contact
@@ -38,14 +39,20 @@ struct EditContactView: View {
                 // Basic Information
                 Section(header: Text("Basic Information")) {
                     TextField("Name*", text: $editedContact.name)
+                        .focused($focusedField, equals: .name)
+                        .onSubmit { focusedField = .position }
                     TextField("Position", text: Binding(
                         get: { editedContact.position ?? "" },
                         set: { editedContact.position = $0.isEmpty ? nil : $0 }
                     ))
+                        .focused($focusedField, equals: .position)
+                        .onSubmit { focusedField = .company }
                     TextField("Company", text: Binding(
                         get: { editedContact.company ?? "" },
                         set: { editedContact.company = $0.isEmpty ? nil : $0 }
                     ))
+                        .focused($focusedField, equals: .company)
+                        .onSubmit { focusedField = .phone }
                 }
                 
                 // Contact Information
@@ -75,6 +82,8 @@ struct EditContactView: View {
                         get: { editedContact.address ?? "" },
                         set: { editedContact.address = $0.isEmpty ? nil : $0 }
                     ))
+                        .focused($focusedField, equals: .address)
+                        .onSubmit { focusedField = .note }
                 }
                 
                 // Image Upload Section
@@ -231,6 +240,7 @@ struct EditContactView: View {
                 }
             }
         }
+        .dismissKeyboardOnTap()
     }
     
     private func saveChanges() {
