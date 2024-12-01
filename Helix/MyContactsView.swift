@@ -108,7 +108,14 @@ struct MyContactsView: View {
                 ScrollView {
                     LazyVStack(spacing: 12) {
                         ForEach(filteredContacts) { contact in
-                            ContactItemView(contact: contact)
+                            ContactItemView(contact: Binding(
+                                get: { contact },
+                                set: { newValue in
+                                    if let index = contacts.firstIndex(where: { $0.id == contact.id }) {
+                                        contacts[index] = newValue
+                                    }
+                                }
+                            ))
                                 .onTapGesture {
                                     toggleSelection(contact.id ?? "")
                                 }

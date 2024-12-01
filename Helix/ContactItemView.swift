@@ -4,7 +4,7 @@ import FirebaseAuth
 import FirebaseStorage
 
 struct ContactItemView: View {
-    let contact: Contact
+    @Binding var contact: Contact
     @State private var showingActionSheet = false
     @State private var showingEditSheet = false
     @State private var showingShareSheet = false
@@ -72,6 +72,9 @@ struct ContactItemView: View {
             Button("Delete", role: .destructive) { deleteContact() }
         } message: {
             Text("Are you sure you want to delete this contact?")
+        }
+        .sheet(isPresented: $showingEditSheet) {
+            EditContactView(contact: $contact)
         }
     }
     
