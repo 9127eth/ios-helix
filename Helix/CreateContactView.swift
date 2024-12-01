@@ -194,7 +194,6 @@ struct CreateContactView: View {
         .onAppear {
             tagManager.fetchTags()
         }
-        .dismissKeyboardOnTap()
     }
     
     private func validatePhone(_ phone: String?) {

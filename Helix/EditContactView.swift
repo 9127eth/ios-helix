@@ -201,16 +201,20 @@ struct EditContactView: View {
                 }
             }
             .navigationTitle("Edit Contact")
-            .navigationBarItems(
-                leading: Button("Cancel") {
-                    dismiss()
-                },
-                trailing: Button("Save") {
-                    saveChanges()
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button("Cancel") {
+                        showingCancelConfirmation = true
+                    }
                 }
-            )
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Save") {
+                        saveChanges()
+                    }
+                    .disabled(editedContact.name.isEmpty || !isPhoneNumberValid || !isEmailValid)
+                }
+            }
         }
-        .dismissKeyboardOnTap()
         .sheet(isPresented: $showingTagSheet) {
             TagSelectionView(tagManager: tagManager, selectedTagIds: $selectedTagIds)
         }

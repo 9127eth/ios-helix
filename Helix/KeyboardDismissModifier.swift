@@ -7,20 +7,17 @@
 
 import SwiftUI
 
-struct DismissKeyboardOnTapModifier: UIViewRepresentable {
-    func makeUIView(context: Context) -> UIView {
-        let view = UIView()
-        let tapGesture = UITapGestureRecognizer(target: view, action: #selector(UIView.endEditing))
-        tapGesture.cancelsTouchesInView = false
-        view.addGestureRecognizer(tapGesture)
-        return view
+struct KeyboardDismissModifier: ViewModifier {
+    func body(content: Content) -> some View {
+        content
+            .onTapGesture {
+                UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+            }
     }
-
-    func updateUIView(_ uiView: UIView, context: Context) {}
 }
 
 extension View {
     func dismissKeyboardOnTap() -> some View {
-        self.background(DismissKeyboardOnTapModifier())
+        self.modifier(KeyboardDismissModifier())
     }
 }
