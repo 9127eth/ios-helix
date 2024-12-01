@@ -24,6 +24,8 @@ struct EditContactView: View {
     @StateObject private var tagManager = TagManager()
     @State private var showingTagSheet = false
     @State private var showingCancelConfirmation = false
+    @State private var imageToDelete: String? = nil
+    @State private var pendingImageData: Data? = nil
     
     init(contact: Binding<Contact>) {
         self._contact = contact
@@ -122,17 +124,27 @@ struct EditContactView: View {
                         }
                         
                         HStack(spacing: 16) {
-                            PhotosPicker(selection: $selectedImage, matching: .images) {
-                                Label(selectedImageData != nil ? "Change Image" : "Add Image", systemImage: "doc.badge.plus")
-                                    .foregroundColor(.blue)
-                            }
-                            
                             if editedContact.imageUrl != nil || selectedImageData != nil {
+                                // Show Replace/Remove buttons when there's an image
+                                PhotosPicker(selection: $selectedImage, matching: .images) {
+                                    Label("Replace Image", systemImage: "photo")
+                                        .foregroundColor(.blue)
+                                }
+                                
                                 Button(role: .destructive) {
-                                    deleteImage()
+                                    withAnimation {
+                                        deleteImage()
+                                        editedContact.imageUrl = nil
+                                    }
                                 } label: {
                                     Label("Remove", systemImage: "trash")
                                         .foregroundColor(.red)
+                                }
+                            } else {
+                                // Show Add Image button when there's no image
+                                PhotosPicker(selection: $selectedImage, matching: .images) {
+                                    Label("Add Image", systemImage: "doc.badge.plus")
+                                        .foregroundColor(.blue)
                                 }
                             }
                         }
@@ -201,6 +213,11 @@ struct EditContactView: View {
         } message: {
             Text("If you cancel without saving, any changes will be lost.")
         }
+        .alert("Error", isPresented: $showAlert) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text(alertMessage)
+        }
         .onAppear {
             selectedTagIds = Set(editedContact.tags ?? [])
             tagManager.fetchTags()
@@ -209,7 +226,12 @@ struct EditContactView: View {
             Task {
                 if let data = try? await newValue?.loadTransferable(type: Data.self) {
                     await MainActor.run {
+                        pendingImageData = data
                         selectedImageData = data
+                        
+                        if let existingUrl = editedContact.imageUrl {
+                            imageToDelete = existingUrl
+                        }
                     }
                 }
             }
@@ -219,24 +241,53 @@ struct EditContactView: View {
     private func saveChanges() {
         Task {
             do {
-                if let imageData = selectedImageData {
-                    let imageUrl = try await Contact.uploadImage(imageData)
-                    editedContact.imageUrl = imageUrl
+                guard let userId = Auth.auth().currentUser?.uid,
+                      let contactId = contact.id else {
+                    print("Error: Missing userId or contactId")
+                    return
                 }
                 
-                guard let userId = Auth.auth().currentUser?.uid,
-                      let contactId = editedContact.id else { return }
+                var updatedContact = editedContact
+                updatedContact.dateModified = Date()
+                updatedContact.tags = Array(selectedTagIds)
+                
+                // Handle image changes first
+                if let imageToDelete = imageToDelete {
+                    try await Contact.deleteImage(url: imageToDelete)
+                    updatedContact.imageUrl = nil
+                    editedContact.imageUrl = nil  // Update the local state as well
+                }
+                
+                if let newImageData = pendingImageData {
+                    let imageUrl = try await Contact.uploadImage(newImageData)
+                    updatedContact.imageUrl = imageUrl
+                }
+                
+                // Debug print after image handling
+                print("Attempting to save contact with data:", updatedContact)
+                
+                // Convert to dictionary AFTER image handling
+                let contactData = try updatedContact.asDictionary()
+                print("Encoded contact data:", contactData)
                 
                 let db = Firestore.firestore()
-                try await db.collection("users").document(userId)
+                let contactRef = db.collection("users").document(userId)
                     .collection("contacts").document(contactId)
-                    .setData(try editedContact.asDictionary(), merge: true)
                 
-                contact = editedContact
-                dismiss()
+                // Update the document with merge: false to ensure removed fields are deleted
+                try await contactRef.setData(contactData)
+                
+                await MainActor.run {
+                    contact = updatedContact
+                    dismiss()
+                }
+                
             } catch {
-                showAlert = true
-                alertMessage = error.localizedDescription
+                print("Save error details:", error)
+                await MainActor.run {
+                    showAlert = true
+                    alertMessage = "Error saving changes: \(error.localizedDescription)"
+                }
             }
         }
     }
@@ -260,24 +311,12 @@ struct EditContactView: View {
     }
     
     private func deleteImage() {
-        Task {
-            if let imageUrl = editedContact.imageUrl {
-                do {
-                    try await Contact.deleteImage(url: imageUrl)
-                    await MainActor.run {
-                        editedContact.imageUrl = nil
-                        selectedImage = nil
-                        selectedImageData = nil
-                    }
-                } catch {
-                    showAlert = true
-                    alertMessage = "Failed to delete image: \(error.localizedDescription)"
-                }
-            } else {
-                selectedImage = nil
-                selectedImageData = nil
-            }
+        if let existingUrl = editedContact.imageUrl {
+            imageToDelete = existingUrl
         }
+        pendingImageData = nil
+        selectedImageData = nil
+        selectedImage = nil
     }
 }
 

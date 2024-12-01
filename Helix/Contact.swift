@@ -39,11 +39,24 @@ struct Contact: Identifiable, Codable {
     }
     
     func asDictionary() throws -> [String: Any] {
-        let encoder = JSONEncoder()
-        let data = try encoder.encode(self)
-        guard let dictionary = try JSONSerialization.jsonObject(with: data) as? [String: Any] else {
-            throw NSError(domain: "Contact", code: -1, userInfo: [NSLocalizedDescriptionKey: "Failed to create dictionary"])
-        }
+        var dictionary: [String: Any] = [
+            "name": name,
+            "dateAdded": dateAdded,
+            "dateModified": dateModified,
+            "contactSource": contactSource.rawValue
+        ]
+        
+        // Optional fields
+        if let id = id { dictionary["id"] = id }
+        if let phone = phone { dictionary["phone"] = phone }
+        if let position = position { dictionary["position"] = position }
+        if let company = company { dictionary["company"] = company }
+        if let address = address { dictionary["address"] = address }
+        if let email = email { dictionary["email"] = email }
+        if let note = note { dictionary["note"] = note }
+        if let tags = tags { dictionary["tags"] = tags }
+        if let imageUrl = imageUrl { dictionary["imageUrl"] = imageUrl }
+        
         return dictionary
     }
     
