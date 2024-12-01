@@ -22,6 +22,7 @@ struct TagManagerView: View {
                     ForEach(tagManager.availableTags) { tag in
                         HStack {
                             Text(tag.name)
+                                .foregroundColor(AppColors.bodyPrimaryText)
                             Spacer()
                             Button(action: {
                                 tagToDelete = tag
@@ -30,7 +31,9 @@ struct TagManagerView: View {
                                 Image(systemName: "trash")
                                     .foregroundColor(.red)
                             }
+                            .buttonStyle(PlainButtonStyle())
                         }
+                        .contentShape(Rectangle())
                     }
                     
                     Button(action: { showingAddTag = true }) {

@@ -67,7 +67,7 @@ struct TagSelectionView: View {
                                 Image(systemName: "trash")
                                     .foregroundColor(.red)
                             }
-                            .padding(.leading, 8)
+                            .buttonStyle(PlainButtonStyle())
                         }
                     }
                     
