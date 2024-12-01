@@ -9,6 +9,7 @@ struct ContactItemView: View {
     @State private var showingEditSheet = false
     @State private var showingShareSheet = false
     @State private var showingDeleteAlert = false
+    @State private var showingContactOptions = false
     
     var body: some View {
         HStack(spacing: 16) {
@@ -33,35 +34,32 @@ struct ContactItemView: View {
             Spacer()
             
             // Quick action buttons
-            HStack(spacing: 12) {
-                if let phone = contact.phone {
-                    Button(action: { callPhone(phone) }) {
-                        Image(systemName: "phone")
-                            .foregroundColor(AppColors.foreground)
-                    }
-                    
-                    Button(action: { sendText(phone) }) {
-                        Image(systemName: "message")
-                            .foregroundColor(AppColors.foreground)
-                    }
-                }
-                
-                if let email = contact.email {
-                    Button(action: { sendEmail(email) }) {
+            HStack(spacing: 20) {
+                if contact.phone != nil || contact.email != nil {
+                    Button(action: { showingContactOptions = true }) {
                         Image(systemName: "envelope")
                             .foregroundColor(AppColors.foreground)
+                            .frame(width: 44, height: 60)
+                            .contentShape(Rectangle())
                     }
+                    .padding(.leading, 8)
                 }
                 
                 Button(action: { showingActionSheet = true }) {
                     Image(systemName: "ellipsis")
                         .foregroundColor(AppColors.foreground)
+                        .frame(width: 44, height: 60)
+                        .contentShape(Rectangle())
                 }
             }
         }
         .padding()
         .background(AppColors.cardGridBackground)
         .cornerRadius(12)
+        .sheet(isPresented: $showingContactOptions) {
+            ContactOptionsSheet(contact: contact)
+                .presentationDetents([.height(250)])
+        }
         .confirmationDialog("Contact Actions", isPresented: $showingActionSheet) {
             Button("Edit") { showingEditSheet = true }
             Button("Share") { showingShareSheet = true }
@@ -75,24 +73,6 @@ struct ContactItemView: View {
         }
         .sheet(isPresented: $showingEditSheet) {
             EditContactView(contact: $contact)
-        }
-    }
-    
-    private func callPhone(_ number: String) {
-        if let url = URL(string: "tel://\(number)") {
-            UIApplication.shared.open(url)
-        }
-    }
-    
-    private func sendText(_ number: String) {
-        if let url = URL(string: "sms://\(number)") {
-            UIApplication.shared.open(url)
-        }
-    }
-    
-    private func sendEmail(_ email: String) {
-        if let url = URL(string: "mailto:\(email)") {
-            UIApplication.shared.open(url)
         }
     }
     
