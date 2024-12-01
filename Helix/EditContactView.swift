@@ -125,12 +125,7 @@ struct EditContactView: View {
                         
                         HStack(spacing: 16) {
                             if editedContact.imageUrl != nil || selectedImageData != nil {
-                                // Show Replace/Remove buttons when there's an image
-                                PhotosPicker(selection: $selectedImage, matching: .images) {
-                                    Label("Replace Image", systemImage: "photo")
-                                        .foregroundColor(.blue)
-                                }
-                                
+                                // Show only Remove button when there's an image
                                 Button(role: .destructive) {
                                     withAnimation {
                                         deleteImage()
