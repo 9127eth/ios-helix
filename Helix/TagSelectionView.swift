@@ -46,16 +46,20 @@ struct TagSelectionView: View {
                 Section(header: Text("Available Tags")) {
                     ForEach(tagManager.availableTags.filter { !selectedTagIds.contains($0.id ?? "") }) { tag in
                         HStack {
-                            Text(tag.name)
-                            Spacer()
                             Button(action: {
                                 if let id = tag.id {
                                     selectedTagIds.insert(id)
                                 }
                             }) {
-                                Image(systemName: "plus.circle")
-                                    .foregroundColor(AppColors.foreground)
+                                HStack {
+                                    Text(tag.name)
+                                    Spacer()
+                                    Image(systemName: "plus.circle")
+                                        .foregroundColor(AppColors.foreground)
+                                }
                             }
+                            .buttonStyle(PlainButtonStyle())
+                            
                             Button(action: {
                                 tagToDelete = tag
                                 showingDeleteConfirmation = true
@@ -63,6 +67,7 @@ struct TagSelectionView: View {
                                 Image(systemName: "trash")
                                     .foregroundColor(.red)
                             }
+                            .padding(.leading, 8)
                         }
                     }
                     

@@ -63,9 +63,27 @@ struct MyContactsView: View {
                 .padding(.horizontal)
                 .padding(.top, 40)
                 
-                // Add Contact Button
+                // Add Contact and Manage Tags buttons
                 HStack {
                     Spacer()
+                    Button(action: {
+                        showingTagManager = true
+                    }) {
+                        HStack(spacing: 6) {
+                            Image(systemName: "tag")
+                                .renderingMode(.template)
+                            Text("Manage Tags")
+                                .font(.footnote)
+                        }
+                        .foregroundColor(AppColors.buttonText)
+                        .padding(.vertical, 8)
+                        .padding(.horizontal, 12)
+                        .background(AppColors.cardGridBackground)
+                        .cornerRadius(16)
+                        .shadow(color: Color.black.opacity(0.1), radius: 2, x: 0, y: 1)
+                    }
+                    .padding(.trailing, 8)
+                    
                     AddContactButton {
                         showingAddContact = true
                     }
@@ -106,6 +124,9 @@ struct MyContactsView: View {
             }
             .sheet(isPresented: $showingAddContact) {
                 CreateContactView()
+            }
+            .sheet(isPresented: $showingTagManager) {
+                TagManagerView()
             }
         }
         .onAppear {

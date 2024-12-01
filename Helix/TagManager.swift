@@ -54,7 +54,12 @@ class TagManager: ObservableObject {
         
         var savedTag = newTag
         savedTag.id = docRef.documentID
-        lastUsedTagId = docRef.documentID
+        
+        // Update published property on main thread
+        await MainActor.run {
+            self.lastUsedTagId = docRef.documentID
+        }
+        
         return savedTag
     }
     
