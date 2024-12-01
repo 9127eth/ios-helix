@@ -8,6 +8,13 @@
 enum SocialLinkType: String, CaseIterable {
     case linkedIn, twitter, facebook, instagram, tiktok, youtube, discord, twitch, snapchat, telegram, whatsapp, threads
     
+    var allowsFullURL: Bool {
+        switch self {
+        case .youtube, .discord, .facebook: return true
+        default: return false
+        }
+    }
+    
     var displayName: String {
         switch self {
         case .linkedIn: return "LinkedIn"
@@ -27,18 +34,18 @@ enum SocialLinkType: String, CaseIterable {
     
     var placeholder: String {
         switch self {
-        case .linkedIn: return "johndoe"
-        case .twitter: return "johndoe"
-        case .facebook: return "johndoe"
-        case .instagram: return "johndoe"
-        case .tiktok: return "johndoe"
-        case .youtube: return "Channel Name or ID"
-        case .discord: return "johndoe#1234"
-        case .twitch: return "johndoe"
-        case .snapchat: return "johndoe"
-        case .telegram: return "johndoe"
+        case .youtube: return "YouTube Link"
+        case .discord: return "Discord Link"
+        case .facebook: return "Facebook Link"
+        case .linkedIn: return "username/handle"
+        case .twitter: return "username/handle"
+        case .instagram: return "username/handle"
+        case .tiktok: return "username/handle"
+        case .twitch: return "username/handle"
+        case .snapchat: return "username/handle"
+        case .telegram: return "username/handle"
         case .whatsapp: return "+1234567890"
-        case .threads: return "johndoe"
+        case .threads: return "username/handle"
         }
     }
     
@@ -52,9 +59,44 @@ enum SocialLinkType: String, CaseIterable {
             "@", "/public/", "/feed/", "/posts/"
         ]
         
-        for path in pathsToRemove {
-            if cleanInput.contains(path) {
-                cleanInput = cleanInput.replacingOccurrences(of: path, with: "")
+        // Special handling for specific platforms
+        switch self {
+        case .snapchat: 
+            return "https://www.snapchat.com/add/"
+        case .linkedIn:
+            cleanInput = cleanInput.replacingOccurrences(of: "in/", with: "")
+        case .twitter:
+            cleanInput = cleanInput.replacingOccurrences(of: "@", with: "")
+        case .instagram:
+            // First remove any URL components
+            let patterns = [
+                "https://www.instagram.com/",
+                "http://www.instagram.com/",
+                "https://instagram.com/",
+                "http://instagram.com/",
+                "www.instagram.com/",
+                "instagram.com/",
+                "https://www./",  // Remove any malformed URLs from previous processing
+                "http://www./",
+                "https:///"
+            ]
+            
+            for pattern in patterns {
+                cleanInput = cleanInput.replacingOccurrences(of: pattern, with: "", options: .caseInsensitive)
+            }
+        default:
+            break
+        }
+
+        if cleanInput.lowercased().contains(self.baseURL.lowercased()) {
+            for path in pathsToRemove {
+                if cleanInput.contains(path) {
+                    cleanInput = cleanInput.replacingOccurrences(of: path, with: "")
+                }
+            }
+            
+            while cleanInput.hasSuffix("/") {
+                cleanInput.removeLast()
             }
         }
         
@@ -62,7 +104,7 @@ enum SocialLinkType: String, CaseIterable {
         if cleanInput.hasPrefix("@") {
             cleanInput.removeFirst()
         }
-        
+
         // Handle various URL formats
         let knownDomains = [
             "linkedin.com", "x.com", "twitter.com", 
@@ -74,6 +116,7 @@ enum SocialLinkType: String, CaseIterable {
             "eu.linkedin.com", "uk.linkedin.com"
         ]
         
+        // Handle both channel names and IDs
         for domain in knownDomains {
             // Remove any protocol and www
             let patterns = [
@@ -93,18 +136,6 @@ enum SocialLinkType: String, CaseIterable {
                     )
                 }
             }
-        }
-        
-        // Special handling for specific platforms
-        switch self {
-        case .linkedIn:
-            cleanInput = cleanInput.replacingOccurrences(of: "in/", with: "")
-        case .twitter:
-            cleanInput = cleanInput.replacingOccurrences(of: "@", with: "")
-        case .instagram:
-            cleanInput = cleanInput.replacingOccurrences(of: "instagram.com", with: "")
-        default:
-            break
         }
         
         // Remove query parameters
@@ -145,16 +176,15 @@ enum SocialLinkType: String, CaseIterable {
     func getFullURL(_ handle: String) -> String {
         let formattedHandle = formatInput(handle)
         
+        // For platforms that accept full URLs, return the formatted URL directly
+        if allowsFullURL {
+            return formattedHandle
+        }
+        
+        // For other platforms, use existing logic
         switch self {
         case .whatsapp:
             return baseURL + formatPhoneNumber(formattedHandle)
-        case .youtube:
-            // Handle both channel names and IDs
-            if formattedHandle.hasPrefix("UC") && formattedHandle.count == 24 {
-                return baseURL + formattedHandle
-            } else {
-                return "https://www.youtube.com/c/" + formattedHandle
-            }
         default:
             return baseURL + formattedHandle
         }
@@ -162,13 +192,12 @@ enum SocialLinkType: String, CaseIterable {
     
     var baseURL: String {
         switch self {
+        case .youtube, .discord, .facebook:
+            return ""  // No base URL needed for full URL platforms
         case .linkedIn: return "https://www.linkedin.com/in/"
         case .twitter: return "https://x.com/"
-        case .facebook: return "https://www.facebook.com/"
         case .instagram: return "https://www.instagram.com/"
         case .tiktok: return "https://www.tiktok.com/@"
-        case .youtube: return "https://www.youtube.com/channel/"
-        case .discord: return "https://discord.com/users/"
         case .twitch: return "https://www.twitch.tv/"
         case .snapchat: return "https://www.snapchat.com/add/"
         case .telegram: return "https://t.me/"
