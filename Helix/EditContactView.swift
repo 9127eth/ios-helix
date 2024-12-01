@@ -78,6 +78,15 @@ struct EditContactView: View {
                     .keyboardType(.emailAddress)
                     .autocapitalization(.none)
                     
+                    TextField("Website", text: Binding(
+                        get: { editedContact.website ?? "" },
+                        set: { editedContact.website = $0.isEmpty ? nil : $0 }
+                    ))
+                    .keyboardType(.URL)
+                    .autocapitalization(.none)
+                    .focused($focusedField, equals: .website)
+                    .onSubmit { focusedField = .address }
+                    
                     TextField("Address", text: Binding(
                         get: { editedContact.address ?? "" },
                         set: { editedContact.address = $0.isEmpty ? nil : $0 }
@@ -192,20 +201,16 @@ struct EditContactView: View {
                 }
             }
             .navigationTitle("Edit Contact")
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Cancel") {
-                        showingCancelConfirmation = true
-                    }
+            .navigationBarItems(
+                leading: Button("Cancel") {
+                    dismiss()
+                },
+                trailing: Button("Save") {
+                    saveChanges()
                 }
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Save") {
-                        saveChanges()
-                    }
-                    .disabled(editedContact.name.isEmpty || !isPhoneNumberValid || !isEmailValid)
-                }
-            }
+            )
         }
+        .dismissKeyboardOnTap()
         .sheet(isPresented: $showingTagSheet) {
             TagSelectionView(tagManager: tagManager, selectedTagIds: $selectedTagIds)
         }
@@ -240,7 +245,6 @@ struct EditContactView: View {
                 }
             }
         }
-        .dismissKeyboardOnTap()
     }
     
     private func saveChanges() {

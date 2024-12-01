@@ -12,6 +12,7 @@ enum Field: Hashable {
     case email
     case address
     case note
+    case website
 }
 
 struct CreateContactView: View {
@@ -83,6 +84,15 @@ struct CreateContactView: View {
                             .foregroundColor(.red)
                             .font(.caption)
                     }
+                    
+                    TextField("Website", text: Binding(
+                        get: { contact.website ?? "" },
+                        set: { contact.website = $0.isEmpty ? nil : $0 }
+                    ))
+                    .keyboardType(.URL)
+                    .autocapitalization(.none)
+                    .focused($focusedField, equals: .website)
+                    .onSubmit { focusedField = .address }
                     
                     TextField("Address", text: Binding(
                         get: { contact.address ?? "" },

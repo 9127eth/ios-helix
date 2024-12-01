@@ -18,6 +18,7 @@ struct Contact: Identifiable, Codable {
     var company: String?
     var address: String?
     var email: String?
+    var website: String?
     var note: String?
     var tags: [String]?
     var dateAdded: Date
@@ -53,6 +54,7 @@ struct Contact: Identifiable, Codable {
         if let company = company { dictionary["company"] = company }
         if let address = address { dictionary["address"] = address }
         if let email = email { dictionary["email"] = email }
+        if let website = website { dictionary["website"] = website }
         if let note = note { dictionary["note"] = note }
         if let tags = tags { dictionary["tags"] = tags }
         if let imageUrl = imageUrl { dictionary["imageUrl"] = imageUrl }

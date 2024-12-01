@@ -33,6 +33,23 @@ struct ContactItemView: View {
             
             Spacer()
             
+            // Image preview
+            if let imageUrl = contact.imageUrl {
+                AsyncImage(url: URL(string: imageUrl)) { image in
+                    image
+                        .resizable()
+                        .scaledToFill()
+                        .frame(width: 60, height: 40)
+                        .clipped()
+                        .cornerRadius(6)
+                } placeholder: {
+                    Rectangle()
+                        .fill(Color.gray.opacity(0.2))
+                        .frame(width: 60, height: 40)
+                        .cornerRadius(6)
+                }
+            }
+            
             // Quick action buttons
             HStack(spacing: 20) {
                 if contact.phone != nil || contact.email != nil {
