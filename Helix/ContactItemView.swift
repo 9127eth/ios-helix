@@ -13,42 +13,32 @@ struct ContactItemView: View {
     
     var body: some View {
         HStack(spacing: 16) {
+            // Contact details
             VStack(alignment: .leading, spacing: 4) {
                 Text(contact.name)
                     .font(.system(size: 16, weight: .medium))
                     .foregroundColor(AppColors.bodyPrimaryText)
+                    .lineLimit(1)
                 
-                if let position = contact.position {
+                if let position = contact.position, let company = contact.company {
+                    Text("\(company) | \(position)")
+                        .font(.system(size: 14))
+                        .foregroundColor(AppColors.bodyPrimaryText.opacity(0.8))
+                        .lineLimit(1)
+                } else if let position = contact.position {
                     Text(position)
                         .font(.system(size: 14))
                         .foregroundColor(AppColors.bodyPrimaryText.opacity(0.8))
-                }
-                
-                if let company = contact.company {
+                        .lineLimit(1)
+                } else if let company = contact.company {
                     Text(company)
                         .font(.system(size: 14))
                         .foregroundColor(AppColors.bodyPrimaryText.opacity(0.8))
+                        .lineLimit(1)
                 }
             }
             
             Spacer()
-            
-            // Image preview
-            if let imageUrl = contact.imageUrl {
-                AsyncImage(url: URL(string: imageUrl)) { image in
-                    image
-                        .resizable()
-                        .scaledToFill()
-                        .frame(width: 60, height: 40)
-                        .clipped()
-                        .cornerRadius(6)
-                } placeholder: {
-                    Rectangle()
-                        .fill(Color.gray.opacity(0.2))
-                        .frame(width: 60, height: 40)
-                        .cornerRadius(6)
-                }
-            }
             
             // Quick action buttons
             HStack(spacing: 20) {
@@ -56,37 +46,37 @@ struct ContactItemView: View {
                     Button(action: { showingContactOptions = true }) {
                         Image(systemName: "envelope")
                             .foregroundColor(AppColors.foreground)
-                            .frame(width: 44, height: 60)
+                            .frame(width: 44, height: 44)
                             .contentShape(Rectangle())
                     }
-                    .padding(.leading, 8)
                 }
                 
-                Button(action: { showingActionSheet = true }) {
+                // Menu button
+                Menu {
+                    Button("Edit") { showingEditSheet = true }
+                    Button("Share") { showingShareSheet = true }
+                    Button("Delete", role: .destructive) { showingDeleteAlert = true }
+                } label: {
                     Image(systemName: "ellipsis")
                         .foregroundColor(AppColors.foreground)
-                        .frame(width: 44, height: 60)
+                        .frame(width: 44, height: 44)
                         .contentShape(Rectangle())
                 }
             }
         }
-        .padding()
+        .frame(height: 72)
+        .padding(.horizontal, 16)
         .background(AppColors.cardGridBackground)
         .cornerRadius(12)
         .sheet(isPresented: $showingContactOptions) {
             ContactOptionsSheet(contact: contact)
                 .presentationDetents([.height(250)])
         }
-        .confirmationDialog("Contact Actions", isPresented: $showingActionSheet) {
-            Button("Edit") { showingEditSheet = true }
-            Button("Share") { showingShareSheet = true }
-            Button("Delete", role: .destructive) { showingDeleteAlert = true }
-        }
         .alert("Delete Contact", isPresented: $showingDeleteAlert) {
             Button("Cancel", role: .cancel) { }
             Button("Delete", role: .destructive) { deleteContact() }
         } message: {
-            Text("Are you sure you want to delete this contact?")
+            Text("Are you sure you want to delete this contact? This action cannot be undone.")
         }
         .sheet(isPresented: $showingEditSheet) {
             EditContactView(contact: $contact)
@@ -99,20 +89,35 @@ struct ContactItemView: View {
         
         Task {
             do {
-                // Delete image if exists
                 if let imageUrl = contact.imageUrl {
                     try await Contact.deleteImage(url: imageUrl)
                 }
                 
-                // Delete contact document
                 let db = Firestore.firestore()
                 try await db.collection("users").document(userId)
-                    .collection("contacts").document(contactId)
+                    .collection("contacts")
+                    .document(contactId)
                     .delete()
                 
             } catch {
-                print("Error deleting contact: \(error.localizedDescription)")
+                print("Error deleting contact: \(error)")
             }
+        }
+    }
+}
+
+struct InitialsView: View {
+    let initials: String
+    
+    var body: some View {
+        ZStack {
+            Circle()
+                .fill(AppColors.cardDepthDefault)
+                .frame(width: 40, height: 40)
+            
+            Text(initials)
+                .font(.system(size: 16, weight: .medium))
+                .foregroundColor(.white)
         }
     }
 } 
