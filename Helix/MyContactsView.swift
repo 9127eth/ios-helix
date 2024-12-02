@@ -116,12 +116,9 @@ struct MyContactsView: View {
                                     }
                                 }
                             ))
-                                .onTapGesture {
-                                    toggleSelection(contact.id ?? "")
-                                }
                         }
                     }
-                    .padding()
+                    .padding(.horizontal)
                 }
             }
             .background(AppColors.background)

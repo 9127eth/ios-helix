@@ -10,6 +10,7 @@ struct ContactItemView: View {
     @State private var showingShareSheet = false
     @State private var showingDeleteAlert = false
     @State private var showingContactOptions = false
+    @State private var showingContactDetails = false
     
     var body: some View {
         HStack(spacing: 16) {
@@ -19,6 +20,9 @@ struct ContactItemView: View {
                     .font(.system(size: 16, weight: .medium))
                     .foregroundColor(AppColors.bodyPrimaryText)
                     .lineLimit(1)
+                    .onTapGesture {
+                        showingContactDetails = true
+                    }
                 
                 if let position = contact.position, let company = contact.company {
                     Text("\(company) | \(position)")
@@ -80,6 +84,9 @@ struct ContactItemView: View {
         }
         .sheet(isPresented: $showingEditSheet) {
             EditContactView(contact: $contact)
+        }
+        .sheet(isPresented: $showingContactDetails) {
+            SeeContactView(contact: contact)
         }
     }
     
