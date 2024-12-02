@@ -261,6 +261,13 @@ struct EditContactView: View {
                 }
                 
                 var updatedContact = editedContact
+                
+                // Parse the full name into first and last name
+                let nameComponents = updatedContact.name.trimmingCharacters(in: .whitespacesAndNewlines)
+                                                 .components(separatedBy: " ")
+                updatedContact.firstName = nameComponents.first ?? ""
+                updatedContact.lastName = nameComponents.count > 1 ? nameComponents.dropFirst().joined(separator: " ") : nil
+                
                 updatedContact.dateModified = Date()
                 updatedContact.tags = Array(selectedTagIds)
                 

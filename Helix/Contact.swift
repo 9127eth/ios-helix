@@ -13,6 +13,8 @@ import FirebaseAuth
 struct Contact: Identifiable, Codable {
     @DocumentID var id: String?
     var name: String
+    var firstName: String?
+    var lastName: String?
     var phone: String?
     var position: String?
     var company: String?
@@ -39,15 +41,28 @@ struct Contact: Identifiable, Codable {
         self.contactSource = .manual
     }
     
+    private func parseName() -> (firstName: String, lastName: String?) {
+        let components = name.trimmingCharacters(in: .whitespacesAndNewlines)
+                           .components(separatedBy: " ")
+        let firstName = components.first ?? ""
+        let lastName = components.count > 1 ? components.dropFirst().joined(separator: " ") : nil
+        return (firstName, lastName)
+    }
+    
     func asDictionary() throws -> [String: Any] {
+        let parsedName = parseName()
         var dictionary: [String: Any] = [
             "name": name,
+            "firstName": parsedName.firstName,
             "dateAdded": dateAdded,
             "dateModified": dateModified,
             "contactSource": contactSource.rawValue
         ]
         
-        // Optional fields
+        if let lastName = parsedName.lastName {
+            dictionary["lastName"] = lastName
+        }
+        
         if let id = id { dictionary["id"] = id }
         if let phone = phone { dictionary["phone"] = phone }
         if let position = position { dictionary["position"] = position }

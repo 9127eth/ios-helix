@@ -153,3 +153,80 @@ Benefits of This Structure
 	•	Scalability: Adding tags, filtering, and exporting remain efficient even as the database grows.
 	•	Centralized Management: Tags can be renamed or deleted easily without manually editing every contact.
 	•	Flexibility: The same tag can be reused across multiple contacts, reducing duplication and improving usability.
+
+
+Detailed Requirements for Name Handling in Contacts
+
+Below are the functional and technical requirements you can pass to your developer based on the recommendation:
+
+Functional Requirements
+
+1. User Input
+
+	•	Provide a single “Name” input field in the user interface where users can enter the contact’s full name. Just as it is now
+
+2. Name Parsing
+
+	•	The system should split the entered “Name” into firstName and lastName before saving it in the database.
+	•	First Name: The first word or segment of the entered name.
+	•	Last Name: The remaining words or segments after the first separated by a space.
+
+3. Display Name
+
+	•	When displaying a contact, reconstruct the full name as first_name + " " + last_name.
+	•	If last_name is empty, display only the first_name.
+
+Storage Requirements
+
+1. Database Structure
+
+Each contact document in the database should include:
+	•	firstName: A string for the contact’s first name.
+	•	lastName: A string for the contact’s last name.
+
+2. Name Input Fallback
+
+	•	If the name cannot be split (e.g., a single word is entered):
+	•	Store the entered name in first_name and leave last_name empty.
+
+Edge Case Handling
+
+	1.	Single-Word Names:
+	•	If the user enters a single word (e.g., “Prince”):
+	•	Store it as first_name.
+	•	Leave last_name empty.
+	2.	Multi-Part Names:
+	•	If the user enters a name with multiple parts (e.g., “Jean-Luc Picard”):
+	•	Store the first segment as firstName (e.g., “Jean-Luc”).
+	•	Combine the remaining segments into last_name (e.g., “Picard”).
+	3.	No Name Provided:
+	•	Name will be a required field.
+	4.	Special Characters or Unusual Formatting:
+	•	Allow names with special characters (e.g., “O’Connor,” “Anne-Marie”).
+	•	Trim leading and trailing spaces before splitting.
+	•	Handle hyphenated or multi-word first names and last names as entered.
+
+Search and Sorting Requirements
+
+	1.	Search:
+	•	Support searching by first_name, last_name, or the reconstructed full name.
+	•	Partial matches should be supported (e.g., searching “Jean” should return “Jean-Luc Picard”).
+	2.	Sorting:
+	•	Provide sorting by:
+	•	firstName (alphabetical).
+	•	lastName (alphabetical).
+
+User Experience Requirements
+
+	1.	Default Handling:
+	•	When users enter a name, automatically split and store it in the appropriate fields.
+	•	Users should not be required to manually input separate first_name and last_name fields.
+
+
+Developer Notes
+
+	1.	Consistency Across Systems:
+	•	Ensure the stored first_name and last_name format aligns with external integrations (e.g., CRMs or email tools) to avoid conflicts in future developments.
+	2.	Error Handling:
+	•	Validate the name input to ensure it doesn’t cause issues (e.g., excessively long names, unsupported characters).
+	•	Notify users if the input is invalid and provide guidance (e.g., “Name should be under 100 characters”).

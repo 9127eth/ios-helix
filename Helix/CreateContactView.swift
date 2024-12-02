@@ -224,6 +224,12 @@ struct CreateContactView: View {
         
         guard let userId = Auth.auth().currentUser?.uid else { return }
         
+        // Parse the full name into first and last name
+        let nameComponents = contact.name.trimmingCharacters(in: .whitespacesAndNewlines)
+                                      .components(separatedBy: " ")
+        contact.firstName = nameComponents.first ?? ""
+        contact.lastName = nameComponents.count > 1 ? nameComponents.dropFirst().joined(separator: " ") : nil
+        
         contact.dateAdded = Date()
         contact.dateModified = Date()
         contact.contactSource = .manual
