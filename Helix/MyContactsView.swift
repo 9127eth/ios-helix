@@ -21,6 +21,12 @@ struct MyContactsView: View {
     @State private var showingDeleteConfirmation = false
     @State private var isLoading = false
     @State private var showSubscriptionView = false
+    @State private var isSelectionMode = false
+    @State private var selectedContactIds: Set<String> = []
+    @State private var showingBulkActionSheet = false
+    @State private var showingBulkTagSheet = false
+    @State private var showingBulkDeleteConfirmation = false
+    @State private var showingExportEmailSheet = false
     @Binding var isPro: Bool
     
     enum SortOption {
@@ -30,40 +36,21 @@ struct MyContactsView: View {
     var body: some View {
         NavigationView {
             VStack(spacing: 0) {
-                // Header
+                // Header with title
                 VStack(alignment: .leading, spacing: 10) {
                     if !isPro {
-                        Button(action: {
-                            showSubscriptionView = true
-                        }) {
-                            HStack(spacing: 6) {
-                                Image(systemName: "bolt.fill")
-                                    .resizable()
-                                    .aspectRatio(contentMode: .fit)
-                                    .frame(width: 12, height: 12)
-                                Text("Get Helix Pro")
-                                    .font(.subheadline)
-                            }
-                            .foregroundColor(AppColors.helixPro)
-                            .padding(.vertical, 6)
-                            .padding(.horizontal, 12)
-                            .background(Color.gray.opacity(0.10))
-                            .cornerRadius(16)
-                            .shadow(color: Color.black.opacity(0.2), radius: 2, x: 0, y: 1)
-                        }
-                        .padding(.bottom, 5)
+                        // ... existing Pro button ...
                     }
                     
                     Text("Contacts")
                         .font(.system(size: 60, weight: .bold))
-                        .fontWeight(.bold)
                         .foregroundColor(AppColors.bodyPrimaryText)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.horizontal)
                 .padding(.top, 40)
                 
-                // Add Contact and Manage Tags buttons
+                // Action buttons row
                 HStack {
                     Spacer()
                     Button(action: {
@@ -91,31 +78,102 @@ struct MyContactsView: View {
                 .padding(.horizontal)
                 .padding(.vertical, 16)
                 
-                // Search and filters
+                // Search and filters with Select button
                 VStack(spacing: 12) {
                     SearchBar(text: $searchText)
                         .padding(.horizontal)
                     
                     HStack {
                         TagFilterButton(selectedTags: $selectedTags)
+                        
+                        Button(action: { isSelectionMode.toggle() }) {
+                            HStack(spacing: 4) {
+                                Image(systemName: isSelectionMode ? "xmark.circle" : "checkmark.circle")
+                                    .renderingMode(.template)
+                                Text(isSelectionMode ? "Cancel" : "Select")
+                                    .font(.footnote)
+                            }
+                            .foregroundColor(AppColors.buttonText)
+                            .padding(.vertical, 8)
+                            .padding(.horizontal, 12)
+                            .background(AppColors.cardGridBackground)
+                            .cornerRadius(16)
+                        }
+                        
                         Spacer()
                         SortButton(selectedOption: $selectedSortOption)
                     }
                     .padding(.horizontal)
+                    
+                    // Selection info bar (visible when in selection mode)
+                    if isSelectionMode {
+                        HStack {
+                            Button(action: {
+                                if selectedContactIds.count == filteredContacts.count {
+                                    selectedContactIds.removeAll()
+                                } else {
+                                    selectedContactIds = Set(filteredContacts.map { $0.id ?? "" })
+                                }
+                            }) {
+                                Text(selectedContactIds.count == filteredContacts.count ? "Deselect All" : "Select All")
+                                    .font(.footnote)
+                                    .foregroundColor(AppColors.buttonText)
+                            }
+                            
+                            Spacer()
+                            
+                            Text("\(selectedContactIds.count) selected")
+                                .font(.footnote)
+                                .foregroundColor(.gray)
+                            
+                            if !selectedContactIds.isEmpty {
+                                Button(action: { showingBulkActionSheet = true }) {
+                                    HStack(spacing: 4) {
+                                        Text("Actions")
+                                        Image(systemName: "chevron.down")
+                                    }
+                                    .font(.footnote)
+                                    .foregroundColor(AppColors.buttonText)
+                                    .padding(.vertical, 4)
+                                    .padding(.horizontal, 8)
+                                    .background(AppColors.cardGridBackground)
+                                    .cornerRadius(8)
+                                }
+                            }
+                        }
+                        .padding(.horizontal)
+                        .padding(.top, 8)
+                    }
                 }
                 
                 // Contacts list
                 ScrollView {
                     LazyVStack(spacing: 12) {
                         ForEach(filteredContacts) { contact in
-                            ContactItemView(contact: Binding(
-                                get: { contact },
-                                set: { newValue in
-                                    if let index = contacts.firstIndex(where: { $0.id == contact.id }) {
-                                        contacts[index] = newValue
-                                    }
+                            HStack {
+                                if isSelectionMode {
+                                    Toggle("", isOn: Binding(
+                                        get: { selectedContactIds.contains(contact.id ?? "") },
+                                        set: { isSelected in
+                                            if isSelected {
+                                                selectedContactIds.insert(contact.id ?? "")
+                                            } else {
+                                                selectedContactIds.remove(contact.id ?? "")
+                                            }
+                                        }
+                                    ))
+                                    .labelsHidden()
                                 }
-                            ))
+                                
+                                ContactItemView(contact: Binding(
+                                    get: { contact },
+                                    set: { newValue in
+                                        if let index = contacts.firstIndex(where: { $0.id == contact.id }) {
+                                            contacts[index] = newValue
+                                        }
+                                    }
+                                ))
+                            }
                         }
                     }
                     .padding(.horizontal)
@@ -131,6 +189,34 @@ struct MyContactsView: View {
             }
             .sheet(isPresented: $showingTagManager) {
                 TagManagerView()
+            }
+        }
+        .actionSheet(isPresented: $showingBulkActionSheet) {
+            ActionSheet(title: Text("Bulk Actions"),
+                       message: Text("Choose an action for selected contacts"),
+                       buttons: [
+                           .default(Text("Add/Change Tags")) { showingBulkTagSheet = true },
+                           .default(Text("Export as CSV")) { showingExportEmailSheet = true },
+                           .destructive(Text("Delete")) { showingBulkDeleteConfirmation = true },
+                           .cancel()
+                       ])
+        }
+        .alert("Delete Contacts", isPresented: $showingBulkDeleteConfirmation) {
+            Button("Cancel", role: .cancel) { }
+            Button("Delete", role: .destructive) { deleteSelectedContacts() }
+        } message: {
+            Text("Are you sure you want to delete \(selectedContactIds.count) contacts? This action cannot be undone.")
+        }
+        .sheet(isPresented: $showingBulkTagSheet) {
+            BulkTagView(selectedContactIds: selectedContactIds) {
+                isSelectionMode = false
+                selectedContactIds.removeAll()
+            }
+        }
+        .sheet(isPresented: $showingExportEmailSheet) {
+            ExportContactsView(selectedContactIds: selectedContactIds) {
+                isSelectionMode = false
+                selectedContactIds.removeAll()
             }
         }
         .onAppear {
@@ -196,5 +282,21 @@ struct MyContactsView: View {
                     try? document.data(as: Contact.self)
                 }
             }
+    }
+    
+    private func deleteSelectedContacts() {
+        Task {
+            do {
+                for contactId in selectedContactIds {
+                    if let contact = contacts.first(where: { $0.id == contactId }) {
+                        try await Contact.delete(contact)
+                    }
+                }
+                selectedContactIds.removeAll()
+                isSelectionMode = false
+            } catch {
+                print("Error deleting contacts: \(error)")
+            }
+        }
     }
 }

@@ -127,4 +127,36 @@ struct Contact: Identifiable, Codable {
         
         try await batch.commit()
     }
+    
+    static func bulkDelete(_ contactIds: Set<String>) async throws {
+        guard let userId = Auth.auth().currentUser?.uid else { return }
+        
+        let db = Firestore.firestore()
+        let batch = db.batch()
+        
+        for contactId in contactIds {
+            let contactRef = db.collection("users").document(userId)
+                .collection("contacts").document(contactId)
+            batch.deleteDocument(contactRef)
+        }
+        
+        try await batch.commit()
+    }
+    
+    static func bulkUpdateTags(_ contactIds: Set<String>, addTags: Set<String>) async throws {
+        guard let userId = Auth.auth().currentUser?.uid else { return }
+        
+        let db = Firestore.firestore()
+        let batch = db.batch()
+        
+        for contactId in contactIds {
+            let contactRef = db.collection("users").document(userId)
+                .collection("contacts").document(contactId)
+            batch.updateData([
+                "tags": FieldValue.arrayUnion(Array(addTags))
+            ], forDocument: contactRef)
+        }
+        
+        try await batch.commit()
+    }
 }
