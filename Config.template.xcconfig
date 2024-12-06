@@ -1,0 +1,33 @@
+// Template file showing required configuration
+// Copy this file to Config.xcconfig and fill in your values
+
+// Google Configuration
+GOOGLE_CLIENT_ID = your.apps.googleusercontent.com
+GOOGLE_REVERSED_CLIENT_ID = com.googleusercontent.apps.your-id
+GOOGLE_API_KEY = your-google-api-key
+GOOGLE_GCM_SENDER_ID = your-sender-id
+GOOGLE_APP_ID = your-app-id
+FIREBASE_DATABASE_URL = your-firebase-database-url
+
+// Firebase Configuration
+NEXT_PUBLIC_FIREBASE_API_KEY = your-firebase-api-key
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN = your-project.firebaseapp.com
+NEXT_PUBLIC_FIREBASE_PROJECT_ID = your-project-id
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET = your-project.appspot.com
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID = your-sender-id
+NEXT_PUBLIC_FIREBASE_APP_ID = your-app-id
+
+// API Configuration
+NEXT_PUBLIC_API_URL = http://localhost:3000
+API_BASE_URL = https://your-domain.com/api
+API_KEY = your-api-key
+
+// Stripe Configuration
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY = your-stripe-publishable-key
+STRIPE_SECRET_KEY = your-stripe-secret-key
+STRIPE_WEBHOOK_SECRET = your-stripe-webhook-secret
+
+// Firebase Admin Configuration
+FIREBASE_PROJECT_ID = your-project-id
+FIREBASE_CLIENT_EMAIL = your-client-email@your-project.iam.gserviceaccount.com
+FIREBASE_PRIVATE_KEY = your-private-key

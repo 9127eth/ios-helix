@@ -1,6 +1,8 @@
+import Foundation
 import SwiftUI
 import FirebaseFirestore
 import FirebaseAuth
+import FirebaseFunctions
 
 struct ExportContactsView: View {
     let selectedContactIds: Set<String>
@@ -11,6 +13,7 @@ struct ExportContactsView: View {
     @State private var isProcessing = false
     @State private var showError = false
     @State private var errorMessage = ""
+    @State private var showSuccessAlert = false
     
     var body: some View {
         NavigationView {
@@ -54,6 +57,11 @@ struct ExportContactsView: View {
             Button("OK", role: .cancel) { }
         } message: {
             Text(errorMessage)
+        }
+        .alert("Success", isPresented: $showSuccessAlert) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text("The export has been sent successfully.")
         }
         .onAppear {
             // Set default email to user's email
@@ -143,18 +151,40 @@ struct ExportContactsView: View {
     }
     
     private func sendExportEmail(to email: String, csvContent: String) async throws {
-        // Implement your email sending logic here
-        // This could be a call to a Cloud Function or your backend API
-        // For now, we'll just simulate the API call
+        guard let url = URL(string: "\(AppEnvironment.apiBaseURL)/send-email") else {
+            throw NSError(domain: "Invalid URL", code: -1, userInfo: nil)
+        }
         
-        // Simulate network delay
-        try await Task.sleep(nanoseconds: 2 * 1_000_000_000)
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue("Bearer \(AppEnvironment.apiKey)", forHTTPHeaderField: "Authorization")
         
-        // TODO: Replace with actual API call
-        // Example:
-        // let response = try await APIClient.shared.sendExportEmail(
-        //     to: email,
-        //     csvContent: csvContent
-        // )
+        let body: [String: Any] = [
+            "type": "csvExport",
+            "email": email,
+            "csvData": csvContent,
+            "fileName": "helix_contacts_export.csv"
+        ]
+        
+        request.httpBody = try JSONSerialization.data(withJSONObject: body)
+        
+        let (_, response) = try await URLSession.shared.data(for: request)
+        
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw NSError(domain: "Invalid response", code: -1, userInfo: nil)
+        }
+        
+        guard httpResponse.statusCode == 200 else {
+            throw NSError(
+                domain: "Server error",
+                code: httpResponse.statusCode,
+                userInfo: [NSLocalizedDescriptionKey: "Failed to send export email"]
+            )
+        }
+        
+        await MainActor.run {
+            showSuccessAlert = true
+        }
     }
 } 
