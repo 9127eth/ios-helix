@@ -84,8 +84,6 @@ struct MyContactsView: View {
                         .padding(.horizontal)
                     
                     HStack {
-                        TagFilterButton(selectedTags: $selectedTags)
-                        
                         Button(action: { isSelectionMode.toggle() }) {
                             HStack(spacing: 4) {
                                 Image(systemName: isSelectionMode ? "xmark.circle" : "checkmark.circle")
@@ -101,7 +99,9 @@ struct MyContactsView: View {
                         }
                         
                         Spacer()
+                        
                         SortButton(selectedOption: $selectedSortOption)
+                        TagFilterButton(selectedTags: $selectedTags)
                     }
                     .padding(.horizontal)
                     
@@ -115,9 +115,13 @@ struct MyContactsView: View {
                                     selectedContactIds = Set(filteredContacts.map { $0.id ?? "" })
                                 }
                             }) {
-                                Text(selectedContactIds.count == filteredContacts.count ? "Deselect All" : "Select All")
-                                    .font(.footnote)
-                                    .foregroundColor(AppColors.buttonText)
+                                HStack {
+                                    Image(systemName: selectedContactIds.count == filteredContacts.count ? "checkmark.square.fill" : "square")
+                                        .foregroundColor(AppColors.buttonText)
+                                    Text(selectedContactIds.count == filteredContacts.count ? "Deselect All" : "Select All")
+                                        .font(.footnote)
+                                        .foregroundColor(AppColors.buttonText)
+                                }
                             }
                             
                             Spacer()
@@ -152,17 +156,16 @@ struct MyContactsView: View {
                         ForEach(filteredContacts) { contact in
                             HStack {
                                 if isSelectionMode {
-                                    Toggle("", isOn: Binding(
-                                        get: { selectedContactIds.contains(contact.id ?? "") },
-                                        set: { isSelected in
-                                            if isSelected {
-                                                selectedContactIds.insert(contact.id ?? "")
-                                            } else {
-                                                selectedContactIds.remove(contact.id ?? "")
-                                            }
+                                    Button(action: {
+                                        if selectedContactIds.contains(contact.id ?? "") {
+                                            selectedContactIds.remove(contact.id ?? "")
+                                        } else {
+                                            selectedContactIds.insert(contact.id ?? "")
                                         }
-                                    ))
-                                    .labelsHidden()
+                                    }) {
+                                        Image(systemName: selectedContactIds.contains(contact.id ?? "") ? "checkmark.square.fill" : "square")
+                                            .foregroundColor(AppColors.buttonText)
+                                    }
                                 }
                                 
                                 ContactItemView(contact: Binding(

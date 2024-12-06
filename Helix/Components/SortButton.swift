@@ -23,13 +23,17 @@ struct SortButton: View {
                 }
             }
         } label: {
-            HStack {
+            HStack(spacing: 4) {
                 Image(systemName: "arrow.up.arrow.down")
+                    .renderingMode(.template)
                 Text("Sort")
+                    .font(.footnote)
             }
-            .padding(8)
-            .background(AppColors.inputFieldBackground)
-            .cornerRadius(8)
+            .foregroundColor(AppColors.buttonText)
+            .padding(.vertical, 8)
+            .padding(.horizontal, 12)
+            .background(AppColors.cardGridBackground)
+            .cornerRadius(16)
         }
     }
 } 

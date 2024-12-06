@@ -9,14 +9,17 @@ struct TagFilterButton: View {
     
     var body: some View {
         Button(action: { showingTagPicker = true }) {
-            HStack {
+            HStack(spacing: 4) {
                 Image(systemName: "tag")
-                Text(selectedTags.isEmpty ? "Filter by tag" : "\(selectedTags.count) tags")
-                    .foregroundColor(selectedTags.isEmpty ? .gray : AppColors.foreground)
+                    .renderingMode(.template)
+                Text(selectedTags.isEmpty ? "Filter" : "\(selectedTags.count)")
+                    .font(.footnote)
             }
-            .padding(8)
-            .background(AppColors.inputFieldBackground)
-            .cornerRadius(8)
+            .foregroundColor(AppColors.buttonText)
+            .padding(.vertical, 8)
+            .padding(.horizontal, 12)
+            .background(AppColors.cardGridBackground)
+            .cornerRadius(16)
         }
         .sheet(isPresented: $showingTagPicker) {
             TagSelectionView(tagManager: tagManager, selectedTagIds: $selectedTags)
