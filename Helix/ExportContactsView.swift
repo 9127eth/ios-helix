@@ -14,6 +14,7 @@ struct ExportContactsView: View {
     @State private var showError = false
     @State private var errorMessage = ""
     @State private var showSuccessAlert = false
+    @StateObject private var tagManager = TagManager()
     
     var body: some View {
         NavigationView {
@@ -68,6 +69,7 @@ struct ExportContactsView: View {
             if let userEmail = Auth.auth().currentUser?.email {
                 emailAddress = userEmail
             }
+            tagManager.fetchTags()
         }
     }
     
@@ -98,11 +100,6 @@ struct ExportContactsView: View {
                 
                 // Call your backend API to send the email with CSV
                 try await sendExportEmail(to: emailAddress, csvContent: csvContent)
-                
-                await MainActor.run {
-                    dismiss()
-                    onComplete()
-                }
             } catch {
                 await MainActor.run {
                     showError = true
@@ -115,18 +112,27 @@ struct ExportContactsView: View {
     
     private func generateCSV(from contacts: [Contact]) -> String {
         // CSV header
-        var csv = "Name,Company,Position,Phone,Email,Tags,Date Added\n"
+        var csv = "Full Name,First Name,Last Name,Company,Position,Phone,Email,Tags,Date Added\n"
+        
+        // Sort contacts alphabetically by name
+        let sortedContacts = contacts.sorted { $0.name.trimmingCharacters(in: .whitespaces).lowercased() < $1.name.trimmingCharacters(in: .whitespaces).lowercased() }
         
         // Add contact rows
-        for contact in contacts {
-            let tags = (contact.tags ?? []).joined(separator: "; ")
+        for contact in sortedContacts {
+            // Get tag names instead of IDs
+            let tagNames = (contact.tags ?? []).compactMap { tagId in
+                tagManager.availableTags.first(where: { $0.id == tagId })?.name
+            }.joined(separator: "; ")
+            
             let row = [
                 contact.name,
+                contact.firstName ?? "",
+                contact.lastName ?? "",
                 contact.company ?? "",
                 contact.position ?? "",
                 contact.phone ?? "",
                 contact.email ?? "",
-                tags,
+                tagNames,
                 formatDate(contact.dateAdded)
             ].map { escapeCSVField($0) }.joined(separator: ",")
             
@@ -185,6 +191,11 @@ struct ExportContactsView: View {
         
         await MainActor.run {
             showSuccessAlert = true
+            // Add delay before dismissing
+            DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+                dismiss()
+                onComplete()
+            }
         }
     }
 } 
