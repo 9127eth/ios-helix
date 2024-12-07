@@ -31,6 +31,7 @@ struct CreateContactView: View {
     
     // OCR-related properties
     var prefilledData: ScannedContactData?
+    @State private var pendingImage: UIImage?
     
     init(prefilledData: ScannedContactData? = nil) {
         self.prefilledData = prefilledData
@@ -50,6 +51,7 @@ struct CreateContactView: View {
         
         // Initialize the state
         _contact = State(initialValue: initialContact)
+        _pendingImage = State(initialValue: prefilledData?.capturedImage)
     }
     
     var body: some View {
@@ -168,21 +170,40 @@ struct CreateContactView: View {
                 
                 // Image Upload Section
                 Section(header: Text("Business Card Image")) {
-                    PhotosPicker(selection: $selectedImage, matching: .images) {
-                        if selectedImageData != nil {
-                            Label("Change Image", systemImage: "photo")
-                        } else {
-                            Label("Select Image", systemImage: "photo")
+                    VStack {
+                        if let imageData = selectedImageData {
+                            Image(uiImage: UIImage(data: imageData)!)
+                                .resizable()
+                                .scaledToFit()
+                                .frame(maxWidth: .infinity)
+                                .frame(height: 200)
+                                .cornerRadius(12)
+                        } else if let scannedImage = pendingImage {
+                            Image(uiImage: scannedImage)
+                                .resizable()
+                                .scaledToFit()
+                                .frame(maxWidth: .infinity)
+                                .frame(height: 200)
+                                .cornerRadius(12)
                         }
-                    }
-                    .onChange(of: selectedImage) { newValue in
-                        print("Image selected")
-                        Task {
-                            if let data = try? await newValue?.loadTransferable(type: Data.self) {
-                                print("Image data loaded: \(data.count) bytes")
-                                await MainActor.run {
-                                    selectedImageData = data
-                                    print("Image data set to state")
+                        
+                        PhotosPicker(selection: $selectedImage, matching: .images) {
+                            if selectedImageData != nil || pendingImage != nil {
+                                Label("Change Image", systemImage: "photo")
+                            } else {
+                                Label("Select Image", systemImage: "photo")
+                            }
+                        }
+                        .onChange(of: selectedImage) { newValue in
+                            print("Image selected")
+                            Task {
+                                if let data = try? await newValue?.loadTransferable(type: Data.self) {
+                                    print("Image data loaded: \(data.count) bytes")
+                                    await MainActor.run {
+                                        selectedImageData = data
+                                        pendingImage = nil  // Clear scanned image when user selects new image
+                                        print("Image data set to state")
+                                    }
                                 }
                             }
                         }
@@ -283,9 +304,12 @@ struct CreateContactView: View {
         
         Task {
             do {
-                if let imageData = selectedImageData {
-                    let imageUrl = try await Contact.uploadImage(imageData)
-                    contact.imageUrl = imageUrl
+                // Handle image upload first if we have a scanned image
+                if let imageToUpload = pendingImage {
+                    if let imageData = imageToUpload.jpegData(compressionQuality: 0.8) {
+                        let imageUrl = try await Contact.uploadImage(imageData)
+                        contact.imageUrl = imageUrl
+                    }
                 }
                 
                 try await db.collection("users").document(userId)

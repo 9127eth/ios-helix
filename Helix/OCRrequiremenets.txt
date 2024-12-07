@@ -141,3 +141,8 @@ Automatically sync pending contacts from the queue to Firebase
 Update the UI to show sync status
 
 This way, users can still scan and create contacts when offline, and everything will sync up automatically when they're back online.
+
+Fine tuning OCR
+
+email domains are likely an identifyer of the company name
+addresses that are locations should start with numbers and should always have a city state and zip code. 

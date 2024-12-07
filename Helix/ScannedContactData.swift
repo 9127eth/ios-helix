@@ -1,3 +1,5 @@
+import UIKit
+
 struct ScannedContactData {
     var name: String = ""
     var email: String = ""
@@ -7,6 +9,7 @@ struct ScannedContactData {
     var website: String = ""
     var address: String = ""
     var confidenceScores: [String: Float] = [:]
+    var capturedImage: UIImage?
     
     var isEmpty: Bool {
         name.isEmpty && email.isEmpty && phone.isEmpty && 

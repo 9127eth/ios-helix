@@ -143,8 +143,12 @@ struct ContactCreationEntryView: View {
                 let processor = TextProcessor()
                 let (processedData, _) = processor.processText(extractedText)
                 
+                // Add the captured image to the scanned data
+                var updatedData = processedData
+                updatedData.capturedImage = image
+                
                 await MainActor.run {
-                    self.scannedData = processedData
+                    self.scannedData = updatedData
                     self.isProcessing = false
                     self.showManualEntry = true
                 }
