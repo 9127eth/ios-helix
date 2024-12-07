@@ -95,17 +95,56 @@ struct CameraPreview: UIViewRepresentable {
             }
             
             guard let imageData = photo.fileDataRepresentation(),
-                  let image = UIImage(data: imageData) else {
+                  let originalImage = UIImage(data: imageData) else {
                 parent.onCapture(.failure(CameraError.photoCaptureFailed))
                 return
             }
             
-            parent.onCapture(.success(image))
+            // Get the orientation from the photo's metadata
+            if let cgImageOrientation = photo.metadata["{Orientation}"] as? UInt32 {
+                let propertyOrientation = CGImagePropertyOrientation(rawValue: cgImageOrientation) ?? .up
+                let correctedImage = UIImage(cgImage: originalImage.cgImage!,
+                                           scale: originalImage.scale,
+                                           orientation: UIImage.Orientation(propertyOrientation))
+                parent.onCapture(.success(correctedImage))
+            } else {
+                // If we can't get the orientation from metadata, use the device orientation
+                let deviceOrientation = UIDevice.current.orientation
+                let imageOrientation: UIImage.Orientation
+                
+                switch deviceOrientation {
+                case .portrait: imageOrientation = .right
+                case .portraitUpsideDown: imageOrientation = .left
+                case .landscapeLeft: imageOrientation = .up
+                case .landscapeRight: imageOrientation = .down
+                default: imageOrientation = .right
+                }
+                
+                let correctedImage = UIImage(cgImage: originalImage.cgImage!,
+                                           scale: originalImage.scale,
+                                           orientation: imageOrientation)
+                parent.onCapture(.success(correctedImage))
+            }
         }
     }
     
     enum CameraError: Error {
         case cameraUnavailable
         case photoCaptureFailed
+    }
+}
+
+extension UIImage.Orientation {
+    init(_ cgOrientation: CGImagePropertyOrientation) {
+        switch cgOrientation {
+        case .up: self = .up
+        case .upMirrored: self = .upMirrored
+        case .down: self = .down
+        case .downMirrored: self = .downMirrored
+        case .left: self = .left
+        case .leftMirrored: self = .leftMirrored
+        case .right: self = .right
+        case .rightMirrored: self = .rightMirrored
+        }
     }
 } 
