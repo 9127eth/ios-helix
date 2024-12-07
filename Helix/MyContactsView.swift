@@ -56,8 +56,8 @@ struct MyContactsView: View {
                     Button(action: {
                         showingTagManager = true
                     }) {
-                        HStack(spacing: 6) {
-                            Image(systemName: "tag")
+                        HStack(spacing: 8) {
+                            Image("tag")
                                 .renderingMode(.template)
                             Text("Manage Tags")
                                 .font(.footnote)
@@ -67,7 +67,6 @@ struct MyContactsView: View {
                         .padding(.horizontal, 12)
                         .background(AppColors.cardGridBackground)
                         .cornerRadius(16)
-                        .shadow(color: Color.black.opacity(0.1), radius: 2, x: 0, y: 1)
                     }
                     .padding(.trailing, 8)
                     
@@ -83,25 +82,25 @@ struct MyContactsView: View {
                     SearchBar(text: $searchText)
                         .padding(.horizontal)
                     
-                    HStack {
+                    HStack(spacing: 8) {
                         Button(action: { isSelectionMode.toggle() }) {
-                            HStack(spacing: 4) {
-                                Image(systemName: isSelectionMode ? "xmark.circle" : "checkmark.circle")
+                            HStack(spacing: 8) {
+                                Image("select")
                                     .renderingMode(.template)
-                                Text(isSelectionMode ? "Cancel" : "Select")
+                                Text("Select")
                                     .font(.footnote)
                             }
                             .foregroundColor(AppColors.buttonText)
                             .padding(.vertical, 8)
                             .padding(.horizontal, 12)
-                            .background(AppColors.cardGridBackground)
+                            .background(isSelectionMode ? AppColors.buttonBackground : AppColors.cardGridBackground)
                             .cornerRadius(16)
                         }
                         
-                        Spacer()
-                        
                         SortButton(selectedOption: $selectedSortOption)
                         TagFilterButton(selectedTags: $selectedTags)
+                        
+                        Spacer()
                     }
                     .padding(.horizontal)
                     
@@ -132,16 +131,17 @@ struct MyContactsView: View {
                             
                             if !selectedContactIds.isEmpty {
                                 Button(action: { showingBulkActionSheet = true }) {
-                                    HStack(spacing: 4) {
+                                    HStack(spacing: 8) {
                                         Text("Actions")
-                                        Image(systemName: "chevron.down")
+                                        Image("arrowdown")
+                                            .renderingMode(.template)
                                     }
                                     .font(.footnote)
                                     .foregroundColor(AppColors.buttonText)
-                                    .padding(.vertical, 4)
-                                    .padding(.horizontal, 8)
+                                    .padding(.vertical, 8)
+                                    .padding(.horizontal, 12)
                                     .background(AppColors.cardGridBackground)
-                                    .cornerRadius(8)
+                                    .cornerRadius(16)
                                 }
                             }
                         }
@@ -149,6 +149,7 @@ struct MyContactsView: View {
                         .padding(.top, 8)
                     }
                 }
+                .padding(.bottom, 12)
                 
                 // Contacts list
                 ScrollView {

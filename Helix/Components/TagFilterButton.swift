@@ -9,8 +9,8 @@ struct TagFilterButton: View {
     
     var body: some View {
         Button(action: { showingTagPicker = true }) {
-            HStack(spacing: 4) {
-                Image(systemName: "tag")
+            HStack(spacing: 8) {
+                Image("filter")
                     .renderingMode(.template)
                 Text(selectedTags.isEmpty ? "Filter" : "\(selectedTags.count)")
                     .font(.footnote)

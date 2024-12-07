@@ -4,9 +4,10 @@ struct SearchBar: View {
     @Binding var text: String
     
     var body: some View {
-        HStack {
-            Image(systemName: "magnifyingglass")
-                .foregroundColor(.gray)
+        HStack(spacing: 8) {
+            Image("search")
+                .renderingMode(.template)
+                .foregroundColor(AppColors.buttonText)
             
             TextField("Search contacts", text: $text)
                 .textFieldStyle(PlainTextFieldStyle())
@@ -18,8 +19,9 @@ struct SearchBar: View {
                 }
             }
         }
-        .padding(8)
-        .background(AppColors.inputFieldBackground)
-        .cornerRadius(8)
+        .padding(.vertical, 8)
+        .padding(.horizontal, 12)
+        .background(AppColors.cardGridBackground)
+        .cornerRadius(16)
     }
 } 

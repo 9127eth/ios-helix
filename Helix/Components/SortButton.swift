@@ -6,8 +6,11 @@ struct SortButton: View {
     var body: some View {
         Menu {
             Button(action: { selectedOption = .name }) {
-                HStack {
+                HStack(spacing: 8) {
+                    Image("sort")
+                        .renderingMode(.template)
                     Text("Name")
+                        .font(.footnote)
                     if selectedOption == .name {
                         Image(systemName: "checkmark")
                     }
@@ -15,16 +18,19 @@ struct SortButton: View {
             }
             
             Button(action: { selectedOption = .dateAdded }) {
-                HStack {
+                HStack(spacing: 8) {
+                    Image("sort")
+                        .renderingMode(.template)
                     Text("Date Added")
+                        .font(.footnote)
                     if selectedOption == .dateAdded {
                         Image(systemName: "checkmark")
                     }
                 }
             }
         } label: {
-            HStack(spacing: 4) {
-                Image(systemName: "arrow.up.arrow.down")
+            HStack(spacing: 8) {
+                Image("sort")
                     .renderingMode(.template)
                 Text("Sort")
                     .font(.footnote)
