@@ -1,0 +1,143 @@
+# OCR Contact Creation Feature Requirements
+
+## Overview
+Implement a feature that allows users to create new contacts by scanning business cards or trade show badges using the device camera or uploading existing photos. The system should use Apple's Vision framework for OCR text recognition and automatically populate the existing contact creation form. When "scanning" a card, this means users will take an image of the card, which would be saved as the contact image in firebase in addition to getting the text data. 
+
+## Technical Requirements
+
+### Dependencies
+- Vision framework
+- VisionKit framework
+- AVFoundation framework
+- PhotosUI framework (for photo library access)
+
+### Core Features
+
+1. Image Acquisition
+   - Implement camera functionality for capturing business cards
+   - Add photo library access for selecting existing images
+   - Support both portrait and landscape orientations
+   - Implement proper camera permissions handling
+   - Provide clear visual guidance for optimal image capture
+
+2. OCR Implementation
+   - Utilize VNRecognizeTextRequest for text recognition
+   - Support both accurate and fast text recognition modes
+   - Implement error handling for failed text recognition, prompt users to enter manual if there is an error
+   - Add progress indication during processing
+   - Support multiple languages based on device settings
+
+3. Text Processing
+   - Implement pattern recognition for common contact fields:
+     - Name (First, Last)
+     - Email addresses
+     - Phone numbers (multiple formats)
+     - Physical addresses
+     - Company name
+     - Job titles
+     - Websites
+   - Use Natural Language Processing to categorize extracted text
+   - Handle multiple format variations of contact information
+
+4. Contact Form Integration
+   - Auto-populate existing contact creation form with extracted data
+   - Highlight fields that were automatically filled
+   - Allow manual editing of all auto-filled fields
+   - Preserve existing form validation rules
+   - Implement confidence scoring for extracted fields, this should work by adding a tooltip next to a field and it should say "double check this field for accuracy" only do this for low confidence extractions. 
+
+### User Flow
+
+1. Entry Points
+   - There is currently a create new button, This button should now launch the view that starts the with the camera, but then has an "add manually" button along with a upload from photos.
+   - Present options for camera or photo library
+   - Handle permission requests gracefully
+
+2. Image Capture/Selection
+   - Show camera view with frame guidelines
+   - Provide flash control if needed
+   - Allow image retaking/reselection
+   - Include basic image editing capabilities (crop, rotate)
+
+3. Processing
+   - Display processing indicator
+   - Allow user to confirm or retake image
+
+4. Data Review
+   -  once text is captured, present user with fields filled out in the create contact form view
+   - Highlight auto-filled fields in our blue from our colors
+   - Allow easy editing of any field
+   - Preserve existing save/cancel functionality
+
+### Error Handling
+
+1. Camera/Photo Library
+   - Handle permission denials, if they denied use of camera, show message to enable but make sure the button to enter manually is still accessible. 
+   - Manage device capability checks
+   - Handle storage access issues
+
+2. OCR Processing
+   - Handle poor image quality
+   - Manage timeout scenarios
+   - Handle unsupported text/languages
+   - Provide user feedback for failed recognition
+
+3. Data Extraction
+   - Handle ambiguous or incomplete data
+   - Manage conflicts in extracted information. The most common example will like be phone numbers. I want us to try to get cell numbers so we should code for extracting that, but if fails, we should capture the first phone number listed
+   - Provide fallbacks for unrecognized fields
+
+### UI/UX Requirements
+
+1. Camera Interface
+   - Clear viewfinder with business card outline
+   - Stable frame detection
+   - Appropriate capture button placement
+   - Cancel option easily accessible
+
+2. Processing Interface
+   - Clear progress indication
+   - Cancel option during processing
+   - Preview of recognized text regions
+
+3. Form Integration
+   - Visual distinction for auto-filled fields
+   - Easy editing capabilities
+   - Clear success/failure states
+   - Smooth transition to existing form
+
+### Security Considerations
+
+1. Data Privacy
+   - Secure handling of captured images
+   - Proper cleanup of temporary files - if a user doesn't save a contact, we should not save an image. Also, if the user starts over and adds another image, the previous image should be deleted. 
+   - Compliance with privacy guidelines
+ 
+
+2. Permission Management
+   - Camera access handling
+   - Photo library access handling
+   - Proper permission states management
+
+Improve the user feedback mechanism by detailing error messages, such as "Text not recognized due to low image quality" instead of generic failure notices.
+
+Advanced Language Support
+Specify support for languages with complex scripts or right-to-left alignment (e.g., Arabic, Chinese, Japanese).
+
+For adding any new contact, we should Include logic for detecting duplicate contacts based on extracted data e.g. email and phone number and providing the user with options to continue if they choose.
+
+Incorporate mechanisms to gather anonymized usage statistics (e.g., recognition success rate, average processing time) to improve the feature over time.
+
+We need to add an offline mode:
+Allow users to save the contacts locally, then to firebase when connectivity established
+When offline: 
+OCR processes the image and extracts the contact info
+Store the contact data temporarily in local device storage (Core Data or UserDefaults)
+Add it to a sync queue of pending uploads
+Show the contact in the app UI (marked as "pending sync" if you want)
+When internet connection is restored: 
+Detect the connection is back (using Network framework or Reachability)
+Automatically sync pending contacts from the queue to Firebase
+Update the UI to show sync status
+
+This way, users can still scan and create contacts when offline, and everything will sync up automatically when they're back online.

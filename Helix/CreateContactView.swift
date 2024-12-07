@@ -3,7 +3,6 @@ import FirebaseFirestore
 import FirebaseAuth
 import PhotosUI
 
-// Add this enum near the top of the file, after the state variables
 enum Field: Hashable {
     case name
     case position
@@ -30,26 +29,66 @@ struct CreateContactView: View {
     @State private var showingTagSheet = false
     @FocusState private var focusedField: Field?
     
+    // OCR-related properties
+    var prefilledData: ScannedContactData?
+    
+    init(prefilledData: ScannedContactData? = nil) {
+        self.prefilledData = prefilledData
+        
+        // Create contact with basic name
+        var initialContact = Contact(name: prefilledData?.name ?? "")
+        
+        // Then set additional properties if they exist
+        if let prefilledData = prefilledData {
+            initialContact.email = prefilledData.email
+            initialContact.phone = prefilledData.phone
+            initialContact.company = prefilledData.company
+            initialContact.position = prefilledData.position
+            initialContact.website = prefilledData.website
+            initialContact.address = prefilledData.address
+        }
+        
+        // Initialize the state
+        _contact = State(initialValue: initialContact)
+    }
+    
     var body: some View {
         NavigationView {
             Form {
+                // OCR confidence indicators
+                if let prefilledData = prefilledData {
+                    Section {
+                        ForEach(prefilledData.lowConfidenceFields, id: \.self) { field in
+                            HStack {
+                                Image(systemName: "exclamationmark.triangle")
+                                    .foregroundColor(.yellow)
+                                Text("Please verify the \(field)")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            }
+                        }
+                    }
+                }
+                
                 // Basic Information Section
                 Section(header: Text("Basic Information")) {
                     TextField("Name*", text: $contact.name)
                         .focused($focusedField, equals: .name)
                         .onSubmit { focusedField = .position }
+                    
                     TextField("Position", text: Binding(
                         get: { contact.position ?? "" },
                         set: { contact.position = $0.isEmpty ? nil : $0 }
                     ))
-                        .focused($focusedField, equals: .position)
-                        .onSubmit { focusedField = .company }
+                    .focused($focusedField, equals: .position)
+                    .onSubmit { focusedField = .company }
+                    
                     TextField("Company", text: Binding(
                         get: { contact.company ?? "" },
                         set: { contact.company = $0.isEmpty ? nil : $0 }
                     ))
-                        .focused($focusedField, equals: .company)
-                        .onSubmit { focusedField = .phone }
+                    .focused($focusedField, equals: .company)
+                    .onSubmit { focusedField = .phone }
                 }
                 
                 // Contact Information Section
