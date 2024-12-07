@@ -28,6 +28,7 @@ struct MyContactsView: View {
     @State private var showingBulkDeleteConfirmation = false
     @State private var showingExportEmailSheet = false
     @Binding var isPro: Bool
+    @FocusState private var isSearchFocused: Bool
     
     enum SortOption {
         case name, dateAdded
@@ -35,155 +36,161 @@ struct MyContactsView: View {
     
     var body: some View {
         NavigationView {
-            VStack(spacing: 0) {
-                // Header with title
-                VStack(alignment: .leading, spacing: 10) {
-                    if !isPro {
-                        // ... existing Pro button ...
-                    }
-                    
-                    Text("Contacts")
-                        .font(.system(size: 60, weight: .bold))
-                        .foregroundColor(AppColors.bodyPrimaryText)
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.horizontal)
-                .padding(.top, 40)
+            ZStack {
+                AppColors.background
+                    .ignoresSafeArea()
                 
-                // Action buttons row
-                HStack {
-                    Spacer()
-                    Button(action: {
-                        showingTagManager = true
-                    }) {
-                        HStack(spacing: 8) {
-                            Image("tag")
-                                .renderingMode(.template)
-                            Text("Manage Tags")
-                                .font(.footnote)
+                VStack(spacing: 0) {
+                    // Header with title
+                    VStack(alignment: .leading, spacing: 10) {
+                        if !isPro {
+                            // ... existing Pro button ...
                         }
-                        .foregroundColor(AppColors.buttonText)
-                        .padding(.vertical, 8)
-                        .padding(.horizontal, 12)
-                        .background(AppColors.cardGridBackground)
-                        .cornerRadius(16)
+                        
+                        Text("Contacts")
+                            .font(.system(size: 60, weight: .bold))
+                            .fontWeight(.bold)
+                            .foregroundColor(AppColors.bodyPrimaryText)
                     }
-                    .padding(.trailing, 8)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal)
+                    .padding(.top, 40)
                     
-                    AddContactButton {
-                        showingAddContact = true
-                    }
-                }
-                .padding(.horizontal)
-                .padding(.vertical, 16)
-                
-                // Search and filters with Select button
-                VStack(spacing: 12) {
-                    SearchBar(text: $searchText)
-                        .padding(.horizontal)
-                    
-                    HStack(spacing: 8) {
-                        Button(action: { isSelectionMode.toggle() }) {
+                    // Action buttons row
+                    HStack {
+                        Spacer()
+                        Button(action: {
+                            showingTagManager = true
+                        }) {
                             HStack(spacing: 8) {
-                                Image("select")
+                                Image("tag")
                                     .renderingMode(.template)
-                                Text("Select")
+                                Text("Manage Tags")
                                     .font(.footnote)
                             }
                             .foregroundColor(AppColors.buttonText)
                             .padding(.vertical, 8)
                             .padding(.horizontal, 12)
-                            .background(isSelectionMode ? AppColors.buttonBackground : AppColors.cardGridBackground)
+                            .background(AppColors.cardGridBackground)
                             .cornerRadius(16)
                         }
+                        .padding(.trailing, 8)
                         
-                        SortButton(selectedOption: $selectedSortOption)
-                        TagFilterButton(selectedTags: $selectedTags)
-                        
-                        Spacer()
+                        AddContactButton {
+                            showingAddContact = true
+                        }
                     }
                     .padding(.horizontal)
+                    .padding(.vertical, 16)
                     
-                    // Selection info bar (visible when in selection mode)
-                    if isSelectionMode {
-                        HStack {
-                            Button(action: {
-                                if selectedContactIds.count == filteredContacts.count {
-                                    selectedContactIds.removeAll()
-                                } else {
-                                    selectedContactIds = Set(filteredContacts.map { $0.id ?? "" })
-                                }
-                            }) {
-                                HStack {
-                                    Image(systemName: selectedContactIds.count == filteredContacts.count ? "checkmark.square.fill" : "square")
-                                        .foregroundColor(AppColors.buttonText)
-                                    Text(selectedContactIds.count == filteredContacts.count ? "Deselect All" : "Select All")
+                    // Search and filters with Select button
+                    VStack(spacing: 12) {
+                        SearchBar(text: $searchText)
+                            .focused($isSearchFocused)
+                            .padding(.horizontal)
+                        
+                        HStack(spacing: 8) {
+                            Button(action: { isSelectionMode.toggle() }) {
+                                HStack(spacing: 8) {
+                                    Image("select")
+                                        .renderingMode(.template)
+                                    Text("Select")
                                         .font(.footnote)
-                                        .foregroundColor(AppColors.buttonText)
                                 }
+                                .foregroundColor(AppColors.buttonText)
+                                .padding(.vertical, 8)
+                                .padding(.horizontal, 12)
+                                .background(isSelectionMode ? AppColors.buttonBackground : AppColors.cardGridBackground)
+                                .cornerRadius(16)
                             }
+                            
+                            SortButton(selectedOption: $selectedSortOption)
+                            TagFilterButton(selectedTags: $selectedTags)
                             
                             Spacer()
-                            
-                            Text("\(selectedContactIds.count) selected")
-                                .font(.footnote)
-                                .foregroundColor(.gray)
-                            
-                            if !selectedContactIds.isEmpty {
-                                Button(action: { showingBulkActionSheet = true }) {
-                                    HStack(spacing: 8) {
-                                        Text("Actions")
-                                        Image("arrowdown")
-                                            .renderingMode(.template)
-                                    }
-                                    .font(.footnote)
-                                    .foregroundColor(AppColors.buttonText)
-                                    .padding(.vertical, 8)
-                                    .padding(.horizontal, 12)
-                                    .background(AppColors.cardGridBackground)
-                                    .cornerRadius(16)
-                                }
-                            }
                         }
                         .padding(.horizontal)
-                        .padding(.top, 8)
-                    }
-                }
-                .padding(.bottom, 12)
-                
-                // Contacts list
-                ScrollView {
-                    LazyVStack(spacing: 12) {
-                        ForEach(filteredContacts) { contact in
+                        
+                        // Selection info bar (visible when in selection mode)
+                        if isSelectionMode {
                             HStack {
-                                if isSelectionMode {
-                                    Button(action: {
-                                        if selectedContactIds.contains(contact.id ?? "") {
-                                            selectedContactIds.remove(contact.id ?? "")
-                                        } else {
-                                            selectedContactIds.insert(contact.id ?? "")
-                                        }
-                                    }) {
-                                        Image(systemName: selectedContactIds.contains(contact.id ?? "") ? "checkmark.square.fill" : "square")
+                                Button(action: {
+                                    if selectedContactIds.count == filteredContacts.count {
+                                        selectedContactIds.removeAll()
+                                    } else {
+                                        selectedContactIds = Set(filteredContacts.map { $0.id ?? "" })
+                                    }
+                                }) {
+                                    HStack {
+                                        Image(systemName: selectedContactIds.count == filteredContacts.count ? "checkmark.square.fill" : "square")
+                                            .foregroundColor(AppColors.buttonText)
+                                        Text(selectedContactIds.count == filteredContacts.count ? "Deselect All" : "Select All")
+                                            .font(.footnote)
                                             .foregroundColor(AppColors.buttonText)
                                     }
                                 }
                                 
-                                ContactItemView(contact: Binding(
-                                    get: { contact },
-                                    set: { newValue in
-                                        if let index = contacts.firstIndex(where: { $0.id == contact.id }) {
-                                            contacts[index] = newValue
+                                Spacer()
+                                
+                                Text("\(selectedContactIds.count) selected")
+                                    .font(.footnote)
+                                    .foregroundColor(.gray)
+                                
+                                if !selectedContactIds.isEmpty {
+                                    Button(action: { showingBulkActionSheet = true }) {
+                                        HStack(spacing: 8) {
+                                            Text("Actions")
+                                            Image("arrowdown")
+                                                .renderingMode(.template)
                                         }
+                                        .font(.footnote)
+                                        .foregroundColor(AppColors.buttonText)
+                                        .padding(.vertical, 8)
+                                        .padding(.horizontal, 12)
+                                        .background(AppColors.cardGridBackground)
+                                        .cornerRadius(16)
                                     }
-                                ))
+                                }
                             }
+                            .padding(.horizontal)
+                            .padding(.top, 8)
                         }
                     }
-                    .padding(.horizontal)
+                    .padding(.bottom, 12)
+                    
+                    // Contacts list
+                    ScrollView {
+                        LazyVStack(spacing: 12) {
+                            ForEach(filteredContacts) { contact in
+                                HStack {
+                                    if isSelectionMode {
+                                        Button(action: {
+                                            if selectedContactIds.contains(contact.id ?? "") {
+                                                selectedContactIds.remove(contact.id ?? "")
+                                            } else {
+                                                selectedContactIds.insert(contact.id ?? "")
+                                            }
+                                        }) {
+                                            Image(systemName: selectedContactIds.contains(contact.id ?? "") ? "checkmark.square.fill" : "square")
+                                                .foregroundColor(AppColors.buttonText)
+                                        }
+                                    }
+                                    
+                                    ContactItemView(contact: Binding(
+                                        get: { contact },
+                                        set: { newValue in
+                                            if let index = contacts.firstIndex(where: { $0.id == contact.id }) {
+                                                contacts[index] = newValue
+                                            }
+                                        }
+                                    ))
+                                }
+                            }
+                        }
+                        .padding(.horizontal)
+                    }
                 }
             }
-            .background(AppColors.background)
             .navigationBarHidden(true)
             .sheet(isPresented: $showSubscriptionView) {
                 SubscriptionView(isPro: $isPro)
