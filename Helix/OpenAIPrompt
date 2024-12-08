@@ -6,7 +6,7 @@ We will implement openai to help with analyzing text from the ocr process and in
 	•	Step 4: Receive and display structured data for form fields. (need to do)
 
 We will be using gpt40 mini
-openai key: sk-svcacct-2MpblZrCqAcUoUwF9dlGmVXhvbzMoy3NdtTfmxB6MRX9qPdrSK1Ei8JqzfF1lx5H6LIT3BlbkFJJD4dZJleKYZHfVi0Isi5VNsx_xyDem3Td1RdggytpE5CwpAdqXB_VGGk-uI4PFiKzAA
+
 this should Implement HTTPS for data transmission.
 
 So we would keep mostly everything the same but we need to add the openai api call and display the results on the form. OpenAI is the text that we will use to populate the form. So make sure the open ai prompt below is structured to return the proper format inorder to populate the form. 
