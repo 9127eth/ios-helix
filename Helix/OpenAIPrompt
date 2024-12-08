@@ -1,0 +1,60 @@
+
+We will implement openai to help with analyzing text from the ocr process and input the fields on the form. So below is flow 
+	•	Step 1: Upload the business card image. (done)
+	•	Step 2: Use OCR to extract raw text. (done)
+	•	Step 3: Send extracted text to OpenAI’s API with a structured prompt. (need to do)
+	•	Step 4: Receive and display structured data for form fields. (need to do)
+
+We will be using gpt40 mini
+openai key: sk-svcacct-2MpblZrCqAcUoUwF9dlGmVXhvbzMoy3NdtTfmxB6MRX9qPdrSK1Ei8JqzfF1lx5H6LIT3BlbkFJJD4dZJleKYZHfVi0Isi5VNsx_xyDem3Td1RdggytpE5CwpAdqXB_VGGk-uI4PFiKzAA
+this should Implement HTTPS for data transmission.
+
+So we would keep mostly everything the same but we need to add the openai api call and display the results on the form. OpenAI is the text that we will use to populate the form. So make sure the open ai prompt below is structured to return the proper format inorder to populate the form. 
+
+I want to be able to see in the terminal the raw text that we are sending to openai and the response that we get back. Also implement proper error handling. 
+
+Below is the prompt that we will use to send to openai. This is a guide, and you can deviate from it as needed to make it better. 
+
+Prompt:
+
+You are an AI designed to extract and organize information from text. I will provide text extracted from a business card or tradeshow badge,  and your task is to extract key details and present them in a structured format. 
+
+Output Format:
+
+Please organize the information in the following format:
+	•	Name: [Full Name]
+	•	Job Title: [Job Title]
+	•	Company: [Company Name]
+	•	Phone: [Phone Number]
+	•	Email: [Email Address]
+	•	Address: [Street Address, City, State, Zip]
+	•	Website: [Website URL]
+	•	Notes: [Any additional relevant details]
+
+If any details are missing from the input, note them as “Not Provided.”
+
+Example Input:
+
+John Doe
+Senior Software Engineer
+Acme Corp
+john.doe@example.com
+123-456-7890
+456 Elm Street, Springfield, IL 62701
+www.acme.com
+
+Desired JSON Output:
+{
+  "name": "John Doe",
+  "job_title": "Senior Software Engineer",
+  "company": "Acme Corp",
+  "phone": "123-456-7890",
+  "email": "john.doe@example.com",
+  "address": "456 Elm Street, Springfield, IL 62701",
+  "website": "www.acme.com",
+  "Notes": "Not Provided"
+}
+
+Input:
+
+[Paste the extracted text here]

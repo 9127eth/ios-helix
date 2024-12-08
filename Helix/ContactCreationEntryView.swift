@@ -137,25 +137,17 @@ struct ContactCreationEntryView: View {
         Task {
             do {
                 let textRecognizer = TextRecognizer()
-                let extractedText = try await textRecognizer.recognizeText(from: image)
-                
-                // Convert the extracted text to ScannedContactData
-                let processor = TextProcessor()
-                let (processedData, _) = processor.processText(extractedText)
-                
-                // Add the captured image to the scanned data
-                var updatedData = processedData
-                updatedData.capturedImage = image
+                let processedData = try await textRecognizer.recognizeAndProcessText(from: image)
                 
                 await MainActor.run {
-                    self.scannedData = updatedData
+                    self.scannedData = processedData
                     self.isProcessing = false
                     self.showManualEntry = true
                 }
             } catch {
                 await MainActor.run {
                     showError = true
-                    errorMessage = error.localizedDescription
+                    errorMessage = "Failed to process image: \(error.localizedDescription)"
                     isProcessing = false
                 }
             }

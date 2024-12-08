@@ -8,13 +8,18 @@ struct ScannedContactData {
     var position: String = ""
     var website: String = ""
     var address: String = ""
+    var notes: String = ""
+    var tags: [String] = []
+    var contactSource: String = "manual"
+    var dateAdded: Date = Date()
+    var dateModified: Date = Date()
     var confidenceScores: [String: Float] = [:]
     var capturedImage: UIImage?
     
     var isEmpty: Bool {
         name.isEmpty && email.isEmpty && phone.isEmpty && 
         company.isEmpty && position.isEmpty && website.isEmpty && 
-        address.isEmpty
+        address.isEmpty && notes.isEmpty
     }
     
     var lowConfidenceFields: [String] {

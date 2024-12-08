@@ -5,3 +5,4 @@ GoogleService-Info.plist
 APIConfig.swift
 *.xcconfig
 !Config.template.xcconfig
+OpenAIPrompt.txt
