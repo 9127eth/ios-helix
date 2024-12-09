@@ -29,7 +29,7 @@ struct MyContactsView: View {
     @State private var showingExportEmailSheet = false
     @Binding var isPro: Bool
     @FocusState private var isSearchFocused: Bool
-    @State private var showingContactCreationEntry = false  // Add this line
+    @State private var isShowingContactCreationEntry = false
     
     enum SortOption {
         case name, dateAdded
@@ -78,7 +78,7 @@ struct MyContactsView: View {
                         .padding(.trailing, 8)
                         
                         AddContactButton {
-                            showingContactCreationEntry = true
+                            isShowingContactCreationEntry = true
                         }
                     }
                     .padding(.horizontal)
@@ -196,8 +196,8 @@ struct MyContactsView: View {
             .sheet(isPresented: $showSubscriptionView) {
                 SubscriptionView(isPro: $isPro)
             }
-            .sheet(isPresented: $showingContactCreationEntry) {
-    ContactCreationEntryView()
+            .sheet(isPresented: $isShowingContactCreationEntry) {
+                ContactCreationEntryView(isPresented: $isShowingContactCreationEntry)
             }
             .sheet(isPresented: $showingTagManager) {
                 TagManagerView()

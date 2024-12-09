@@ -32,9 +32,11 @@ struct CreateContactView: View {
     // OCR-related properties
     var prefilledData: ScannedContactData?
     @State private var pendingImage: UIImage?
+    var onSave: (() -> Void)? = nil
     
-    init(prefilledData: ScannedContactData? = nil) {
+    init(prefilledData: ScannedContactData? = nil, onSave: (() -> Void)? = nil) {
         self.prefilledData = prefilledData
+        self.onSave = onSave
         
         // Create contact with basic name
         var initialContact = Contact(name: prefilledData?.name ?? "")
@@ -377,6 +379,7 @@ struct CreateContactView: View {
                 
                 await MainActor.run {
                     dismiss()
+                    onSave?()
                 }
             } catch {
                 await MainActor.run {

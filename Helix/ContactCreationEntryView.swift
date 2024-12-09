@@ -12,6 +12,7 @@ struct ContactCreationEntryView: View {
     @State private var showError = false
     @State private var errorMessage = ""
     @State private var cameraPermissionGranted = false
+    @Binding var isPresented: Bool
     
     var body: some View {
         NavigationView {
@@ -80,7 +81,13 @@ struct ContactCreationEntryView: View {
             .navigationBarItems(leading: Button("Cancel") { dismiss() })
         }
         .sheet(isPresented: $showManualEntry) {
-            CreateContactView(prefilledData: scannedData)
+            CreateContactView(
+                prefilledData: scannedData,
+                onSave: {
+                    dismiss()
+                    isPresented = false
+                }
+            )
         }
         .sheet(isPresented: $showImagePicker) {
             ImagePickerView { image in
