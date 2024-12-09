@@ -22,6 +22,7 @@ struct SeeContactView: View {
                 Section {
                     HStack {
                         Text(contact.name)
+                            .textSelection(.enabled)
                         Spacer()
                         Text("Name")
                             .font(.caption)
@@ -31,6 +32,7 @@ struct SeeContactView: View {
                     if let position = contact.position {
                         HStack {
                             Text(position)
+                                .textSelection(.enabled)
                             Spacer()
                             Text("Position")
                                 .font(.caption)
@@ -41,6 +43,7 @@ struct SeeContactView: View {
                     if let company = contact.company {
                         HStack {
                             Text(company)
+                                .textSelection(.enabled)
                             Spacer()
                             Text("Company")
                                 .font(.caption)
@@ -51,6 +54,7 @@ struct SeeContactView: View {
                     if let phone = contact.phone {
                         HStack {
                             Text(phone)
+                                .textSelection(.enabled)
                             Spacer()
                             Text("Phone")
                                 .font(.caption)
@@ -61,6 +65,7 @@ struct SeeContactView: View {
                     if let email = contact.email {
                         HStack {
                             Text(email)
+                                .textSelection(.enabled)
                             Spacer()
                             Text("Email")
                                 .font(.caption)
@@ -71,6 +76,7 @@ struct SeeContactView: View {
                     if let website = contact.website {
                         HStack {
                             Text(website)
+                                .textSelection(.enabled)
                             Spacer()
                             Text("Website")
                                 .font(.caption)
@@ -81,6 +87,7 @@ struct SeeContactView: View {
                     if let address = contact.address {
                         HStack {
                             Text(address)
+                                .textSelection(.enabled)
                             Spacer()
                             Text("Address")
                                 .font(.caption)
@@ -95,6 +102,7 @@ struct SeeContactView: View {
                             if let tag = tagManager.availableTags.first(where: { $0.id == tagId }) {
                                 HStack {
                                     Text(tag.name)
+                                        .textSelection(.enabled)
                                     Spacer()
                                     Text("Tag")
                                         .font(.caption)
@@ -109,6 +117,7 @@ struct SeeContactView: View {
                     Section {
                         HStack {
                             Text(note)
+                                .textSelection(.enabled)
                                 .multilineTextAlignment(.leading)
                             Spacer()
                             Text("Notes")
