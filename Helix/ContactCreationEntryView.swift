@@ -78,7 +78,7 @@ struct ContactCreationEntryView: View {
                 }
             }
             .navigationBarTitleDisplayMode(.inline)
-            .navigationBarItems(leading: Button("Cancel") { dismiss() })
+            .navigationBarItems(leading: Button("Close") { dismiss() })
         }
         .sheet(isPresented: $showManualEntry) {
             CreateContactView(
