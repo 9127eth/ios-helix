@@ -34,6 +34,10 @@ struct CreateContactView: View {
     @State private var pendingImage: UIImage?
     var onSave: (() -> Void)? = nil
     
+    // Add these state variables at the top with other @State properties
+    @State private var showDuplicateAlert = false
+    @State private var duplicateContact: Contact? = nil
+    
     init(prefilledData: ScannedContactData? = nil, onSave: (() -> Void)? = nil) {
         self.prefilledData = prefilledData
         self.onSave = onSave
@@ -267,17 +271,11 @@ struct CreateContactView: View {
                 
                 // Notes Section
                 Section(header: Text("Notes")) {
-                    HStack {
-                        TextEditor(text: Binding(
-                            get: { contact.note ?? "" },
-                            set: { contact.note = $0.isEmpty ? nil : $0 }
-                        ))
-                        .frame(height: 100)
-                        Spacer()
-                        Text("Notes")
-                            .font(.caption)
-                            .foregroundColor(.gray)
-                    }
+                    TextEditor(text: Binding(
+                        get: { contact.note ?? "" },
+                        set: { contact.note = $0.isEmpty ? nil : $0 }
+                    ))
+                    .frame(height: 100)
                 }
             }
             .navigationTitle("Create Contact")
@@ -311,6 +309,17 @@ struct CreateContactView: View {
             Button("OK", role: .cancel) { }
         } message: {
             Text(alertMessage)
+        }
+        .alert("Duplicate Contact Found", isPresented: $showDuplicateAlert) {
+            Button("Continue Saving", role: .destructive) {
+                Task {
+                    guard let userId = Auth.auth().currentUser?.uid else { return }
+                    await saveContactToFirestore(db: Firestore.firestore(), userId: userId)
+                }
+            }
+            Button("Go Back", role: .cancel) { }
+        } message: {
+            Text("A contact with this email already exists: \(duplicateContact?.name ?? "")")
         }
         .onAppear {
             tagManager.fetchTags()
@@ -365,27 +374,56 @@ struct CreateContactView: View {
         
         Task {
             do {
-                // Handle image upload first if we have a scanned image
-                if let imageToUpload = pendingImage {
-                    if let imageData = imageToUpload.jpegData(compressionQuality: 0.8) {
-                        let imageUrl = try await Contact.uploadImage(imageData)
-                        contact.imageUrl = imageUrl
+                // Check for duplicate email if email is provided
+                if let email = contact.email {
+                    let snapshot = try await db.collection("users").document(userId)
+                        .collection("contacts")
+                        .whereField("email", isEqualTo: email)
+                        .getDocuments()
+                    
+                    if let existingContact = try snapshot.documents.first?.data(as: Contact.self) {
+                        await MainActor.run {
+                            duplicateContact = existingContact
+                            showDuplicateAlert = true
+                        }
+                        return
                     }
                 }
                 
-                try await db.collection("users").document(userId)
-                    .collection("contacts")
-                    .addDocument(from: contact)
+                // Continue with normal save if no duplicate
+                await saveContactToFirestore(db: db, userId: userId)
                 
-                await MainActor.run {
-                    dismiss()
-                    onSave?()
-                }
             } catch {
                 await MainActor.run {
                     showAlert = true
                     alertMessage = "Error saving contact: \(error.localizedDescription)"
                 }
+            }
+        }
+    }
+    
+    private func saveContactToFirestore(db: Firestore, userId: String) async {
+        do {
+            // Handle image upload first if we have a scanned image
+            if let imageToUpload = pendingImage {
+                if let imageData = imageToUpload.jpegData(compressionQuality: 0.8) {
+                    let imageUrl = try await Contact.uploadImage(imageData)
+                    contact.imageUrl = imageUrl
+                }
+            }
+            
+            try await db.collection("users").document(userId)
+                .collection("contacts")
+                .addDocument(from: contact)
+            
+            await MainActor.run {
+                dismiss()
+                onSave?()
+            }
+        } catch {
+            await MainActor.run {
+                showAlert = true
+                alertMessage = "Error saving contact: \(error.localizedDescription)"
             }
         }
     }

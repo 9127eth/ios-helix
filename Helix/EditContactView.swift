@@ -259,17 +259,11 @@ struct EditContactView: View {
                 
                 // Notes Section
                 Section(header: Text("Notes")) {
-                    HStack {
-                        TextEditor(text: Binding(
-                            get: { editedContact.note ?? "" },
-                            set: { editedContact.note = $0.isEmpty ? nil : $0 }
-                        ))
-                        .frame(height: 100)
-                        Spacer()
-                        Text("Notes")
-                            .font(.caption)
-                            .foregroundColor(.gray)
-                    }
+                    TextEditor(text: Binding(
+                        get: { editedContact.note ?? "" },
+                        set: { editedContact.note = $0.isEmpty ? nil : $0 }
+                    ))
+                    .frame(height: 100)
                 }
                 
                 // Add this new section at the bottom after the Notes section
