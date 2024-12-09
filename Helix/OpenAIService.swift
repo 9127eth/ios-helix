@@ -38,6 +38,8 @@ class OpenAIService {
          - do not include prefixes like "Mr.", "Ms.", "Dr.", etc. Names should just start with the first name. You can include suffixes like "Jr.", "Sr.", "III", pharmd, md, bsn, rn, md, etc. 
          - if multiple phone numbers are found, prioritize cell/mobile numbers. Then office numbers if no cell. Defininitely dont want fax numbers. But only extract one phone number.
          - if a website is not present, but an email address is, we can assume the domain from the email address is the website.
+         - do not include registerd trademark symbols.
+         - phone numbers should be in the format of (123) 456-7890
 
         \(text)
         
@@ -85,8 +87,15 @@ class OpenAIService {
            let choices = jsonResponse["choices"] as? [[String: Any]],
            let firstChoice = choices.first,
            let message = firstChoice["message"] as? [String: Any],
-           let content = message["content"] as? String,
-           let jsonData = content.data(using: .utf8) {
+           let content = message["content"] as? String {
+            
+            // Remove any markdown formatting if present
+            let cleanContent = content.replacingOccurrences(of: "```json\n", with: "")
+                .replacingOccurrences(of: "\n```", with: "")
+            
+            guard let jsonData = cleanContent.data(using: .utf8) else {
+                throw OpenAIError.decodingError
+            }
             
             let decoder = JSONDecoder()
             return try decoder.decode(OpenAIResponse.self, from: jsonData)
