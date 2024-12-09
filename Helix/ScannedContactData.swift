@@ -10,7 +10,7 @@ struct ScannedContactData {
     var address: String = ""
     var notes: String = ""
     var tags: [String] = []
-    var contactSource: String = "manual"
+    var contactSource: String = "scanned"
     var dateAdded: Date = Date()
     var dateModified: Date = Date()
     var confidenceScores: [String: Float] = [:]

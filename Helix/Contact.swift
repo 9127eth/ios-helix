@@ -34,11 +34,11 @@ struct Contact: Identifiable, Codable {
         case scanned
     }
     
-    init(name: String) {
+    init(name: String, source: ContactSource = .manual) {
         self.name = name
         self.dateAdded = Date()
         self.dateModified = Date()
-        self.contactSource = .manual
+        self.contactSource = source
     }
     
     private func parseName() -> (firstName: String, lastName: String?) {

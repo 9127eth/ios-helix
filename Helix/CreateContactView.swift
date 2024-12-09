@@ -53,6 +53,7 @@ struct CreateContactView: View {
             initialContact.position = prefilledData.position
             initialContact.website = prefilledData.website
             initialContact.address = prefilledData.address
+            initialContact.contactSource = .scanned
         }
         
         // Initialize the state
@@ -362,7 +363,6 @@ struct CreateContactView: View {
         
         contact.dateAdded = Date()
         contact.dateModified = Date()
-        contact.contactSource = .manual
         contact.tags = Array(selectedTagIds)
         
         // Save last used tag
