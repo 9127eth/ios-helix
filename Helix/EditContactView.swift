@@ -27,6 +27,7 @@ struct EditContactView: View {
     @State private var imageToDelete: String? = nil
     @State private var pendingImageData: Data? = nil
     @FocusState private var focusedField: Field?
+    @State private var showingDeleteConfirmation = false
     
     init(contact: Binding<Contact>) {
         self._contact = contact
@@ -270,6 +271,19 @@ struct EditContactView: View {
                             .foregroundColor(.gray)
                     }
                 }
+                
+                // Add this new section at the bottom after the Notes section
+                Section {
+                    Button(role: .destructive) {
+                        showingDeleteConfirmation = true
+                    } label: {
+                        HStack {
+                            Spacer()
+                            Text("Delete Contact")
+                            Spacer()
+                        }
+                    }
+                }
             }
             .navigationTitle("Edit Contact")
             .toolbar {
@@ -301,6 +315,14 @@ struct EditContactView: View {
             Button("OK", role: .cancel) { }
         } message: {
             Text(alertMessage)
+        }
+        .alert("Delete Contact?", isPresented: $showingDeleteConfirmation) {
+            Button("Cancel", role: .cancel) { }
+            Button("Delete", role: .destructive) {
+                deleteContact()
+            }
+        } message: {
+            Text("Are you sure you want to delete this contact? This action cannot be undone.")
         }
         .onAppear {
             selectedTagIds = Set(editedContact.tags ?? [])
@@ -408,6 +430,40 @@ struct EditContactView: View {
         pendingImageData = nil
         selectedImageData = nil
         selectedImage = nil
+    }
+    
+    private func deleteContact() {
+        Task {
+            do {
+                guard let userId = Auth.auth().currentUser?.uid,
+                      let contactId = contact.id else {
+                    print("Error: Missing userId or contactId")
+                    return
+                }
+                
+                let db = Firestore.firestore()
+                let contactRef = db.collection("users").document(userId)
+                    .collection("contacts").document(contactId)
+                
+                // Delete the contact's image if it exists
+                if let imageUrl = contact.imageUrl {
+                    try await Contact.deleteImage(url: imageUrl)
+                }
+                
+                // Delete the contact document
+                try await contactRef.delete()
+                
+                await MainActor.run {
+                    dismiss()
+                }
+                
+            } catch {
+                await MainActor.run {
+                    showAlert = true
+                    alertMessage = "Error deleting contact: \(error.localizedDescription)"
+                }
+            }
+        }
     }
 }
 
