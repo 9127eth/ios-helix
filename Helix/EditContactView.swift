@@ -38,61 +38,126 @@ struct EditContactView: View {
             Form {
                 // Basic Information
                 Section(header: Text("Basic Information")) {
-                    TextField("Name*", text: $editedContact.name)
-                        .focused($focusedField, equals: .name)
-                        .onSubmit { focusedField = .position }
-                    TextField("Position", text: Binding(
-                        get: { editedContact.position ?? "" },
-                        set: { editedContact.position = $0.isEmpty ? nil : $0 }
-                    ))
+                    HStack {
+                        TextField("Name*", text: $editedContact.name)
+                            .focused($focusedField, equals: .name)
+                            .onSubmit { focusedField = .position }
+                            .multilineTextAlignment(.leading)
+                        Spacer()
+                        Text("Name")
+                            .font(.caption)
+                            .foregroundColor(.gray)
+                    }
+                    
+                    HStack {
+                        TextField("Position", text: Binding(
+                            get: { editedContact.position ?? "" },
+                            set: { editedContact.position = $0.isEmpty ? nil : $0 }
+                        ))
                         .focused($focusedField, equals: .position)
                         .onSubmit { focusedField = .company }
-                    TextField("Company", text: Binding(
-                        get: { editedContact.company ?? "" },
-                        set: { editedContact.company = $0.isEmpty ? nil : $0 }
-                    ))
+                        .multilineTextAlignment(.leading)
+                        Spacer()
+                        Text("Position")
+                            .font(.caption)
+                            .foregroundColor(.gray)
+                    }
+                    
+                    HStack {
+                        TextField("Company", text: Binding(
+                            get: { editedContact.company ?? "" },
+                            set: { editedContact.company = $0.isEmpty ? nil : $0 }
+                        ))
                         .focused($focusedField, equals: .company)
                         .onSubmit { focusedField = .phone }
+                        .multilineTextAlignment(.leading)
+                        Spacer()
+                        Text("Company")
+                            .font(.caption)
+                            .foregroundColor(.gray)
+                    }
                 }
                 
                 // Contact Information
                 Section(header: Text("Contact Information")) {
-                    TextField("Phone", text: Binding(
-                        get: { editedContact.phone ?? "" },
-                        set: { 
-                            let newValue = $0.isEmpty ? nil : $0
-                            editedContact.phone = newValue
-                            validatePhone(newValue)
+                    VStack(alignment: .leading) {
+                        HStack {
+                            TextField("Phone", text: Binding(
+                                get: { editedContact.phone ?? "" },
+                                set: { 
+                                    let newValue = $0.isEmpty ? nil : $0
+                                    editedContact.phone = newValue
+                                    validatePhone(newValue)
+                                }
+                            ))
+                            .keyboardType(.phonePad)
+                            .multilineTextAlignment(.leading)
+                            Spacer()
+                            Text("Phone")
+                                .font(.caption)
+                                .foregroundColor(.gray)
                         }
-                    ))
-                    .keyboardType(.phonePad)
-                    
-                    TextField("Email", text: Binding(
-                        get: { editedContact.email ?? "" },
-                        set: { 
-                            let newValue = $0.isEmpty ? nil : $0
-                            editedContact.email = newValue
-                            validateEmail(newValue)
+                        if !isPhoneNumberValid {
+                            Text("Please enter a valid phone number")
+                                .foregroundColor(.red)
+                                .font(.caption)
                         }
-                    ))
-                    .keyboardType(.emailAddress)
-                    .autocapitalization(.none)
+                    }
                     
-                    TextField("Website", text: Binding(
-                        get: { editedContact.website ?? "" },
-                        set: { editedContact.website = $0.isEmpty ? nil : $0 }
-                    ))
-                    .keyboardType(.URL)
-                    .autocapitalization(.none)
-                    .focused($focusedField, equals: .website)
-                    .onSubmit { focusedField = .address }
+                    VStack(alignment: .leading) {
+                        HStack {
+                            TextField("Email", text: Binding(
+                                get: { editedContact.email ?? "" },
+                                set: { 
+                                    let newValue = $0.isEmpty ? nil : $0
+                                    editedContact.email = newValue
+                                    validateEmail(newValue)
+                                }
+                            ))
+                            .keyboardType(.emailAddress)
+                            .autocapitalization(.none)
+                            .multilineTextAlignment(.leading)
+                            Spacer()
+                            Text("Email")
+                                .font(.caption)
+                                .foregroundColor(.gray)
+                        }
+                        if !isEmailValid {
+                            Text("Please enter a valid email address")
+                                .foregroundColor(.red)
+                                .font(.caption)
+                        }
+                    }
                     
-                    TextField("Address", text: Binding(
-                        get: { editedContact.address ?? "" },
-                        set: { editedContact.address = $0.isEmpty ? nil : $0 }
-                    ))
+                    HStack {
+                        TextField("Website", text: Binding(
+                            get: { editedContact.website ?? "" },
+                            set: { editedContact.website = $0.isEmpty ? nil : $0 }
+                        ))
+                        .keyboardType(.URL)
+                        .autocapitalization(.none)
+                        .focused($focusedField, equals: .website)
+                        .onSubmit { focusedField = .address }
+                        .multilineTextAlignment(.leading)
+                        Spacer()
+                        Text("Website")
+                            .font(.caption)
+                            .foregroundColor(.gray)
+                    }
+                    
+                    HStack {
+                        TextField("Address", text: Binding(
+                            get: { editedContact.address ?? "" },
+                            set: { editedContact.address = $0.isEmpty ? nil : $0 }
+                        ))
                         .focused($focusedField, equals: .address)
                         .onSubmit { focusedField = .note }
+                        .multilineTextAlignment(.leading)
+                        Spacer()
+                        Text("Address")
+                            .font(.caption)
+                            .foregroundColor(.gray)
+                    }
                 }
                 
                 // Image Upload Section
@@ -193,11 +258,17 @@ struct EditContactView: View {
                 
                 // Notes Section
                 Section(header: Text("Notes")) {
-                    TextEditor(text: Binding(
-                        get: { editedContact.note ?? "" },
-                        set: { editedContact.note = $0.isEmpty ? nil : $0 }
-                    ))
-                    .frame(height: 100)
+                    HStack {
+                        TextEditor(text: Binding(
+                            get: { editedContact.note ?? "" },
+                            set: { editedContact.note = $0.isEmpty ? nil : $0 }
+                        ))
+                        .frame(height: 100)
+                        Spacer()
+                        Text("Notes")
+                            .font(.caption)
+                            .foregroundColor(.gray)
+                    }
                 }
             }
             .navigationTitle("Edit Contact")

@@ -74,73 +74,126 @@ struct CreateContactView: View {
                 
                 // Basic Information Section
                 Section(header: Text("Basic Information")) {
-                    TextField("Name*", text: $contact.name)
-                        .focused($focusedField, equals: .name)
-                        .onSubmit { focusedField = .position }
+                    HStack {
+                        TextField("Name*", text: $contact.name)
+                            .focused($focusedField, equals: .name)
+                            .onSubmit { focusedField = .position }
+                            .multilineTextAlignment(.leading)
+                        Spacer()
+                        Text("Name")
+                            .font(.caption)
+                            .foregroundColor(.gray)
+                    }
                     
-                    TextField("Position", text: Binding(
-                        get: { contact.position ?? "" },
-                        set: { contact.position = $0.isEmpty ? nil : $0 }
-                    ))
-                    .focused($focusedField, equals: .position)
-                    .onSubmit { focusedField = .company }
+                    HStack {
+                        TextField("Position", text: Binding(
+                            get: { contact.position ?? "" },
+                            set: { contact.position = $0.isEmpty ? nil : $0 }
+                        ))
+                        .focused($focusedField, equals: .position)
+                        .onSubmit { focusedField = .company }
+                        .multilineTextAlignment(.leading)
+                        Spacer()
+                        Text("Position")
+                            .font(.caption)
+                            .foregroundColor(.gray)
+                    }
                     
-                    TextField("Company", text: Binding(
-                        get: { contact.company ?? "" },
-                        set: { contact.company = $0.isEmpty ? nil : $0 }
-                    ))
-                    .focused($focusedField, equals: .company)
-                    .onSubmit { focusedField = .phone }
+                    HStack {
+                        TextField("Company", text: Binding(
+                            get: { contact.company ?? "" },
+                            set: { contact.company = $0.isEmpty ? nil : $0 }
+                        ))
+                        .focused($focusedField, equals: .company)
+                        .onSubmit { focusedField = .phone }
+                        .multilineTextAlignment(.leading)
+                        Spacer()
+                        Text("Company")
+                            .font(.caption)
+                            .foregroundColor(.gray)
+                    }
                 }
                 
                 // Contact Information Section
                 Section(header: Text("Contact Information")) {
-                    TextField("Phone", text: Binding(
-                        get: { contact.phone ?? "" },
-                        set: { 
-                            let newValue = $0.isEmpty ? nil : $0
-                            contact.phone = newValue
-                            validatePhone(newValue)
+                    VStack(alignment: .leading) {
+                        HStack {
+                            TextField("Phone", text: Binding(
+                                get: { contact.phone ?? "" },
+                                set: { 
+                                    let newValue = $0.isEmpty ? nil : $0
+                                    contact.phone = newValue
+                                    validatePhone(newValue)
+                                }
+                            ))
+                            .keyboardType(.phonePad)
+                            .multilineTextAlignment(.leading)
+                            Spacer()
+                            Text("Phone")
+                                .font(.caption)
+                                .foregroundColor(.gray)
                         }
-                    ))
-                    .keyboardType(.phonePad)
-                    if !isPhoneNumberValid {
-                        Text("Please enter a valid phone number")
-                            .foregroundColor(.red)
-                            .font(.caption)
+                        if !isPhoneNumberValid {
+                            Text("Please enter a valid phone number")
+                                .foregroundColor(.red)
+                                .font(.caption)
+                        }
                     }
                     
-                    TextField("Email", text: Binding(
-                        get: { contact.email ?? "" },
-                        set: { 
-                            let newValue = $0.isEmpty ? nil : $0
-                            contact.email = newValue
-                            validateEmail(newValue)
+                    VStack(alignment: .leading) {
+                        HStack {
+                            TextField("Email", text: Binding(
+                                get: { contact.email ?? "" },
+                                set: { 
+                                    let newValue = $0.isEmpty ? nil : $0
+                                    contact.email = newValue
+                                    validateEmail(newValue)
+                                }
+                            ))
+                            .keyboardType(.emailAddress)
+                            .autocapitalization(.none)
+                            .multilineTextAlignment(.leading)
+                            Spacer()
+                            Text("Email")
+                                .font(.caption)
+                                .foregroundColor(.gray)
                         }
-                    ))
-                    .keyboardType(.emailAddress)
-                    .autocapitalization(.none)
-                    if !isEmailValid {
-                        Text("Please enter a valid email address")
-                            .foregroundColor(.red)
-                            .font(.caption)
+                        if !isEmailValid {
+                            Text("Please enter a valid email address")
+                                .foregroundColor(.red)
+                                .font(.caption)
+                        }
                     }
                     
-                    TextField("Website", text: Binding(
-                        get: { contact.website ?? "" },
-                        set: { contact.website = $0.isEmpty ? nil : $0 }
-                    ))
-                    .keyboardType(.URL)
-                    .autocapitalization(.none)
-                    .focused($focusedField, equals: .website)
-                    .onSubmit { focusedField = .address }
+                    HStack {
+                        TextField("Website", text: Binding(
+                            get: { contact.website ?? "" },
+                            set: { contact.website = $0.isEmpty ? nil : $0 }
+                        ))
+                        .keyboardType(.URL)
+                        .autocapitalization(.none)
+                        .focused($focusedField, equals: .website)
+                        .onSubmit { focusedField = .address }
+                        .multilineTextAlignment(.leading)
+                        Spacer()
+                        Text("Website")
+                            .font(.caption)
+                            .foregroundColor(.gray)
+                    }
                     
-                    TextField("Address", text: Binding(
-                        get: { contact.address ?? "" },
-                        set: { contact.address = $0.isEmpty ? nil : $0 }
-                    ))
+                    HStack {
+                        TextField("Address", text: Binding(
+                            get: { contact.address ?? "" },
+                            set: { contact.address = $0.isEmpty ? nil : $0 }
+                        ))
                         .focused($focusedField, equals: .address)
                         .onSubmit { focusedField = .note }
+                        .multilineTextAlignment(.leading)
+                        Spacer()
+                        Text("Address")
+                            .font(.caption)
+                            .foregroundColor(.gray)
+                    }
                 }
                 
                 // Tags Section
@@ -212,11 +265,17 @@ struct CreateContactView: View {
                 
                 // Notes Section
                 Section(header: Text("Notes")) {
-                    TextEditor(text: Binding(
-                        get: { contact.note ?? "" },
-                        set: { contact.note = $0.isEmpty ? nil : $0 }
-                    ))
-                    .frame(height: 100)
+                    HStack {
+                        TextEditor(text: Binding(
+                            get: { contact.note ?? "" },
+                            set: { contact.note = $0.isEmpty ? nil : $0 }
+                        ))
+                        .frame(height: 100)
+                        Spacer()
+                        Text("Notes")
+                            .font(.caption)
+                            .foregroundColor(.gray)
+                    }
                 }
             }
             .navigationTitle("Create Contact")
