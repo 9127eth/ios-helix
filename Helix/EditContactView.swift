@@ -253,7 +253,7 @@ struct EditContactView: View {
                     }
                     
                     Button(action: { showingTagSheet = true }) {
-                        Label("Manage Tags", systemImage: "tag")
+                        Label("Add Tags", systemImage: "tag")
                     }
                 }
                 
