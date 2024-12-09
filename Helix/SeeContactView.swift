@@ -7,6 +7,7 @@ struct SeeContactView: View {
     @Environment(\.dismiss) var dismiss
     @State private var showingEditSheet = false
     @StateObject private var tagManager = TagManager()
+    @State private var showingZoomableImage = false
     
     var body: some View {
         NavigationView {
@@ -127,6 +128,9 @@ struct SeeContactView: View {
                                 .frame(maxWidth: .infinity)
                                 .frame(height: 200)
                                 .cornerRadius(12)
+                                .onTapGesture {
+                                    showingZoomableImage = true
+                                }
                         } placeholder: {
                             ProgressView()
                                 .frame(height: 200)
@@ -152,8 +156,76 @@ struct SeeContactView: View {
         .sheet(isPresented: $showingEditSheet) {
             EditContactView(contact: .constant(contact))
         }
+        .sheet(isPresented: $showingZoomableImage) {
+            if let imageUrl = contact.imageUrl {
+                ZoomableImageView(imageUrl: imageUrl)
+            }
+        }
         .onAppear {
             tagManager.fetchTags()
+        }
+    }
+}
+
+struct ZoomableImageView: View {
+    let imageUrl: String
+    @Environment(\.dismiss) var dismiss
+    @State private var scale: CGFloat = 1.0
+    @State private var lastScale: CGFloat = 1.0
+    @State private var offset: CGSize = .zero
+    @State private var lastOffset: CGSize = .zero
+    
+    var body: some View {
+        NavigationView {
+            GeometryReader { geometry in
+                AsyncImage(url: URL(string: imageUrl)) { image in
+                    image
+                        .resizable()
+                        .scaledToFit()
+                        .scaleEffect(scale)
+                        .offset(offset)
+                        .gesture(
+                            MagnificationGesture()
+                                .onChanged { value in
+                                    let delta = value / lastScale
+                                    lastScale = value
+                                    scale = min(max(scale * delta, 1), 4)
+                                }
+                                .onEnded { _ in
+                                    lastScale = 1.0
+                                }
+                        )
+                        .gesture(
+                            DragGesture()
+                                .onChanged { value in
+                                    offset = CGSize(
+                                        width: lastOffset.width + value.translation.width,
+                                        height: lastOffset.height + value.translation.height
+                                    )
+                                }
+                                .onEnded { _ in
+                                    lastOffset = offset
+                                }
+                        )
+                        .onTapGesture(count: 2) {
+                            withAnimation {
+                                scale = scale > 1 ? 1 : 2
+                                offset = .zero
+                                lastOffset = .zero
+                            }
+                        }
+                } placeholder: {
+                    ProgressView()
+                }
+            }
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Done") {
+                        dismiss()
+                    }
+                }
+            }
         }
     }
 } 
