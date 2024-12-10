@@ -59,8 +59,7 @@ struct MyContactsView: View {
                     .padding(.top, 40)
                     
                     // Action buttons row
-                    HStack {
-                        Spacer()
+                    HStack(spacing: 8) {
                         Button(action: {
                             showingTagManager = true
                         }) {
@@ -81,6 +80,8 @@ struct MyContactsView: View {
                         AddContactButton {
                             isShowingContactCreationEntry = true
                         }
+                        
+                        Spacer()
                     }
                     .padding(.horizontal)
                     .padding(.vertical, 16)
