@@ -13,81 +13,92 @@ struct ContactItemView: View {
     @State private var showingContactDetails = false
     
     var body: some View {
-        HStack(spacing: 16) {
-            // Contact details
-            VStack(alignment: .leading, spacing: 4) {
-                Text(contact.name)
-                    .font(.system(size: 16, weight: .medium))
-                    .foregroundColor(AppColors.bodyPrimaryText)
-                    .lineLimit(1)
-                    .onTapGesture {
-                        showingContactDetails = true
+        ZStack {
+            // Background shadow layer for depth effect
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color.gray.opacity(0.5))
+                .offset(x: 4, y: 4) // Smaller offset since contact items are smaller than cards
+            
+            // Main content (existing view)
+            VStack(alignment: .leading, spacing: 8) {
+                HStack(spacing: 16) {
+                    // Contact details
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(contact.name)
+                            .font(.system(size: 16, weight: .medium))
+                            .foregroundColor(AppColors.bodyPrimaryText)
+                            .lineLimit(1)
+                            .onTapGesture {
+                                showingContactDetails = true
+                            }
+                        
+                        if let position = contact.position, let company = contact.company {
+                            Text("\(company) | \(position)")
+                                .font(.system(size: 14))
+                                .foregroundColor(AppColors.bodyPrimaryText.opacity(0.8))
+                                .lineLimit(1)
+                        } else if let position = contact.position {
+                            Text(position)
+                                .font(.system(size: 14))
+                                .foregroundColor(AppColors.bodyPrimaryText.opacity(0.8))
+                                .lineLimit(1)
+                        } else if let company = contact.company {
+                            Text(company)
+                                .font(.system(size: 14))
+                                .foregroundColor(AppColors.bodyPrimaryText.opacity(0.8))
+                                .lineLimit(1)
+                        }
                     }
-                
-                if let position = contact.position, let company = contact.company {
-                    Text("\(company) | \(position)")
-                        .font(.system(size: 14))
-                        .foregroundColor(AppColors.bodyPrimaryText.opacity(0.8))
-                        .lineLimit(1)
-                } else if let position = contact.position {
-                    Text(position)
-                        .font(.system(size: 14))
-                        .foregroundColor(AppColors.bodyPrimaryText.opacity(0.8))
-                        .lineLimit(1)
-                } else if let company = contact.company {
-                    Text(company)
-                        .font(.system(size: 14))
-                        .foregroundColor(AppColors.bodyPrimaryText.opacity(0.8))
-                        .lineLimit(1)
+                    
+                    Spacer()
+                    
+                    // Quick action buttons
+                    HStack(spacing: 20) {
+                        if contact.phone != nil || contact.email != nil {
+                            Button(action: { showingContactOptions = true }) {
+                                Image(systemName: "envelope")
+                                    .foregroundColor(AppColors.foreground)
+                                    .frame(width: 44, height: 44)
+                                    .contentShape(Rectangle())
+                            }
+                        }
+                        
+                        // Menu button
+                        Menu {
+                            Button("Edit") { showingEditSheet = true }
+                            Button("Share") { showingShareSheet = true }
+                            Button("Delete", role: .destructive) { showingDeleteAlert = true }
+                        } label: {
+                            Image(systemName: "ellipsis")
+                                .foregroundColor(AppColors.foreground)
+                                .frame(width: 44, height: 44)
+                                .contentShape(Rectangle())
+                        }
+                    }
+                }
+                .frame(height: 72)
+                .padding(.horizontal, 16)
+                .background(AppColors.cardGridBackground)
+                .cornerRadius(12)
+                .sheet(isPresented: $showingContactOptions) {
+                    ContactOptionsSheet(contact: contact)
+                        .presentationDetents([.height(250)])
+                }
+                .alert("Delete Contact", isPresented: $showingDeleteAlert) {
+                    Button("Cancel", role: .cancel) { }
+                    Button("Delete", role: .destructive) { deleteContact() }
+                } message: {
+                    Text("Are you sure you want to delete this contact? This action cannot be undone.")
+                }
+                .sheet(isPresented: $showingEditSheet) {
+                    EditContactView(contact: $contact)
+                }
+                .sheet(isPresented: $showingContactDetails) {
+                    SeeContactView(contact: contact)
                 }
             }
-            
-            Spacer()
-            
-            // Quick action buttons
-            HStack(spacing: 20) {
-                if contact.phone != nil || contact.email != nil {
-                    Button(action: { showingContactOptions = true }) {
-                        Image(systemName: "envelope")
-                            .foregroundColor(AppColors.foreground)
-                            .frame(width: 44, height: 44)
-                            .contentShape(Rectangle())
-                    }
-                }
-                
-                // Menu button
-                Menu {
-                    Button("Edit") { showingEditSheet = true }
-                    Button("Share") { showingShareSheet = true }
-                    Button("Delete", role: .destructive) { showingDeleteAlert = true }
-                } label: {
-                    Image(systemName: "ellipsis")
-                        .foregroundColor(AppColors.foreground)
-                        .frame(width: 44, height: 44)
-                        .contentShape(Rectangle())
-                }
-            }
         }
-        .frame(height: 72)
-        .padding(.horizontal, 16)
-        .background(AppColors.cardGridBackground)
-        .cornerRadius(12)
-        .sheet(isPresented: $showingContactOptions) {
-            ContactOptionsSheet(contact: contact)
-                .presentationDetents([.height(250)])
-        }
-        .alert("Delete Contact", isPresented: $showingDeleteAlert) {
-            Button("Cancel", role: .cancel) { }
-            Button("Delete", role: .destructive) { deleteContact() }
-        } message: {
-            Text("Are you sure you want to delete this contact? This action cannot be undone.")
-        }
-        .sheet(isPresented: $showingEditSheet) {
-            EditContactView(contact: $contact)
-        }
-        .sheet(isPresented: $showingContactDetails) {
-            SeeContactView(contact: contact)
-        }
+        .frame(maxWidth: .infinity)
     }
     
     private func deleteContact() {
