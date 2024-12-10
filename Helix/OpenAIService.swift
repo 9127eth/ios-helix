@@ -11,6 +11,7 @@ enum OpenAIError: Error {
     case invalidResponse
     case apiError(String)
     case decodingError
+    case rateLimitExceeded
 }
 
 struct OpenAIResponse: Codable {
@@ -23,16 +24,64 @@ struct OpenAIResponse: Codable {
     let website: String
 }
 
+class RateLimiter {
+    private let queue = DispatchQueue(label: "com.helix.ratelimiter")
+    private var lastRequestTime: Date?
+    private let minInterval: TimeInterval // Minimum time between requests in seconds
+    private let maxRequestsPerMinute: Int
+    private var requestCount = 0
+    private var minuteStartTime: Date?
+    
+    init(minInterval: TimeInterval = 1.0, maxRequestsPerMinute: Int = 20) {
+        self.minInterval = minInterval
+        self.maxRequestsPerMinute = maxRequestsPerMinute
+    }
+    
+    func shouldAllowRequest() async -> Bool {
+        await queue.sync {
+            let now = Date()
+            
+            // Initialize or reset minute window
+            if minuteStartTime == nil || now.timeIntervalSince(minuteStartTime!) >= 60 {
+                minuteStartTime = now
+                requestCount = 0
+            }
+            
+            // Check rate limits
+            if let lastRequest = lastRequestTime,
+               now.timeIntervalSince(lastRequest) < minInterval {
+                return false
+            }
+            
+            if requestCount >= maxRequestsPerMinute {
+                return false
+            }
+            
+            // Update tracking
+            lastRequestTime = now
+            requestCount += 1
+            return true
+        }
+    }
+}
+
 class OpenAIService {
     private let apiKey: String
     private let endpoint = "https://api.openai.com/v1/chat/completions"
+    private let rateLimiter: RateLimiter
     
     init() {
         // In production, you should use a proper configuration system
         self.apiKey = ProcessInfo.processInfo.environment["OPENAI_API_KEY"] ?? ""
+        self.rateLimiter = RateLimiter()
     }
     
     func processBusinessCard(text: String) async throws -> OpenAIResponse {
+        // Check rate limit before proceeding
+        guard await rateLimiter.shouldAllowRequest() else {
+            throw OpenAIError.rateLimitExceeded
+        }
+        
         let prompt = """
         You are an AI designed to extract and organize information from text. The text will be either a business card or a tradeshow badge. Extract key details from this business card text and present them in a structured format. Also some general rules:
          - do not include prefixes like "Mr.", "Ms.", "Dr.", etc. Names should just start with the first name. You can include suffixes like "Jr.", "Sr.", "III", pharmd, md, bsn, rn, md, etc. 
