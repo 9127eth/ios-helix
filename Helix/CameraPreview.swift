@@ -27,7 +27,7 @@ struct CameraPreview: UIViewRepresentable {
         captureButton.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             captureButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            captureButton.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -50),
+            captureButton.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -110),
             captureButton.widthAnchor.constraint(equalToConstant: 70),
             captureButton.heightAnchor.constraint(equalToConstant: 70)
         ])
