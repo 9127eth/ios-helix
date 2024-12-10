@@ -8,6 +8,7 @@ struct SeeContactView: View {
     @State private var showingEditSheet = false
     @StateObject private var tagManager = TagManager()
     @State private var showingZoomableImage = false
+    @State private var showingContactOptions = false
     
     var body: some View {
         NavigationView {
@@ -127,7 +128,7 @@ struct SeeContactView: View {
                     }
                 }
                 
-                // Image Section at the bottom
+                // Image Section
                 if let imageUrl = contact.imageUrl {
                     Section {
                         AsyncImage(url: URL(string: imageUrl)) { image in
@@ -143,6 +144,28 @@ struct SeeContactView: View {
                         } placeholder: {
                             ProgressView()
                                 .frame(height: 200)
+                        }
+                    }
+                }
+                
+                // Add some spacing
+                Section {
+                    EmptyView()
+                }
+                .listRowBackground(Color.clear)
+                .frame(height: 20)
+                
+                // Contact Button Section at the very bottom
+                Section {
+                    if contact.phone != nil || contact.email != nil {
+                        Button {
+                            showingContactOptions = true
+                        } label: {
+                            HStack {
+                                Spacer()
+                                Text("Contact")
+                                Spacer()
+                            }
                         }
                     }
                 }
@@ -169,6 +192,10 @@ struct SeeContactView: View {
             if let imageUrl = contact.imageUrl {
                 ZoomableImageView(imageUrl: imageUrl)
             }
+        }
+        .sheet(isPresented: $showingContactOptions) {
+            ContactOptionsSheet(contact: contact)
+                .presentationDetents([.height(250)])
         }
         .onAppear {
             tagManager.fetchTags()
