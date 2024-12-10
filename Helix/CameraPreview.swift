@@ -19,11 +19,43 @@ struct CameraPreview: UIViewRepresentable {
         // Setup camera
         setupCamera(previewLayer: previewLayer, view: view, coordinator: context.coordinator)
         
-        // Add tap gesture
-        let tapGesture = UITapGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.handleTap))
-        view.addGestureRecognizer(tapGesture)
+        // Add capture button
+        let captureButton = createCaptureButton(coordinator: context.coordinator)
+        view.addSubview(captureButton)
+        
+        // Center the button at the bottom of the screen
+        captureButton.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            captureButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            captureButton.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -50),
+            captureButton.widthAnchor.constraint(equalToConstant: 70),
+            captureButton.heightAnchor.constraint(equalToConstant: 70)
+        ])
         
         return view
+    }
+    
+    private func createCaptureButton(coordinator: Coordinator) -> UIButton {
+        let button = UIButton(type: .custom)
+        
+        // Create outer circle
+        let outerCircle = CAShapeLayer()
+        outerCircle.path = UIBezierPath(ovalIn: CGRect(x: 0, y: 0, width: 70, height: 70)).cgPath
+        outerCircle.fillColor = UIColor.white.withAlphaComponent(0.2).cgColor
+        outerCircle.strokeColor = UIColor.white.cgColor
+        outerCircle.lineWidth = 3
+        button.layer.addSublayer(outerCircle)
+        
+        // Create inner circle
+        let innerCircle = CAShapeLayer()
+        innerCircle.path = UIBezierPath(ovalIn: CGRect(x: 10, y: 10, width: 50, height: 50)).cgPath
+        innerCircle.fillColor = UIColor.white.cgColor
+        button.layer.addSublayer(innerCircle)
+        
+        // Add tap action
+        button.addTarget(coordinator, action: #selector(Coordinator.handleCapture), for: .touchUpInside)
+        
+        return button
     }
     
     func updateUIView(_ uiView: UIView, context: Context) {
@@ -83,7 +115,7 @@ struct CameraPreview: UIViewRepresentable {
             self.parent = parent
         }
         
-        @objc func handleTap() {
+        @objc func handleCapture() {
             let settings = AVCapturePhotoSettings()
             parent.photoOutput.capturePhoto(with: settings, delegate: self)
         }
