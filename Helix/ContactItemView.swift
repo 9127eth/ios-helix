@@ -65,6 +65,7 @@ struct ContactItemView: View {
                         
                         // Menu button
                         Menu {
+                            Button("View") { showingContactDetails = true }
                             Button("Edit") { showingEditSheet = true }
                             Button("Share") { showingShareSheet = true }
                             Button("Delete", role: .destructive) { showingDeleteAlert = true }
