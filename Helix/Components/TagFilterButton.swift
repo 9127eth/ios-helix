@@ -15,7 +15,7 @@ struct TagFilterButton: View {
                 Text(selectedTags.isEmpty ? "Filter" : "\(selectedTags.count)")
                     .font(.footnote)
             }
-            .foregroundColor(AppColors.buttonText)
+            .foregroundColor(AppColors.bodyPrimaryText)
             .padding(.vertical, 8)
             .padding(.horizontal, 12)
             .background(AppColors.cardGridBackground)

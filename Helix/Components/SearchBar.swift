@@ -7,15 +7,16 @@ struct SearchBar: View {
         HStack(spacing: 8) {
             Image("search")
                 .renderingMode(.template)
-                .foregroundColor(AppColors.buttonText)
+                .foregroundColor(AppColors.bodyPrimaryText)
             
             TextField("Search contacts", text: $text)
                 .textFieldStyle(PlainTextFieldStyle())
+                .foregroundColor(AppColors.bodyPrimaryText)
             
             if !text.isEmpty {
                 Button(action: { text = "" }) {
                     Image(systemName: "xmark.circle.fill")
-                        .foregroundColor(.gray)
+                        .foregroundColor(AppColors.bodyPrimaryText.opacity(0.6))
                 }
             }
         }

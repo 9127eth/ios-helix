@@ -12,10 +12,10 @@ struct AddContactButton: View {
                 Text("Create New")
                     .font(.footnote)
             }
-            .foregroundColor(AppColors.buttonText)
+            .foregroundColor(.black)
             .padding(.vertical, 8)
             .padding(.horizontal, 12)
-            .background(AppColors.cardGridBackground)
+            .background(AppColors.cardDepthDefault)
             .cornerRadius(16)
             .shadow(color: Color.black.opacity(0.1), radius: 2, x: 0, y: 1)
         }

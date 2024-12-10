@@ -15,6 +15,7 @@ struct SortButton: View {
                         Image(systemName: "checkmark")
                     }
                 }
+                .foregroundColor(AppColors.bodyPrimaryText)
             }
             
             Button(action: { selectedOption = .dateAdded }) {
@@ -27,6 +28,7 @@ struct SortButton: View {
                         Image(systemName: "checkmark")
                     }
                 }
+                .foregroundColor(AppColors.bodyPrimaryText)
             }
         } label: {
             HStack(spacing: 8) {
@@ -35,7 +37,7 @@ struct SortButton: View {
                 Text("Sort")
                     .font(.footnote)
             }
-            .foregroundColor(AppColors.buttonText)
+            .foregroundColor(AppColors.bodyPrimaryText)
             .padding(.vertical, 8)
             .padding(.horizontal, 12)
             .background(AppColors.cardGridBackground)

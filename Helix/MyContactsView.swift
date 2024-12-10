@@ -69,7 +69,7 @@ struct MyContactsView: View {
                                 Text("Manage Tags")
                                     .font(.footnote)
                             }
-                            .foregroundColor(AppColors.buttonText)
+                            .foregroundColor(AppColors.bodyPrimaryText)
                             .padding(.vertical, 8)
                             .padding(.horizontal, 12)
                             .background(AppColors.cardGridBackground)
@@ -100,7 +100,7 @@ struct MyContactsView: View {
                                     Text("Select")
                                         .font(.footnote)
                                 }
-                                .foregroundColor(AppColors.buttonText)
+                                .foregroundColor(AppColors.bodyPrimaryText)
                                 .padding(.vertical, 8)
                                 .padding(.horizontal, 12)
                                 .background(isSelectionMode ? AppColors.buttonBackground : AppColors.cardGridBackground)
