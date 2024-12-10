@@ -279,6 +279,7 @@ struct CreateContactView: View {
                     .frame(height: 100)
                 }
             }
+            .dismissKeyboardOnTap()
             .navigationTitle("Create Contact")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

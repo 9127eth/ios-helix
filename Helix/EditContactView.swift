@@ -279,6 +279,7 @@ struct EditContactView: View {
                     }
                 }
             }
+            .dismissKeyboardOnTap()
             .navigationTitle("Edit Contact")
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
