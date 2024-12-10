@@ -72,17 +72,10 @@ struct ImagePickerView: View {
                     throw NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "Failed to load image"])
                 }
                 
-                onImagePicked(uiImage)
-                
-                let textRecognizer = TextRecognizer()
-                let recognizedText = try await textRecognizer.recognizeText(from: uiImage)
-                let processor = TextProcessor()
-                let processed = processor.processText(recognizedText)
-                
                 await MainActor.run {
-                    self.scannedData = processed.data
-                    self.showingManualEntry = true
+                    onImagePicked(uiImage)
                     self.isProcessing = false
+                    dismiss()
                 }
             } catch {
                 await MainActor.run {

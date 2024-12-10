@@ -1,6 +1,7 @@
 import SwiftUI
 import AVFoundation
 import VisionKit
+import PhotosUI
 
 struct ContactCreationEntryView: View {
     @Environment(\.dismiss) var dismiss
@@ -13,6 +14,7 @@ struct ContactCreationEntryView: View {
     @State private var errorMessage = ""
     @State private var cameraPermissionGranted = false
     @Binding var isPresented: Bool
+    @State private var selectedItem: PhotosPickerItem?
     
     var body: some View {
         NavigationView {
@@ -53,13 +55,22 @@ struct ContactCreationEntryView: View {
                 VStack {
                     Spacer()
                     HStack(spacing: 20) {
-                        Button(action: { showImagePicker = true }) {
+                        PhotosPicker(selection: $selectedItem, matching: .images) {
                             VStack {
                                 Image(systemName: "photo.fill")
                                 Text("Choose Photo")
                                     .font(.caption)
                             }
                             .foregroundColor(.white)
+                        }
+                        .onChange(of: selectedItem) { newValue in
+                            Task {
+                                if let data = try? await newValue?.loadTransferable(type: Data.self),
+                                   let uiImage = UIImage(data: data) {
+                                    self.capturedImage = uiImage
+                                    processImage(uiImage)
+                                }
+                            }
                         }
                         
                         Spacer()
@@ -88,12 +99,6 @@ struct ContactCreationEntryView: View {
                     isPresented = false
                 }
             )
-        }
-        .sheet(isPresented: $showImagePicker) {
-            ImagePickerView { image in
-                self.capturedImage = image
-                processImage(image)
-            }
         }
         .overlay(
             Group {
