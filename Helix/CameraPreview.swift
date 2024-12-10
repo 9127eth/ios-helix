@@ -23,16 +23,77 @@ struct CameraPreview: UIViewRepresentable {
         let captureButton = createCaptureButton(coordinator: context.coordinator)
         view.addSubview(captureButton)
         
-        // Center the button at the bottom of the screen
+        // Store the button in the coordinator for later access
+        context.coordinator.captureButton = captureButton
+        
+        // Setup constraints
         captureButton.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            captureButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            captureButton.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -110),
-            captureButton.widthAnchor.constraint(equalToConstant: 70),
-            captureButton.heightAnchor.constraint(equalToConstant: 70)
-        ])
+        updateButtonConstraints(for: view, button: captureButton)
+        
+        // Add orientation observer
+        NotificationCenter.default.addObserver(
+            context.coordinator,
+            selector: #selector(Coordinator.orientationChanged),
+            name: UIDevice.orientationDidChangeNotification,
+            object: nil
+        )
         
         return view
+    }
+    
+    private func updateButtonConstraints(for view: UIView, button: UIButton) {
+        // Remove any existing constraints
+        button.removeConstraints(button.constraints)
+        view.removeConstraints(view.constraints.filter { $0.firstItem === button })
+        
+        let orientation = UIDevice.current.orientation
+        var constraints = [NSLayoutConstraint]()
+        
+        switch orientation {
+        case .landscapeLeft, .landscapeRight:
+            // Position button on the right side with original padding
+            constraints = [
+                button.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+                button.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -50),
+                button.widthAnchor.constraint(equalToConstant: 70),
+                button.heightAnchor.constraint(equalToConstant: 70)
+            ]
+        default:
+            // Position button at the bottom center with larger padding
+            constraints = [
+                button.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+                button.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -110),
+                button.widthAnchor.constraint(equalToConstant: 70),
+                button.heightAnchor.constraint(equalToConstant: 70)
+            ]
+        }
+        
+        NSLayoutConstraint.activate(constraints)
+    }
+    
+    func updateUIView(_ uiView: UIView, context: Context) {
+        guard let previewLayer = uiView.layer.sublayers?.first as? AVCaptureVideoPreviewLayer,
+              let button = context.coordinator.captureButton else { return }
+        
+        previewLayer.frame = uiView.bounds
+        
+        if let connection = previewLayer.connection {
+            let currentDevice = UIDevice.current
+            let orientation = currentDevice.orientation
+            
+            if connection.isVideoOrientationSupported {
+                switch orientation {
+                case .portrait: connection.videoOrientation = .portrait
+                case .landscapeRight: connection.videoOrientation = .landscapeLeft
+                case .landscapeLeft: connection.videoOrientation = .landscapeRight
+                case .portraitUpsideDown: connection.videoOrientation = .portraitUpsideDown
+                default: connection.videoOrientation = .portrait
+                }
+            }
+            
+            // Update button constraints
+            updateButtonConstraints(for: uiView, button: button)
+        }
     }
     
     private func createCaptureButton(coordinator: Coordinator) -> UIButton {
@@ -56,26 +117,6 @@ struct CameraPreview: UIViewRepresentable {
         button.addTarget(coordinator, action: #selector(Coordinator.handleCapture), for: .touchUpInside)
         
         return button
-    }
-    
-    func updateUIView(_ uiView: UIView, context: Context) {
-        guard let previewLayer = uiView.layer.sublayers?.first as? AVCaptureVideoPreviewLayer else { return }
-        previewLayer.frame = uiView.bounds
-        
-        if let connection = previewLayer.connection {
-            let currentDevice = UIDevice.current
-            let orientation = currentDevice.orientation
-            
-            if connection.isVideoOrientationSupported {
-                switch orientation {
-                case .portrait: connection.videoOrientation = .portrait
-                case .landscapeRight: connection.videoOrientation = .landscapeLeft
-                case .landscapeLeft: connection.videoOrientation = .landscapeRight
-                case .portraitUpsideDown: connection.videoOrientation = .portraitUpsideDown
-                default: connection.videoOrientation = .portrait
-                }
-            }
-        }
     }
     
     private func setupCamera(previewLayer: AVCaptureVideoPreviewLayer, view: UIView, coordinator: Coordinator) {
@@ -110,6 +151,7 @@ struct CameraPreview: UIViewRepresentable {
     
     class Coordinator: NSObject, AVCapturePhotoCaptureDelegate {
         let parent: CameraPreview
+        var captureButton: UIButton?
         
         init(_ parent: CameraPreview) {
             self.parent = parent
@@ -156,6 +198,17 @@ struct CameraPreview: UIViewRepresentable {
                                            scale: originalImage.scale,
                                            orientation: imageOrientation)
                 parent.onCapture(.success(correctedImage))
+            }
+        }
+        
+        @objc func orientationChanged() {
+            if let button = captureButton,
+               let view = button.superview {
+                parent.updateButtonConstraints(for: view, button: button)
+                
+                UIView.animate(withDuration: 0.3) {
+                    view.layoutIfNeeded()
+                }
             }
         }
     }
