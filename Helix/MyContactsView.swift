@@ -40,6 +40,7 @@ struct MyContactsView: View {
             ZStack {
                 AppColors.background
                     .ignoresSafeArea()
+                    .dismissKeyboardOnTap()
                 
                 VStack(spacing: 0) {
                     // Header with title
