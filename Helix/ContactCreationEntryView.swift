@@ -57,7 +57,7 @@ struct ContactCreationEntryView: View {
                     HStack(spacing: 20) {
                         PhotosPicker(selection: $selectedItem, matching: .images) {
                             VStack {
-                                Image(systemName: "photo.fill")
+                                Image("addImage")
                                 Text("Choose Photo")
                                     .font(.caption)
                             }
@@ -77,7 +77,8 @@ struct ContactCreationEntryView: View {
                         
                         Button(action: { showManualEntry = true }) {
                             VStack {
-                                Image(systemName: "square.and.pencil")
+                                Image("entermanually")
+                                    .renderingMode(.template)
                                 Text("Enter Manually")
                                     .font(.caption)
                             }

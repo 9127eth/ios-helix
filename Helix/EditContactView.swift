@@ -246,7 +246,11 @@ struct EditContactView: View {
                     }
                     
                     Button(action: { showingTagSheet = true }) {
-                        Label("Add Tags", systemImage: "tag")
+                        HStack(spacing: 8) {
+                            Image("tag")
+                                .renderingMode(.template)
+                            Text("Add Tags")
+                        }
                     }
                 }
                 

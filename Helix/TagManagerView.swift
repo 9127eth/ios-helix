@@ -37,7 +37,7 @@ struct TagManagerView: View {
                     }
                     
                     Button(action: { showingAddTag = true }) {
-                        Label("Add New Tag", systemImage: "plus.circle")
+                        Label("Add New Tag", image: "tag")
                     }
                 }
             }
