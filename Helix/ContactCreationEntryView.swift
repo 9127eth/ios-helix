@@ -15,6 +15,7 @@ struct ContactCreationEntryView: View {
     @State private var cameraPermissionGranted = false
     @Binding var isPresented: Bool
     @State private var selectedItem: PhotosPickerItem?
+    @State private var orientation = UIDevice.current.orientation
     
     var body: some View {
         NavigationView {
@@ -54,39 +55,41 @@ struct ContactCreationEntryView: View {
                 // Bottom controls overlay
                 VStack {
                     Spacer()
-                    HStack(spacing: 20) {
-                        PhotosPicker(selection: $selectedItem, matching: .images) {
-                            VStack {
-                                Image("addImage")
-                                Text("Choose Photo")
-                                    .font(.caption)
+                    if UIDevice.current.orientation.isPortrait {  // Only show in portrait
+                        HStack(spacing: 20) {
+                            PhotosPicker(selection: $selectedItem, matching: .images) {
+                                VStack {
+                                    Image("addImage")
+                                    Text("Choose Photo")
+                                        .font(.caption)
+                                }
+                                .foregroundColor(.white)
                             }
-                            .foregroundColor(.white)
-                        }
-                        .onChange(of: selectedItem) { newValue in
-                            Task {
-                                if let data = try? await newValue?.loadTransferable(type: Data.self),
-                                   let uiImage = UIImage(data: data) {
-                                    self.capturedImage = uiImage
-                                    processImage(uiImage)
+                            .onChange(of: selectedItem) { newValue in
+                                Task {
+                                    if let data = try? await newValue?.loadTransferable(type: Data.self),
+                                       let uiImage = UIImage(data: data) {
+                                        self.capturedImage = uiImage
+                                        processImage(uiImage)
+                                    }
                                 }
                             }
-                        }
-                        
-                        Spacer()
-                        
-                        Button(action: { showManualEntry = true }) {
-                            VStack {
-                                Image("entermanually")
-                                    .renderingMode(.template)
-                                Text("Enter Manually")
-                                    .font(.caption)
+                            
+                            Spacer()
+                            
+                            Button(action: { showManualEntry = true }) {
+                                VStack {
+                                    Image("entermanually")
+                                        .renderingMode(.template)
+                                    Text("Enter Manually")
+                                        .font(.caption)
+                                }
+                                .foregroundColor(.white)
                             }
-                            .foregroundColor(.white)
                         }
+                        .padding()
+                        .background(Color.black.opacity(0.6))
                     }
-                    .padding()
-                    .background(Color.black.opacity(0.6))
                 }
             }
             .navigationBarTitleDisplayMode(.inline)
@@ -110,6 +113,23 @@ struct ContactCreationEntryView: View {
         )
         .onAppear {
             checkCameraPermission()
+            
+            // Add orientation observer
+            NotificationCenter.default.addObserver(
+                forName: UIDevice.orientationDidChangeNotification,
+                object: nil,
+                queue: .main
+            ) { _ in
+                orientation = UIDevice.current.orientation
+            }
+        }
+        .onDisappear {
+            // Remove orientation observer
+            NotificationCenter.default.removeObserver(
+                self,
+                name: UIDevice.orientationDidChangeNotification,
+                object: nil
+            )
         }
         .alert("Error", isPresented: $showError) {
             Button("OK", role: .cancel) { }
