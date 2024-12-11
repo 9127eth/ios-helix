@@ -104,7 +104,15 @@ struct Contact: Identifiable, Codable {
         if let index = components.firstIndex(of: "contacts") {
             let path = components[index...].joined(separator: "/")
             let storageRef = Storage.storage().reference().child(path)
-            try await storageRef.delete()
+            
+            do {
+                _ = try await storageRef.getMetadata()  // Check if file exists
+                try await storageRef.delete()
+            } catch {
+                // If file doesn't exist, just return without throwing
+                print("Warning: Image file not found in storage, skipping image deletion")
+                return
+            }
         }
     }
     
@@ -122,7 +130,12 @@ struct Contact: Identifiable, Codable {
         
         // Delete associated image if exists
         if let imageUrl = contact.imageUrl {
-            try await deleteImage(url: imageUrl)
+            do {
+                try await deleteImage(url: imageUrl)
+            } catch {
+                print("Warning: Failed to delete image: \(error.localizedDescription)")
+                // Continue with contact deletion even if image deletion fails
+            }
         }
         
         try await batch.commit()

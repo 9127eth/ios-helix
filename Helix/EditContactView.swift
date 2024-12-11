@@ -9,6 +9,7 @@ import SwiftUI
 import FirebaseFirestore
 import FirebaseAuth
 import PhotosUI
+import FirebaseStorage
 
 struct EditContactView: View {
     @Environment(\.dismiss) var dismiss
@@ -296,6 +297,11 @@ struct EditContactView: View {
         .alert("Cancel Editing?", isPresented: $showingCancelConfirmation) {
             Button("Continue Editing", role: .cancel) { }
             Button("Yes, I'm sure", role: .destructive) {
+                // Reset all image-related state
+                imageToDelete = nil
+                pendingImageData = nil
+                selectedImageData = nil
+                selectedImage = nil
                 dismiss()
             }
         } message: {
@@ -414,22 +420,16 @@ struct EditContactView: View {
     }
     
     private func deleteImage() {
-        Task {
-            if let existingUrl = editedContact.imageUrl {
-                do {
-                    try await Contact.deleteImage(url: existingUrl)
-                    await MainActor.run {
-                        imageToDelete = existingUrl
-                        editedContact.imageUrl = nil
-                        pendingImageData = nil
-                        selectedImageData = nil
-                        selectedImage = nil
-                    }
-                } catch {
-                    print("Error deleting image: \(error)")
-                }
-            }
+        // If there's an existing image URL, mark it for deletion
+        if let existingUrl = editedContact.imageUrl {
+            imageToDelete = existingUrl
         }
+        
+        // Reset all image-related state
+        editedContact.imageUrl = nil
+        pendingImageData = nil
+        selectedImageData = nil
+        selectedImage = nil
     }
     
     private func deleteContact() {
@@ -445,23 +445,26 @@ struct EditContactView: View {
                 let contactRef = db.collection("users").document(userId)
                     .collection("contacts").document(contactId)
                 
-                // Delete the contact's image if it exists
+                // Try to delete the image if it exists
                 if let imageUrl = contact.imageUrl {
-                    try await Contact.deleteImage(url: imageUrl)
+                    do {
+                        try await Contact.deleteImage(url: imageUrl)
+                    } catch let error as NSError {
+                        // If the error is that the file doesn't exist, continue
+                        if error.domain == StorageErrorDomain && 
+                           error.code == StorageErrorCode.objectNotFound.rawValue {
+                            print("Warning: Image file not found in storage, continuing with deletion")
+                        } else {
+                            // For other errors, throw them
+                            throw error
+                        }
+                    }
                 }
                 
                 // Delete the contact document
                 try await contactRef.delete()
-                
-                await MainActor.run {
-                    dismiss()
-                }
-                
             } catch {
-                await MainActor.run {
-                    showAlert = true
-                    alertMessage = "Error deleting contact: \(error.localizedDescription)"
-                }
+                print("Error deleting contact: \(error.localizedDescription)")
             }
         }
     }

@@ -109,7 +109,15 @@ struct ContactItemView: View {
         Task {
             do {
                 if let imageUrl = contact.imageUrl {
-                    try await Contact.deleteImage(url: imageUrl)
+                    do {
+                        try await Contact.deleteImage(url: imageUrl)
+                    } catch let error as StorageErrorCode {
+                        if error == .objectNotFound {
+                            print("Warning: Image file not found in storage, continuing with deletion")
+                        } else {
+                            throw error
+                        }
+                    }
                 }
                 
                 let db = Firestore.firestore()
