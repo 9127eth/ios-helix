@@ -9,6 +9,8 @@ struct SeeContactView: View {
     @StateObject private var tagManager = TagManager()
     @State private var showingZoomableImage = false
     @State private var showingContactOptions = false
+    @State private var shareImage: UIImage?
+    @State private var showingShareSheet = false
     
     var body: some View {
         NavigationView {
@@ -132,15 +134,25 @@ struct SeeContactView: View {
                 if let imageUrl = contact.imageUrl {
                     Section {
                         AsyncImage(url: URL(string: imageUrl)) { image in
-                            image
-                                .resizable()
-                                .scaledToFit()
-                                .frame(maxWidth: .infinity)
-                                .frame(height: 200)
-                                .cornerRadius(12)
-                                .onTapGesture {
-                                    showingZoomableImage = true
+                            VStack(spacing: 12) {
+                                image
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(maxWidth: .infinity)
+                                    .frame(height: 200)
+                                    .cornerRadius(12)
+                                    .onTapGesture {
+                                        showingZoomableImage = true
+                                    }
+                                    .contentShape(Rectangle())
+                                
+                                Button {
+                                    shareImage(imageUrl: imageUrl)
+                                } label: {
+                                    Label("Share Image", systemImage: "square.and.arrow.up")
                                 }
+                                .buttonStyle(.bordered)
+                            }
                         } placeholder: {
                             ProgressView()
                                 .frame(height: 200)
@@ -199,9 +211,27 @@ struct SeeContactView: View {
             ContactOptionsSheet(contact: contact)
                 .presentationDetents([.height(250)])
         }
+        .sheet(isPresented: $showingShareSheet) {
+            if let image = shareImage {
+                ShareSheet(activityItems: [image])
+            }
+        }
         .onAppear {
             tagManager.fetchTags()
         }
+    }
+    
+    private func shareImage(imageUrl: String) {
+        guard let url = URL(string: imageUrl) else { return }
+        
+        URLSession.shared.dataTask(with: url) { data, _, _ in
+            guard let data = data, let uiImage = UIImage(data: data) else { return }
+            
+            DispatchQueue.main.async {
+                self.shareImage = uiImage
+                self.showingShareSheet = true
+            }
+        }.resume()
     }
 }
 
@@ -266,4 +296,18 @@ struct ZoomableImageView: View {
             }
         }
     }
+}
+
+struct ShareSheet: UIViewControllerRepresentable {
+    let activityItems: [Any]
+    
+    func makeUIViewController(context: Context) -> UIActivityViewController {
+        let controller = UIActivityViewController(
+            activityItems: activityItems,
+            applicationActivities: nil
+        )
+        return controller
+    }
+    
+    func updateUIViewController(_ uiViewController: UIActivityViewController, context: Context) {}
 } 

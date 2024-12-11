@@ -207,25 +207,20 @@ struct EditContactView: View {
                                 )
                         }
                         
-                        HStack(spacing: 16) {
-                            if editedContact.imageUrl != nil || selectedImageData != nil {
-                                // Show only Remove button when there's an image
-                                Button(role: .destructive) {
-                                    withAnimation {
-                                        deleteImage()
-                                        editedContact.imageUrl = nil
-                                    }
-                                } label: {
-                                    Label("Remove", systemImage: "trash")
-                                        .foregroundColor(.red)
-                                }
-                            } else {
-                                // Show Add Image button when there's no image
-                                PhotosPicker(selection: $selectedImage, matching: .images) {
-                                    Label("Add Image", systemImage: "doc.badge.plus")
-                                        .foregroundColor(.blue)
-                                }
+                        if editedContact.imageUrl != nil || selectedImageData != nil {
+                            Button(role: .destructive) {
+                                deleteImage()
+                            } label: {
+                                Label("Remove Image", systemImage: "trash")
+                                    .foregroundColor(.red)
                             }
+                            .buttonStyle(.bordered)
+                        } else {
+                            PhotosPicker(selection: $selectedImage, matching: .images) {
+                                Label("Add Image", systemImage: "doc.badge.plus")
+                                    .foregroundColor(.blue)
+                            }
+                            .buttonStyle(.bordered)
                         }
                     }
                     .frame(maxWidth: .infinity)
@@ -419,12 +414,22 @@ struct EditContactView: View {
     }
     
     private func deleteImage() {
-        if let existingUrl = editedContact.imageUrl {
-            imageToDelete = existingUrl
+        Task {
+            if let existingUrl = editedContact.imageUrl {
+                do {
+                    try await Contact.deleteImage(url: existingUrl)
+                    await MainActor.run {
+                        imageToDelete = existingUrl
+                        editedContact.imageUrl = nil
+                        pendingImageData = nil
+                        selectedImageData = nil
+                        selectedImage = nil
+                    }
+                } catch {
+                    print("Error deleting image: \(error)")
+                }
+            }
         }
-        pendingImageData = nil
-        selectedImageData = nil
-        selectedImage = nil
     }
     
     private func deleteContact() {
