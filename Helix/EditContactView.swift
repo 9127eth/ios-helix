@@ -172,10 +172,6 @@ struct EditContactView: View {
                                 .frame(maxWidth: .infinity)
                                 .frame(height: 200)
                                 .cornerRadius(12)
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 12)
-                                        .stroke(AppColors.divider, lineWidth: 1)
-                                )
                         } else if let imageUrl = editedContact.imageUrl {
                             AsyncImage(url: URL(string: imageUrl)) { image in
                                 image
@@ -184,10 +180,6 @@ struct EditContactView: View {
                                     .frame(maxWidth: .infinity)
                                     .frame(height: 200)
                                     .cornerRadius(12)
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 12)
-                                            .stroke(AppColors.divider, lineWidth: 1)
-                                    )
                             } placeholder: {
                                 ProgressView()
                                     .frame(height: 200)
@@ -202,20 +194,25 @@ struct EditContactView: View {
                                 .frame(height: 200)
                                 .background(AppColors.inputFieldBackground)
                                 .cornerRadius(12)
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 12)
-                                        .stroke(AppColors.divider, lineWidth: 1)
-                                )
                         }
                         
                         if editedContact.imageUrl != nil || selectedImageData != nil {
                             Button(role: .destructive) {
                                 deleteImage()
                             } label: {
-                                Label("Remove Image", systemImage: "trash")
-                                    .foregroundColor(.red)
+                                HStack(spacing: 8) {
+                                    Image("trashDelete")
+                                        .renderingMode(.template)
+                                    Text("Remove Image")
+                                        .font(.system(size: 14))
+                                }
+                                .foregroundColor(.red)
+                                .padding(.vertical, 6)
+                                .padding(.horizontal, 12)
+                                .background(AppColors.cardGridBackground)
+                                .cornerRadius(12)
                             }
-                            .buttonStyle(.bordered)
+                            .frame(maxWidth: 160)
                         } else {
                             PhotosPicker(selection: $selectedImage, matching: .images) {
                                 Label("Add Image", systemImage: "doc.badge.plus")

@@ -149,9 +149,19 @@ struct SeeContactView: View {
                                 Button {
                                     shareImage(imageUrl: imageUrl)
                                 } label: {
-                                    Label("Share Image", systemImage: "square.and.arrow.up")
+                                    HStack(spacing: 8) {
+                                        Image("share.3")
+                                            .renderingMode(.template)
+                                        Text("Share Image")
+                                            .font(.system(size: 14))
+                                    }
+                                    .foregroundColor(AppColors.buttonText)
+                                    .padding(.vertical, 6)
+                                    .padding(.horizontal, 12)
+                                    .background(AppColors.secondary)
+                                    .cornerRadius(12)
                                 }
-                                .buttonStyle(.bordered)
+                                .frame(maxWidth: 160)
                             }
                         } placeholder: {
                             ProgressView()
