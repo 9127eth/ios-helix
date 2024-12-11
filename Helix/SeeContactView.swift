@@ -172,6 +172,8 @@ struct SeeContactView: View {
             }
             .navigationTitle("Details")
             .navigationBarTitleDisplayMode(.large)
+            .padding(.top, 10)
+            .background(Color(uiColor: .systemGroupedBackground))
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button("Close") {
