@@ -55,7 +55,17 @@ struct ContactOptionsSheet: View {
     }
     
     private func sendText(_ number: String) {
-        if let url = URL(string: "sms://\(number)") {
+        // Step 1: Remove spaces and special characters
+        let noSpaces = number.replacingOccurrences(of: " ", with: "")
+        let noHyphens = noSpaces.replacingOccurrences(of: "-", with: "")
+        let noParens = noHyphens.replacingOccurrences(of: "(", with: "")
+            .replacingOccurrences(of: ")", with: "")
+        
+        // Step 2: Clean up
+        let cleaned = noParens.trimmingCharacters(in: .whitespacesAndNewlines)
+        
+        // Step 3: Create and open URL
+        if let url = URL(string: "sms:\(cleaned)") {
             UIApplication.shared.open(url)
         }
     }

@@ -1,6 +1,7 @@
 import SwiftUI
 import FirebaseFirestore
 import FirebaseAuth
+import ContactsUI
 
 struct SeeContactView: View {
     let contact: Contact
@@ -11,6 +12,7 @@ struct SeeContactView: View {
     @State private var showingContactOptions = false
     @State private var shareImage: UIImage?
     @State private var showingShareSheet = false
+    @State private var showingExportSheet = false
     
     var body: some View {
         NavigationView {
@@ -177,19 +179,95 @@ struct SeeContactView: View {
                 .listRowBackground(Color.clear)
                 .frame(height: 20)
                 
-                // Contact Button Section at the very bottom
+                // Action Buttons Section at the bottom
                 Section {
-                    if contact.phone != nil || contact.email != nil {
-                        Button {
-                            showingContactOptions = true
-                        } label: {
-                            HStack {
-                                Spacer()
-                                Text("Contact")
-                                Spacer()
+                    VStack(spacing: 12) {
+                        // Communication buttons
+                        HStack(spacing: 12) {
+                            if let phone = contact.phone {
+                                Button {
+                                    if let url = URL(string: "tel://\(phone)") {
+                                        UIApplication.shared.open(url)
+                                    }
+                                } label: {
+                                    HStack {
+                                        Image(systemName: "phone.fill")
+                                        Text("Call")
+                                    }
+                                    .frame(maxWidth: .infinity)
+                                }
+                                .tint(.green)
+                                .buttonStyle(.borderedProminent)
+                                
+                                Button {
+                                    guard let phone = contact.phone else { return }
+                                    
+                                    // Step 1: Remove spaces and special characters
+                                    let noSpaces = phone.replacingOccurrences(of: " ", with: "")
+                                    let noHyphens = noSpaces.replacingOccurrences(of: "-", with: "")
+                                    let noParens = noHyphens.replacingOccurrences(of: "(", with: "")
+                                        .replacingOccurrences(of: ")", with: "")
+                                    
+                                    // Step 2: Clean up
+                                    let cleaned = noParens.trimmingCharacters(in: .whitespacesAndNewlines)
+                                    
+                                    // Step 3: Create and open URL
+                                    if let url = URL(string: "sms:\(cleaned)") {
+                                        UIApplication.shared.open(url)
+                                    }
+                                } label: {
+                                    HStack {
+                                        Image(systemName: "message.fill")
+                                        Text("Text")
+                                    }
+                                    .frame(maxWidth: .infinity)
+                                }
+                                .tint(.green)
+                                .buttonStyle(.borderedProminent)
+                            }
+                            
+                            if let email = contact.email {
+                                Button {
+                                    if let url = URL(string: "mailto:\(email)") {
+                                        UIApplication.shared.open(url)
+                                    }
+                                } label: {
+                                    HStack {
+                                        Image(systemName: "envelope.fill")
+                                        Text("Email")
+                                    }
+                                    .frame(maxWidth: .infinity)
+                                }
+                                .tint(.green)
+                                .buttonStyle(.borderedProminent)
                             }
                         }
+                        
+                        // Save to Contacts button
+                        Button {
+                            saveToContacts()
+                        } label: {
+                            HStack {
+                                Image(systemName: "person.crop.circle.badge.plus")
+                                Text("Save to Contacts")
+                            }
+                            .frame(maxWidth: .infinity)
+                        }
+                        .buttonStyle(.bordered)
+                        
+                        // Export button
+                        Button {
+                            showingExportSheet = true
+                        } label: {
+                            HStack {
+                                Image(systemName: "square.and.arrow.up")
+                                Text("Export")
+                            }
+                            .frame(maxWidth: .infinity)
+                        }
+                        .buttonStyle(.bordered)
                     }
+                    .padding(.vertical, 8)
                 }
             }
             .navigationTitle("Details")
@@ -242,6 +320,73 @@ struct SeeContactView: View {
                 self.showingShareSheet = true
             }
         }.resume()
+    }
+    
+    private func saveToContacts() {
+        let newContact = CNMutableContact()
+        
+        // Set name
+        let nameComponents = contact.name.components(separatedBy: " ")
+        newContact.givenName = nameComponents.first ?? ""
+        if nameComponents.count > 1 {
+            newContact.familyName = nameComponents.dropFirst().joined(separator: " ")
+        }
+        
+        // Set organization
+        if let company = contact.company {
+            newContact.organizationName = company
+        }
+        
+        // Set job title
+        if let position = contact.position {
+            newContact.jobTitle = position
+        }
+        
+        // Set phone
+        if let phone = contact.phone {
+            newContact.phoneNumbers = [CNLabeledValue(
+                label: CNLabelPhoneNumberMain,
+                value: CNPhoneNumber(stringValue: phone)
+            )]
+        }
+        
+        // Set email
+        if let email = contact.email {
+            newContact.emailAddresses = [CNLabeledValue(
+                label: CNLabelWork,
+                value: email as NSString
+            )]
+        }
+        
+        // Set website
+        if let website = contact.website {
+            newContact.urlAddresses = [CNLabeledValue(
+                label: CNLabelWork,
+                value: website as NSString
+            )]
+        }
+        
+        // Set address
+        if let address = contact.address {
+            let postalAddress = CNMutablePostalAddress()
+            postalAddress.street = address
+            newContact.postalAddresses = [CNLabeledValue(
+                label: CNLabelWork,
+                value: postalAddress
+            )]
+        }
+        
+        // Save contact
+        let store = CNContactStore()
+        let saveRequest = CNSaveRequest()
+        saveRequest.add(newContact, toContainerWithIdentifier: nil)
+        
+        do {
+            try store.execute(saveRequest)
+            // Show success message
+        } catch {
+            // Show error message
+        }
     }
 }
 
