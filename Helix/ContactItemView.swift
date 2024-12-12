@@ -56,7 +56,7 @@ struct ContactItemView: View {
                     HStack(spacing: 20) {
                         if contact.phone != nil || contact.email != nil {
                             Button(action: { showingContactOptions = true }) {
-                                Image(systemName: "envelope")
+                                Image("email")
                                     .foregroundColor(AppColors.foreground)
                                     .frame(width: 44, height: 44)
                                     .contentShape(Rectangle())

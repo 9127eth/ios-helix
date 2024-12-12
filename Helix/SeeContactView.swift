@@ -220,7 +220,7 @@ private struct ContactDetailsContent: View {
                                 }
                             } label: {
                                 HStack {
-                                    Image(systemName: "phone.fill")
+                                    Image("phone")
                                     Text("Call")
                                 }
                                 .frame(maxWidth: .infinity)
@@ -246,7 +246,7 @@ private struct ContactDetailsContent: View {
                                 }
                             } label: {
                                 HStack {
-                                    Image(systemName: "message.fill")
+                                    Image("textmessage")
                                     Text("Text")
                                 }
                                 .frame(maxWidth: .infinity)
@@ -262,7 +262,7 @@ private struct ContactDetailsContent: View {
                                 }
                             } label: {
                                 HStack {
-                                    Image(systemName: "envelope.fill")
+                                    Image("email")
                                     Text("Email")
                                 }
                                 .frame(maxWidth: .infinity)
@@ -277,7 +277,7 @@ private struct ContactDetailsContent: View {
                         saveToContacts()
                     } label: {
                         HStack {
-                            Image(systemName: "person.crop.circle.badge.plus")
+                            Image("savecontact")
                             Text("Save to Contacts")
                         }
                         .frame(maxWidth: .infinity)
@@ -289,7 +289,7 @@ private struct ContactDetailsContent: View {
                         viewModel.showingExportSheet = true
                     } label: {
                         HStack {
-                            Image(systemName: "square.and.arrow.up")
+                            Image("csv")
                             Text("Export as CSV")
                         }
                         .frame(maxWidth: .infinity)
