@@ -13,6 +13,10 @@ struct SeeContactView: View {
     @State private var shareImage: UIImage?
     @State private var showingShareSheet = false
     @State private var showingExportSheet = false
+    @State private var showingSaveSuccess = false
+    @State private var showingSaveError = false
+    @State private var showingPermissionDenied = false
+    @State private var errorMessage = ""
     
     var body: some View {
         NavigationView {
@@ -307,6 +311,26 @@ struct SeeContactView: View {
         .onAppear {
             tagManager.fetchTags()
         }
+        .alert("Success", isPresented: $showingSaveSuccess) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text("Contact saved successfully")
+        }
+        .alert("Error", isPresented: $showingSaveError) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text(errorMessage)
+        }
+        .alert("Permission Required", isPresented: $showingPermissionDenied) {
+            Button("Cancel", role: .cancel) { }
+            Button("Settings") {
+                if let settingsUrl = URL(string: UIApplication.openSettingsURLString) {
+                    UIApplication.shared.open(settingsUrl)
+                }
+            }
+        } message: {
+            Text("Please enable contact access in Settings to save contacts")
+        }
     }
     
     private func shareImage(imageUrl: String) {
@@ -323,13 +347,41 @@ struct SeeContactView: View {
     }
     
     private func saveToContacts() {
+        let store = CNContactStore()
+        
+        store.requestAccess(for: .contacts) { granted, error in
+            if granted {
+                DispatchQueue.main.async {
+                    self.performContactSave(store: store)
+                }
+            } else {
+                DispatchQueue.main.async {
+                    self.showingPermissionDenied = true
+                }
+            }
+        }
+    }
+    
+    private func performContactSave(store: CNContactStore) {
         let newContact = CNMutableContact()
         
-        // Set name
-        let nameComponents = contact.name.components(separatedBy: " ")
-        newContact.givenName = nameComponents.first ?? ""
-        if nameComponents.count > 1 {
-            newContact.familyName = nameComponents.dropFirst().joined(separator: " ")
+        // Debug print
+        print("Contact data being saved:")
+        print("Name: \(contact.name)")
+        print("Company: \(contact.company ?? "nil")")
+        print("Phone: \(contact.phone ?? "nil")")
+        print("Email: \(contact.email ?? "nil")")
+        
+        // Set name (improved splitting logic)
+        let nameComponents = contact.name.trimmingCharacters(in: .whitespacesAndNewlines)
+            .components(separatedBy: " ")
+            .filter { !$0.isEmpty }
+        
+        if !nameComponents.isEmpty {
+            newContact.givenName = nameComponents[0]
+            if nameComponents.count > 1 {
+                newContact.familyName = nameComponents[1...].joined(separator: " ")
+            }
         }
         
         // Set organization
@@ -376,16 +428,22 @@ struct SeeContactView: View {
             )]
         }
         
-        // Save contact
-        let store = CNContactStore()
-        let saveRequest = CNSaveRequest()
-        saveRequest.add(newContact, toContainerWithIdentifier: nil)
-        
-        do {
-            try store.execute(saveRequest)
-            // Show success message
-        } catch {
-            // Show error message
+        // Save contact in background
+        DispatchQueue.global(qos: .userInitiated).async {
+            let saveRequest = CNSaveRequest()
+            saveRequest.add(newContact, toContainerWithIdentifier: nil)
+            
+            do {
+                try store.execute(saveRequest)
+                DispatchQueue.main.async {
+                    self.showingSaveSuccess = true
+                }
+            } catch {
+                DispatchQueue.main.async {
+                    self.errorMessage = error.localizedDescription
+                    self.showingSaveError = true
+                }
+            }
         }
     }
 }
