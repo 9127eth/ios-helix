@@ -95,7 +95,6 @@ private struct ContactDetailsContent: View {
     
     var body: some View {
         Form {
-            // Add padding at the top
             Section {
                 EmptyView()
             }
@@ -132,18 +131,7 @@ private struct ContactDetailsContent: View {
             
             if let tags = contact.tags, !tags.isEmpty {
                 Section {
-                    ForEach(tags, id: \.self) { tagId in
-                        if let tag = tagManager.availableTags.first(where: { $0.id == tagId }) {
-                            HStack {
-                                Text(tag.name)
-                                    .textSelection(.enabled)
-                                Spacer()
-                                Text("Tag")
-                                    .font(.caption)
-                                    .foregroundColor(.gray)
-                            }
-                        }
-                    }
+                    TagsList(tags: tags, tagManager: tagManager)
                 }
             }
             
@@ -224,9 +212,11 @@ private struct ContactDetailsContent: View {
                                     Text("Call")
                                 }
                                 .frame(maxWidth: .infinity)
+                                .foregroundColor(AppColors.buttonText)
+                                .padding(.vertical, 6)
+                                .background(AppColors.primary)
+                                .cornerRadius(12)
                             }
-                            .tint(.green)
-                            .buttonStyle(.borderedProminent)
                             
                             Button {
                                 guard let phone = contact.phone else { return }
@@ -250,9 +240,11 @@ private struct ContactDetailsContent: View {
                                     Text("Text")
                                 }
                                 .frame(maxWidth: .infinity)
+                                .foregroundColor(AppColors.buttonText)
+                                .padding(.vertical, 6)
+                                .background(AppColors.primary)
+                                .cornerRadius(12)
                             }
-                            .tint(.green)
-                            .buttonStyle(.borderedProminent)
                         }
                         
                         if let email = contact.email {
@@ -266,9 +258,11 @@ private struct ContactDetailsContent: View {
                                     Text("Email")
                                 }
                                 .frame(maxWidth: .infinity)
+                                .foregroundColor(AppColors.buttonText)
+                                .padding(.vertical, 6)
+                                .background(AppColors.primary)
+                                .cornerRadius(12)
                             }
-                            .tint(.green)
-                            .buttonStyle(.borderedProminent)
                         }
                     }
                     
@@ -281,8 +275,11 @@ private struct ContactDetailsContent: View {
                             Text("Save to Contacts")
                         }
                         .frame(maxWidth: .infinity)
+                        .foregroundColor(AppColors.buttonText)
+                        .padding(.vertical, 6)
+                        .background(AppColors.cardDepthDefault)
+                        .cornerRadius(12)
                     }
-                    .buttonStyle(.bordered)
                     
                     // Export button
                     Button {
@@ -293,8 +290,11 @@ private struct ContactDetailsContent: View {
                             Text("Export as CSV")
                         }
                         .frame(maxWidth: .infinity)
+                        .foregroundColor(AppColors.buttonText)
+                        .padding(.vertical, 6)
+                        .background(Color.gray.opacity(0.3))
+                        .cornerRadius(12)
                     }
-                    .buttonStyle(.bordered)
                 }
                 .padding(.vertical, 8)
             }
@@ -520,4 +520,24 @@ class SeeContactViewModel: ObservableObject {
     @Published var showingSaveError = false
     @Published var showingPermissionDenied = false
     @Published var errorMessage = ""
+}
+
+private struct TagsList: View {
+    let tags: [String]
+    @ObservedObject var tagManager: TagManager
+    
+    var body: some View {
+        ForEach(tags, id: \.self) { tagId in
+            if let tag = tagManager.availableTags.first(where: { $0.id == tagId }) {
+                HStack {
+                    Text(tag.name)
+                        .textSelection(.enabled)
+                    Spacer()
+                    Text("Tag")
+                        .font(.caption)
+                        .foregroundColor(.gray)
+                }
+            }
+        }
+    }
 } 
