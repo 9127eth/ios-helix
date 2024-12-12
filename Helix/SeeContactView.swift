@@ -177,10 +177,10 @@ private struct ContactDetailsContent: View {
                                 .foregroundColor(AppColors.buttonText)
                                 .padding(.vertical, 6)
                                 .padding(.horizontal, 12)
-                                .background(AppColors.secondary)
+                                .background(Color.gray.opacity(0.3))
                                 .cornerRadius(12)
                             }
-                            .frame(maxWidth: 160)
+                            .frame(maxWidth: 200)
                         }
                     } placeholder: {
                         ProgressView()
