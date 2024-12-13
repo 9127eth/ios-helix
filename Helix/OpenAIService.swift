@@ -89,6 +89,7 @@ class OpenAIService {
          - if a website is not present, but an email address is, we can assume the domain from the email address is the website.
          - do not include registerd trademark symbols.
          - phone numbers should be in the format of (123) 456-7890
+         - Ensure that all caps text is converted to proper upper and lower case formatting for a clean appearance, while preserving accurate capitalization for company names and personal names. However, do not alter someone's credentials e.g. PharmD, MD, BSN, RN, CPhT, etc.
 
         \(text)
         

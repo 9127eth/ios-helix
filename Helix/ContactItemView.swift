@@ -32,17 +32,7 @@ struct ContactItemView: View {
                                 showingContactDetails = true
                             }
                         
-                        if let position = contact.position, let company = contact.company {
-                            Text("\(company) | \(position)")
-                                .font(.system(size: 14))
-                                .foregroundColor(AppColors.bodyPrimaryText.opacity(0.8))
-                                .lineLimit(1)
-                        } else if let position = contact.position {
-                            Text(position)
-                                .font(.system(size: 14))
-                                .foregroundColor(AppColors.bodyPrimaryText.opacity(0.8))
-                                .lineLimit(1)
-                        } else if let company = contact.company {
+                        if let company = contact.company {
                             Text(company)
                                 .font(.system(size: 14))
                                 .foregroundColor(AppColors.bodyPrimaryText.opacity(0.8))
