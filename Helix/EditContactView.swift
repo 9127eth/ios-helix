@@ -245,13 +245,12 @@ struct EditContactView: View {
                         }
                     }
                     
-                    Button(action: { showingTagSheet = true }) {
-                        HStack(spacing: 8) {
-                            Image("tag")
-                                .renderingMode(.template)
-                            Text("Add Tags")
+                    Text("Add Tags")
+                        .foregroundColor(.blue)
+                        .onTapGesture {
+                            print("Tag text tapped")
+                            showingTagSheet.toggle()
                         }
-                    }
                 }
                 
                 // Notes Section
@@ -292,7 +291,9 @@ struct EditContactView: View {
                 }
             }
         }
-        .sheet(isPresented: $showingTagSheet) {
+        .sheet(isPresented: $showingTagSheet, onDismiss: {
+            print("Sheet dismissed")
+        }) {
             TagSelectionView(tagManager: tagManager, selectedTagIds: $selectedTagIds)
         }
         .alert("Cancel Editing?", isPresented: $showingCancelConfirmation) {
@@ -322,6 +323,7 @@ struct EditContactView: View {
             Text("Are you sure you want to delete this contact? This action cannot be undone.")
         }
         .onAppear {
+            print("Available tags: \(tagManager.availableTags.count)")
             selectedTagIds = Set(editedContact.tags ?? [])
             tagManager.fetchTags()
         }
@@ -338,6 +340,9 @@ struct EditContactView: View {
                     }
                 }
             }
+        }
+        .onChange(of: showingTagSheet) { newValue in
+            print("showingTagSheet changed to: \(newValue)")
         }
     }
     
