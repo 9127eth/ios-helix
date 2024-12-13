@@ -10,6 +10,7 @@ import UIKit
 
 class TextRecognizer {
     private let openAIService = OpenAIService()
+    private let claudeAIService = ClaudeAIService()
     
     func recognizeAndProcessText(from image: UIImage) async throws -> ScannedContactData {
         // First, use Vision framework to extract text
@@ -18,10 +19,24 @@ class TextRecognizer {
         // Print raw extracted text for debugging
         print("Raw OCR Text:", extractedText)
         
-        // Process through OpenAI
-        let processedData = try await openAIService.processBusinessCard(text: extractedText)
-        
-        // Convert OpenAI response to ScannedContactData
+        // Try OpenAI first, then Claude as fallback
+        do {
+            let processedData = try await openAIService.processBusinessCard(text: extractedText)
+            return convertToScannedData(processedData, image)
+        } catch {
+            print("OpenAI processing failed, trying Claude: \(error.localizedDescription)")
+            do {
+                let processedData = try await claudeAIService.processBusinessCard(text: extractedText)
+                return convertToScannedData(processedData, image)
+            } catch {
+                print("Claude processing failed: \(error.localizedDescription)")
+                throw NSError(domain: "", code: -1, 
+                            userInfo: [NSLocalizedDescriptionKey: "AI service currently unavailable."])
+            }
+        }
+    }
+    
+    private func convertToScannedData(_ processedData: OpenAIResponse, _ image: UIImage) -> ScannedContactData {
         var scannedData = ScannedContactData()
         scannedData.name = processedData.name
         scannedData.email = processedData.email
@@ -32,7 +47,6 @@ class TextRecognizer {
         scannedData.address = processedData.address
         scannedData.capturedImage = image
         
-        // Set confidence scores
         scannedData.confidenceScores = [
             "name": 0.9,
             "email": 0.95,
