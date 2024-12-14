@@ -102,7 +102,7 @@ struct MyContactsView: View {
                                     Text("Select")
                                         .font(.footnote)
                                 }
-                                .foregroundColor(AppColors.bodyPrimaryText)
+                                .foregroundColor(isSelectionMode ? AppColors.buttonText : AppColors.bodyPrimaryText)
                                 .padding(.vertical, 8)
                                 .padding(.horizontal, 12)
                                 .background(isSelectionMode ? AppColors.buttonBackground : AppColors.cardGridBackground)
@@ -128,10 +128,10 @@ struct MyContactsView: View {
                                 }) {
                                     HStack {
                                         Image(systemName: selectedContactIds.count == filteredContacts.count ? "checkmark.square.fill" : "square")
-                                            .foregroundColor(AppColors.buttonText)
+                                            .foregroundColor(AppColors.bodyPrimaryText)
                                         Text(selectedContactIds.count == filteredContacts.count ? "Deselect All" : "Select All")
                                             .font(.footnote)
-                                            .foregroundColor(AppColors.buttonText)
+                                            .foregroundColor(AppColors.bodyPrimaryText)
                                     }
                                 }
                                 
@@ -149,7 +149,7 @@ struct MyContactsView: View {
                                                 .renderingMode(.template)
                                         }
                                         .font(.footnote)
-                                        .foregroundColor(AppColors.buttonText)
+                                        .foregroundColor(AppColors.bodyPrimaryText)
                                         .padding(.vertical, 8)
                                         .padding(.horizontal, 12)
                                         .background(AppColors.cardGridBackground)
@@ -177,7 +177,7 @@ struct MyContactsView: View {
                                             }
                                         }) {
                                             Image(systemName: selectedContactIds.contains(contact.id ?? "") ? "checkmark.square.fill" : "square")
-                                                .foregroundColor(AppColors.buttonText)
+                                                .foregroundColor(AppColors.bodyPrimaryText)
                                         }
                                     }
                                     

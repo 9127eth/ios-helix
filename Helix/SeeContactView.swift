@@ -92,6 +92,7 @@ private struct ContactDetailsContent: View {
     @ObservedObject var viewModel: SeeContactViewModel
     @ObservedObject var tagManager: TagManager
     let dismiss: DismissAction
+    @Environment(\.colorScheme) var colorScheme
     
     var body: some View {
         Form {
@@ -174,10 +175,18 @@ private struct ContactDetailsContent: View {
                                     Text("Share Image")
                                         .font(.system(size: 14))
                                 }
-                                .foregroundColor(AppColors.buttonText)
+                                .foregroundColor(.black)
                                 .padding(.vertical, 6)
                                 .padding(.horizontal, 12)
-                                .background(Color.gray.opacity(0.3))
+                                .background(
+                                    Group {
+                                        if colorScheme == .dark {
+                                            AppColors.primary
+                                        } else {
+                                            Color.gray.opacity(0.3)
+                                        }
+                                    }
+                                )
                                 .cornerRadius(12)
                             }
                             .frame(maxWidth: 200)
@@ -290,9 +299,17 @@ private struct ContactDetailsContent: View {
                             Text("Export as CSV")
                         }
                         .frame(maxWidth: .infinity)
-                        .foregroundColor(AppColors.buttonText)
+                        .foregroundColor(.black)
                         .padding(.vertical, 6)
-                        .background(Color.gray.opacity(0.3))
+                        .background(
+                            Group {
+                                if colorScheme == .dark {
+                                    AppColors.primary
+                                } else {
+                                    Color.gray.opacity(0.3)
+                                }
+                            }
+                        )
                         .cornerRadius(12)
                     }
                 }

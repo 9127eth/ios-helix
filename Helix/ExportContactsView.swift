@@ -25,11 +25,12 @@ struct ExportContactsView: View {
                         .autocapitalization(.none)
                         .autocorrectionDisabled()
                 } header: {
-                    Text("Export will be sent to")
+                    Text("Enter the email address to send export")
                 } footer: {
                     Text("A CSV file containing the selected contacts will be emailed to this address")
                 }
             }
+            .padding(.top, 120)
             .navigationTitle("Export Contacts")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

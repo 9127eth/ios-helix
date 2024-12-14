@@ -7,10 +7,6 @@ struct SortButton: View {
         Menu {
             Button(action: { selectedOption = .name }) {
                 HStack(spacing: 8) {
-                    Image("sort")
-                        .renderingMode(.template)
-                        .resizable()
-                        .frame(width: 14, height: 14)
                     Text("Name")
                         .font(.footnote)
                     if selectedOption == .name {
@@ -22,10 +18,6 @@ struct SortButton: View {
             
             Button(action: { selectedOption = .dateAdded }) {
                 HStack(spacing: 8) {
-                    Image("sort")
-                        .renderingMode(.template)
-                        .resizable()
-                        .frame(width: 14, height: 14)
                     Text("Date Added")
                         .font(.footnote)
                     if selectedOption == .dateAdded {
