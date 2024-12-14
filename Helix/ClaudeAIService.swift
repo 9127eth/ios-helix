@@ -1,13 +1,6 @@
-//
-//  ClaudeAIService.swift
-//  Helix
-//
-//  Created by Richard Waithe on 12/13/24.
-//
-
 import Foundation
 
-enum ClaudeAIError: Error {
+enum ClaudeError: Error {
     case invalidResponse
     case apiError(String)
     case decodingError
@@ -22,12 +15,17 @@ class ClaudeAIService {
     init() {
         self.apiKey = ProcessInfo.processInfo.environment["CLAUDE_API_KEY"] ?? ""
         self.rateLimiter = RateLimiter()
+        
+        // Debug print to verify API key
+        #if DEBUG
+        print("Claude API Key present: \(!self.apiKey.isEmpty)")
+        #endif
     }
     
     func processBusinessCard(text: String) async throws -> OpenAIResponse {
         // Check rate limit before proceeding
         guard await rateLimiter.shouldAllowRequest() else {
-            throw ClaudeAIError.rateLimitExceeded
+            throw ClaudeError.rateLimitExceeded
         }
         
         let prompt = """
@@ -40,55 +38,78 @@ class ClaudeAIService {
          - Ensure that all caps text is converted to proper upper and lower case formatting for a clean appearance, while preserving accurate capitalization for company names and personal names. However, do not alter someone's credentials e.g. PharmD, MD, BSN, RN, CPhT, etc.
 
         \(text)
-        """
         
-        let messages: [[String: Any]] = [
-            ["role": "user", "content": prompt]
-        ]
+        Return only a JSON object with these fields:
+        {
+          "name": "Full Name",
+          "position": "Job Title",
+          "company": "Company Name",
+          "phone": "Phone Number",
+          "email": "Email Address",
+          "address": "Full Address",
+          "website": "Website URL"
+        }
+        """
         
         let requestBody: [String: Any] = [
             "model": "claude-3-sonnet-20240229",
-            "messages": messages,
             "max_tokens": 1024,
-            "temperature": 0.3
+            "messages": [
+                ["role": "user", "content": prompt]
+            ]
         ]
         
         var request = URLRequest(url: URL(string: endpoint)!)
         request.httpMethod = "POST"
-        request.addValue("Bearer \(apiKey)", forHTTPHeaderField: "x-api-key")
+        request.addValue(apiKey, forHTTPHeaderField: "x-api-key")
+        request.addValue("2023-06-01", forHTTPHeaderField: "anthropic-version")
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.addValue("anthropic/claude-3", forHTTPHeaderField: "x-api-vendor")
         request.httpBody = try JSONSerialization.data(withJSONObject: requestBody)
         
         let (data, response) = try await URLSession.shared.data(for: request)
         
-        guard let httpResponse = response as? HTTPURLResponse,
-              (200...299).contains(httpResponse.statusCode) else {
-            throw ClaudeAIError.invalidResponse
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw ClaudeError.invalidResponse
+        }
+        
+        if !(200...299).contains(httpResponse.statusCode) {
+            // Log the error response
+            let errorResponse = String(data: data, encoding: .utf8) ?? "No response body"
+            print("Claude API Error Response: ", errorResponse)
+            
+            switch httpResponse.statusCode {
+            case 401:
+                throw ClaudeError.apiError("Authentication failed: Invalid API key")
+            case 400:
+                throw ClaudeError.apiError("Bad request: \(errorResponse)")
+            case 429:
+                throw ClaudeError.rateLimitExceeded
+            default:
+                throw ClaudeError.apiError("API request failed with status \(httpResponse.statusCode): \(errorResponse)")
+            }
         }
         
         // Print raw response for debugging
         print("Claude Raw Response:", String(data: data, encoding: .utf8) ?? "")
         
         // Parse the response
-        guard let jsonResponse = try JSONSerialization.jsonObject(with: data) as? [String: Any],
-              let content = jsonResponse["content"] as? [[String: Any]],
-              let firstContent = content.first,
-              let text = firstContent["text"] as? String else {
-            throw ClaudeAIError.decodingError
-        }
+        if let jsonResponse = try JSONSerialization.jsonObject(with: data) as? [String: Any],
+           let content = jsonResponse["content"] as? [[String: Any]],
+           let firstContent = content.first,
+           let text = firstContent["text"] as? String {
             
-        // Extract JSON from the response text
-        let jsonStartIndex = text.firstIndex(of: "{") ?? text.startIndex
-        let jsonEndIndex = text.lastIndex(of: "}") ?? text.endIndex
-        let jsonString = String(text[jsonStartIndex...jsonEndIndex])
-        
-        guard let jsonData = jsonString.data(using: .utf8) else {
-            throw ClaudeAIError.decodingError
+            // Remove any markdown formatting if present
+            let cleanContent = text.replacingOccurrences(of: "```json\n", with: "")
+                .replacingOccurrences(of: "\n```", with: "")
+            
+            guard let jsonData = cleanContent.data(using: .utf8) else {
+                throw ClaudeError.decodingError
+            }
+            
+            let decoder = JSONDecoder()
+            return try decoder.decode(OpenAIResponse.self, from: jsonData)
         }
         
-        let decoder = JSONDecoder()
-        return try decoder.decode(OpenAIResponse.self, from: jsonData)
+        throw ClaudeError.decodingError
     }
 }
-
