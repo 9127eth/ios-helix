@@ -12,6 +12,8 @@ struct TagFilterButton: View {
             HStack(spacing: 8) {
                 Image("filter")
                     .renderingMode(.template)
+                    .resizable()
+                    .frame(width: 14, height: 14)
                 Text(selectedTags.isEmpty ? "Filter" : "\(selectedTags.count)")
                     .font(.footnote)
             }

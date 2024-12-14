@@ -97,6 +97,8 @@ struct MyContactsView: View {
                                 HStack(spacing: 8) {
                                     Image("select")
                                         .renderingMode(.template)
+                                        .resizable()
+                                        .frame(width: 14, height: 14)
                                     Text("Select")
                                         .font(.footnote)
                                 }

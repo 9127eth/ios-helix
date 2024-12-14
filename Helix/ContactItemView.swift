@@ -57,7 +57,6 @@ struct ContactItemView: View {
                         Menu {
                             Button("View") { showingContactDetails = true }
                             Button("Edit") { showingEditSheet = true }
-                            Button("Share") { showingShareSheet = true }
                             Button("Delete", role: .destructive) { showingDeleteAlert = true }
                         } label: {
                             Image(systemName: "ellipsis")
