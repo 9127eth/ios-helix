@@ -71,9 +71,16 @@ class OpenAIService {
     private let rateLimiter: RateLimiter
     
     init() {
-        // In production, you should use a proper configuration system
-        self.apiKey = ProcessInfo.processInfo.environment["OPENAI_API_KEY"] ?? ""
+        // Read from Info.plist instead of ProcessInfo
+        guard let apiKey = Bundle.main.infoDictionary?["OPENAI_API_KEY"] as? String else {
+            fatalError("OPENAI_API_KEY not found in Info.plist")
+        }
+        self.apiKey = apiKey
         self.rateLimiter = RateLimiter()
+        
+        #if DEBUG
+        print("OpenAI API Key present: \(!self.apiKey.isEmpty)")
+        #endif
     }
     
     func processBusinessCard(text: String) async throws -> OpenAIResponse {

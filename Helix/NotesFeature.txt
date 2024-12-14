@@ -1,0 +1,76 @@
+Below is a detailed list of business requirements for the one-page notepad feature. 
+
+we will use "notes" icon from assets. And this icon will be added to the bottom navigation bar. 
+
+This should be stored with each user in firebase and a new collection in addition to tags, business cards, and contacts. 
+
+All of the menu stuff should be on a sticky header at the top. 
+
+Business Requirements for One-Page Notepad Feature
+
+1. Core Functionality
+
+	•	The notepad should appear as a single, continuously scrolling page designed like a traditional legal pad.
+	•	Users should be able to write, edit, and delete text directly on the page.
+	•	Changes should be automatically saved in real-time without requiring a “Save” button.
+	•	Provide a “Clear All” option to erase all text, with a confirmation prompt. 
+
+2. Design and Layout
+
+	•	The visual design should resemble a legal pad, including:
+	•	Horizontal lines to guide writing
+That ride line on the left of a notepad. Users should be able to turn on or off both of these lines
+	•	Infinite scroll functionality to accommodate unlimited text input.
+	•	Text should auto-wrap and adjust to the width of the screen.
+
+3. Text Formatting
+
+	•	Basic formatting options should be available:
+	•	Bold, italic, underline.
+	•	Bullet points and numbered lists.
+	•	Text alignment: left, center, right.
+	•	Option to adjust font size, style, and color via a formatting toolbar.
+
+4. Search and Navigation
+
+	•	Include a search bar to allow users to find specific text within the notepad.
+
+5. Sharing and Exporting
+
+	•	Allow users to export the content as aPDF.
+	•	Share functionality to send the note via email, messaging apps, or other platforms.
+
+6. Undo/Redo
+
+	•	Provide undo and redo buttons for quick recovery of text changes.
+
+7. Sticky Headers
+
+	•	A sticky header at the top should include:
+	•	''Notes'' title just as how business cards and contact page has a title.
+	•	Search bar.
+	•	Options menu (three dots) with export, share, and clear all features.
+There should also be a text edit button that allows them to apply formating and change selected text to things like bold, underline etc. 
+The options for formatting should be exactly the same features that are available in the ios notes app. 
+
+8. User Preferences
+
+	•	Allow customization of the notepad’s appearance:
+allow for them to change the background color?
+	•	Toggle for legal pad styling on/off which would just remove the lines.
+	
+9. Offline Access
+
+	•	Ensure the feature is fully functional offline.
+	•	Sync changes to firebase (if available) once the user goes online.
+
+
+10. Performance
+
+	•	Optimize the feature for performance to handle large amounts of text without lagging.
+	•	Ensure smooth scrolling on all device types and screen sizes.
+
+12. Responsive Design
+
+	•	Ensure the notepad works seamlessly across different devices and orientations
+	•	Include pinch-to-zoom functionality for better text readability.

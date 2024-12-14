@@ -13,7 +13,10 @@ class ClaudeAIService {
     private let rateLimiter: RateLimiter
     
     init() {
-        self.apiKey = ProcessInfo.processInfo.environment["CLAUDE_API_KEY"] ?? ""
+        guard let apiKey = Bundle.main.infoDictionary?["CLAUDE_API_KEY"] as? String else {
+            fatalError("CLAUDE_API_KEY not found in Info.plist")
+        }
+        self.apiKey = apiKey
         self.rateLimiter = RateLimiter()
         
         // Debug print to verify API key

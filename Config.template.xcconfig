@@ -31,3 +31,7 @@ STRIPE_WEBHOOK_SECRET = your-stripe-webhook-secret
 FIREBASE_PROJECT_ID = your-project-id
 FIREBASE_CLIENT_EMAIL = your-client-email@your-project.iam.gserviceaccount.com
 FIREBASE_PRIVATE_KEY = your-private-key
+
+// OpenAI Configuration
+OPENAI_API_KEY = your-openai-api-key-here
+CLAUDE_API_KEY = your-claude-api-key-here
