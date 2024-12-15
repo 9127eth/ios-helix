@@ -120,7 +120,7 @@ struct ContentView: View {
         BusinessCardGridView(businessCards: $businessCards, showCreateCard: $showCreateCard, username: username, isPro: $isPro)
             .tabItem {
                 Label {
-                    Text("Cards")
+                    Text("My Cards")
                 } icon: {
                     Image("cardsNavi")
                         .renderingMode(.template)

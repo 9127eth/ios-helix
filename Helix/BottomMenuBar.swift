@@ -19,7 +19,7 @@ struct BottomMenuBar: View {
                         .resizable()
                         .scaledToFit()
                         .frame(width: 24, height: 24)
-                    Text("Cards")
+                    Text("My Cards")
                 }
             }
             Spacer()
