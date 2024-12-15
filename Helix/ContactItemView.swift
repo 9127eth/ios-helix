@@ -55,9 +55,38 @@ struct ContactItemView: View {
                         
                         // Menu button
                         Menu {
-                            Button("View") { showingContactDetails = true }
-                            Button("Edit") { showingEditSheet = true }
-                            Button("Delete", role: .destructive) { showingDeleteAlert = true }
+                            Button {
+                                showingContactDetails = true
+                            } label: {
+                                Label {
+                                    Text("View")
+                                } icon: {
+                                    Image("person")
+                                        .foregroundColor(AppColors.foreground)
+                                }
+                            }
+                            
+                            Button {
+                                showingEditSheet = true
+                            } label: {
+                                Label {
+                                    Text("Edit")
+                                } icon: {
+                                    Image("pencilEdit")
+                                        .foregroundColor(AppColors.foreground)
+                                }
+                            }
+                            
+                            Button(role: .destructive) {
+                                showingDeleteAlert = true
+                            } label: {
+                                Label {
+                                    Text("Delete")
+                                } icon: {
+                                    Image("trashDelete")
+                                        .foregroundColor(AppColors.foreground)
+                                }
+                            }
                         } label: {
                             Image(systemName: "ellipsis")
                                 .foregroundColor(AppColors.foreground)
