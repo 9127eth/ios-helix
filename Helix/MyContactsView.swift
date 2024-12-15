@@ -268,6 +268,14 @@ struct MyContactsView: View {
                                     .cornerRadius(16)
                                 }
                                 
+                                // Add this new text
+                                Text("Try it now by hitting the Create New button at the top of this page. You can create 2 contacts to see how it works before upgrading.")
+                                    .font(.subheadline)
+                                    .foregroundColor(AppColors.bodyPrimaryText.opacity(0.8))
+                                    .multilineTextAlignment(.center)
+                                    .padding(.horizontal)
+                                    .padding(.vertical, 8)
+                                
                                 // Existing upgrade button
                                 Button(action: {
                                     showSubscriptionView = true
