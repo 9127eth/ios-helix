@@ -78,6 +78,7 @@ struct SubscriptionView: View {
                                             "$19.99 pay once, get Helix Pro forever!"),
                             features: [
                                 "Up to 10 business cards",
+                                "AI powered business card scanning",
                                 "CV/Resume Upload",
                                 "Link to physical card via NFC",
                                 "Image Upload"
@@ -101,6 +102,7 @@ struct SubscriptionView: View {
                             ],
                             disabledFeatures: [
                                 "Up to 10 business cards",
+                                "AI powered business card scanning",
                                 "CV/Resume Upload"
                             ],
                             isCurrentPlan: !isPro,

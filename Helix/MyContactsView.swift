@@ -30,6 +30,7 @@ struct MyContactsView: View {
     @Binding var isPro: Bool
     @FocusState private var isSearchFocused: Bool
     @State private var isShowingContactCreationEntry = false
+    @State private var showUpgradeModal = false
     
     enum SortOption {
         case name, dateAdded
@@ -46,7 +47,25 @@ struct MyContactsView: View {
                     // Header with title
                     VStack(alignment: .leading, spacing: 10) {
                         if !isPro {
-                            // ... existing Pro button ...
+                            Button(action: {
+                                showSubscriptionView = true
+                            }) {
+                                HStack(spacing: 6) {
+                                    Image(systemName: "bolt.fill")
+                                        .resizable()
+                                        .aspectRatio(contentMode: .fit)
+                                        .frame(width: 12, height: 12)
+                                    Text("Get Helix Pro")
+                                        .font(.subheadline)
+                                }
+                                .foregroundColor(AppColors.helixPro)
+                                .padding(.vertical, 6)
+                                .padding(.horizontal, 12)
+                                .background(Color.gray.opacity(0.10))
+                                .cornerRadius(16)
+                                .shadow(color: Color.black.opacity(0.2), radius: 2, x: 0, y: 1)
+                            }
+                            .padding(.bottom, 5)
                         }
                         
                         Text("Contacts")
@@ -77,8 +96,20 @@ struct MyContactsView: View {
                         }
                         .padding(.trailing, 8)
                         
-                        AddContactButton {
-                            isShowingContactCreationEntry = true
+                        Button(action: {
+                            if !isPro && contacts.count >= 2 {
+                                showUpgradeModal = true
+                            } else {
+                                isShowingContactCreationEntry = true
+                            }
+                        }) {
+                            AddContactButton(action: {
+                                if !isPro && contacts.count >= 2 {
+                                    showUpgradeModal = true
+                                } else {
+                                    isShowingContactCreationEntry = true
+                                }
+                            })
                         }
                         
                         Spacer()
@@ -205,6 +236,9 @@ struct MyContactsView: View {
             }
             .sheet(isPresented: $showingTagManager) {
                 TagManagerView()
+            }
+            .sheet(isPresented: $showUpgradeModal) {
+                UpgradeModalView(isPresented: $showUpgradeModal)
             }
         }
         .actionSheet(isPresented: $showingBulkActionSheet) {

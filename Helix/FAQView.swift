@@ -65,7 +65,7 @@ struct FAQView: View {
         ),
         FAQItem(
             question: "What is the difference between free and pro accounts?",
-            answer: "Free accounts include one digital business card with basic features like profile image upload and NFC sharing. Pro accounts ($2.99/month or $12.99/year) unlock premium features including: up to 10 business cards, CV/resume upload capability, and future updates and capabilities."
+            answer: "Free accounts include one digital business card and up to 2 contacts with basic features like profile image upload and NFC sharing. Pro accounts ($2.99/month or $12.99/year) unlock premium features including: up to 10 business cards, unlimited contacts, AI powered business card scanning, CV/resume upload capability, and future updates and capabilities."
         ),
         FAQItem(
             question: "Can I cancel my subscription anytime?",

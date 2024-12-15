@@ -17,7 +17,7 @@ struct UpgradeModalView: View {
                 .font(.title)
                 .fontWeight(.bold)
 
-            Text("Upgrade to Helix Pro to create more business cards, upload a CV/Resume, and unlock more features!")
+            Text("Upgrade to Helix Pro to create more business cards, enable AI powered business card scanning, upload a CV/Resume, and more!")
                 .multilineTextAlignment(.center)
                 .padding()
 
