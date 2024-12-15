@@ -126,77 +126,79 @@ struct MyContactsView: View {
                     
                     // Search and filters with Select button
                     VStack(spacing: 12) {
-                        SearchBar(text: $searchText)
-                            .focused($isSearchFocused)
-                            .padding(.horizontal)
-                        
-                        HStack(spacing: 8) {
-                            Button(action: { isSelectionMode.toggle() }) {
-                                HStack(spacing: 8) {
-                                    Image("select")
-                                        .renderingMode(.template)
-                                        .resizable()
-                                        .frame(width: 14, height: 14)
-                                    Text("Select")
-                                        .font(.footnote)
-                                }
-                                .foregroundColor(isSelectionMode ? AppColors.buttonText : AppColors.bodyPrimaryText)
-                                .padding(.vertical, 8)
-                                .padding(.horizontal, 12)
-                                .background(isSelectionMode ? AppColors.buttonBackground : AppColors.cardGridBackground)
-                                .cornerRadius(16)
-                            }
+                        if !contacts.isEmpty {
+                            SearchBar(text: $searchText)
+                                .focused($isSearchFocused)
+                                .padding(.horizontal)
                             
-                            SortButton(selectedOption: $selectedSortOption)
-                            TagFilterButton(selectedTags: $selectedTags)
-                            
-                            Spacer()
-                        }
-                        .padding(.horizontal)
-                        
-                        // Selection info bar (visible when in selection mode)
-                        if isSelectionMode {
-                            HStack {
-                                Button(action: {
-                                    if selectedContactIds.count == filteredContacts.count {
-                                        selectedContactIds.removeAll()
-                                    } else {
-                                        selectedContactIds = Set(filteredContacts.map { $0.id ?? "" })
-                                    }
-                                }) {
-                                    HStack {
-                                        Image(systemName: selectedContactIds.count == filteredContacts.count ? "checkmark.square.fill" : "square")
-                                            .foregroundColor(AppColors.bodyPrimaryText)
-                                        Text(selectedContactIds.count == filteredContacts.count ? "Deselect All" : "Select All")
+                            HStack(spacing: 8) {
+                                Button(action: { isSelectionMode.toggle() }) {
+                                    HStack(spacing: 8) {
+                                        Image("select")
+                                            .renderingMode(.template)
+                                            .resizable()
+                                            .frame(width: 14, height: 14)
+                                        Text("Select")
                                             .font(.footnote)
-                                            .foregroundColor(AppColors.bodyPrimaryText)
                                     }
+                                    .foregroundColor(isSelectionMode ? AppColors.buttonText : AppColors.bodyPrimaryText)
+                                    .padding(.vertical, 8)
+                                    .padding(.horizontal, 12)
+                                    .background(isSelectionMode ? AppColors.buttonBackground : AppColors.cardGridBackground)
+                                    .cornerRadius(16)
                                 }
+                                
+                                SortButton(selectedOption: $selectedSortOption)
+                                TagFilterButton(selectedTags: $selectedTags)
                                 
                                 Spacer()
-                                
-                                Text("\(selectedContactIds.count) selected")
-                                    .font(.footnote)
-                                    .foregroundColor(.gray)
-                                
-                                if !selectedContactIds.isEmpty {
-                                    Button(action: { showingBulkActionSheet = true }) {
-                                        HStack(spacing: 8) {
-                                            Text("Actions")
-                                            Image("arrowdown")
-                                                .renderingMode(.template)
-                                        }
-                                        .font(.footnote)
-                                        .foregroundColor(AppColors.bodyPrimaryText)
-                                        .padding(.vertical, 8)
-                                        .padding(.horizontal, 12)
-                                        .background(AppColors.cardGridBackground)
-                                        .cornerRadius(16)
-                                    }
-                                }
                             }
                             .padding(.horizontal)
-                            .padding(.top, 8)
+                            
+                            // Selection info bar (visible when in selection mode)
+                            if isSelectionMode {
+                                HStack {
+                                    Button(action: {
+                                        if selectedContactIds.count == filteredContacts.count {
+                                            selectedContactIds.removeAll()
+                                        } else {
+                                            selectedContactIds = Set(filteredContacts.map { $0.id ?? "" })
+                                        }
+                                    }) {
+                                        HStack {
+                                            Image(systemName: selectedContactIds.count == filteredContacts.count ? "checkmark.square.fill" : "square")
+                                                .foregroundColor(AppColors.bodyPrimaryText)
+                                            Text(selectedContactIds.count == filteredContacts.count ? "Deselect All" : "Select All")
+                                                .font(.footnote)
+                                                .foregroundColor(AppColors.bodyPrimaryText)
+                                        }
+                                    }
+                                    
+                                    Spacer()
+                                    
+                                    Text("\(selectedContactIds.count) selected")
+                                        .font(.footnote)
+                                        .foregroundColor(.gray)
+                                    
+                                    if !selectedContactIds.isEmpty {
+                                        Button(action: { showingBulkActionSheet = true }) {
+                                            HStack(spacing: 8) {
+                                                Text("Actions")
+                                                Image("arrowdown")
+                                                    .renderingMode(.template)
+                                            }
+                                            .font(.footnote)
+                                            .foregroundColor(AppColors.bodyPrimaryText)
+                                            .padding(.vertical, 8)
+                                            .padding(.horizontal, 12)
+                                            .background(AppColors.cardGridBackground)
+                                            .cornerRadius(16)
+                                        }
+                                    }
+                                }
+                                .padding(.horizontal)
+                                .padding(.top, 8)
+                            }
                         }
                     }
                     .padding(.bottom, 12)
