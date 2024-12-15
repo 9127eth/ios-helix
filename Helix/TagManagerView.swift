@@ -14,11 +14,18 @@ struct TagManagerView: View {
     @State private var showingAddTag = false
     @State private var showingDeleteConfirmation = false
     @State private var tagToDelete: Tag?
+    @State private var showingTooltip = false
     
     var body: some View {
         NavigationView {
             List {
-                Section(header: Text("Available Tags")) {
+                Section(header: HStack {
+                    Text("Available Tags")
+                    Image("tooltip")
+                        .onTapGesture {
+                            showingTooltip = true
+                        }
+                }) {
                     ForEach(tagManager.availableTags) { tag in
                         HStack {
                             Text(tag.name)
@@ -74,6 +81,11 @@ struct TagManagerView: View {
                 }
             } message: {
                 Text("This action cannot be undone.")
+            }
+            .alert("What are tags?", isPresented: $showingTooltip) {
+                Button("OK", role: .cancel) { }
+            } message: {
+                Text("Tags allow you to group contacts together. You can use tags to filter, delete, and export contacts in bulk.")
             }
         }
         .onAppear {
