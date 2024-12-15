@@ -9,6 +9,13 @@ import SwiftUI
 import FirebaseFirestore
 import FirebaseAuth
 
+struct ProFeature: Identifiable {
+    let id = UUID()
+    let icon: String
+    let title: String
+    let description: String
+}
+
 struct MyContactsView: View {
     @State private var contacts: [Contact] = []
     @State private var showingAddContact = false
@@ -224,6 +231,61 @@ struct MyContactsView: View {
                             }
                         }
                         .padding(.horizontal)
+                        
+                        // Add the new promotional content
+                        if !isPro {
+                            VStack(spacing: 24) {
+                                // Add this new title section
+                                Text("Unlock AI-Powered Networking")
+                                    .font(.title2)
+                                    .fontWeight(.bold)
+                                    .foregroundColor(AppColors.bodyPrimaryText)
+                                    .frame(maxWidth: .infinity, alignment: .center)
+                                    .padding(.bottom, 8)
+                                
+                                // Existing feature cards
+                                ForEach(proFeatures) { feature in
+                                    HStack(spacing: 16) {
+                                        Image(feature.icon)
+                                            .renderingMode(.template)
+                                            .foregroundColor(AppColors.helixPro)
+                                            .frame(width: 24, height: 24)
+                                        
+                                        VStack(alignment: .leading, spacing: 4) {
+                                            Text(feature.title)
+                                                .font(.headline)
+                                                .foregroundColor(AppColors.bodyPrimaryText)
+                                            
+                                            Text(feature.description)
+                                                .font(.subheadline)
+                                                .foregroundColor(AppColors.bodyPrimaryText.opacity(0.8))
+                                                .fixedSize(horizontal: false, vertical: true)
+                                        }
+                                    }
+                                    .padding()
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    .background(Color.gray.opacity(0.10))
+                                    .cornerRadius(16)
+                                }
+                                
+                                // Existing upgrade button
+                                Button(action: {
+                                    showSubscriptionView = true
+                                }) {
+                                    HStack {
+                                        Image(systemName: "bolt.fill")
+                                        Text("Upgrade to Helix Pro")
+                                    }
+                                    .font(.headline)
+                                    .foregroundColor(AppColors.buttonText)
+                                    .frame(maxWidth: .infinity)
+                                    .padding()
+                                    .background(AppColors.buttonBackground)
+                                    .cornerRadius(16)
+                                }
+                            }
+                            .padding()
+                        }
                     }
                 }
             }
@@ -348,5 +410,32 @@ struct MyContactsView: View {
                 print("Error deleting contacts: \(error)")
             }
         }
+    }
+}
+
+extension MyContactsView {
+    var proFeatures: [ProFeature] {
+        [
+            ProFeature(
+                icon: "ai",
+                title: "AI-Powered Scanning",
+                description: "Quickly scan business cards with our advanced AI and vision technology."
+            ),
+            ProFeature(
+                icon: "savecontact",
+                title: "Contacts always at your fingertips",
+                description: "Your scanned contacts are always at your fingertips. Never lose a contact again."
+            ),
+            ProFeature(
+                icon: "download",
+                title: "Simple Export",
+                description: "Easily export your contacts. They'll be ready to import into your favorite CRM."
+            ),
+            ProFeature(
+                icon: "lock",
+                title: "Secure Storage",
+                description: "Your contacts are securely stored and protected."
+            )
+        ]
     }
 }
