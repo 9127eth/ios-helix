@@ -423,7 +423,7 @@ extension MyContactsView {
             ),
             ProFeature(
                 icon: "savecontact",
-                title: "Contacts always at your fingertips",
+                title: "Contacts Always at Your Fingertips",
                 description: "Your scanned contacts are always at your fingertips. Never lose a contact again."
             ),
             ProFeature(
