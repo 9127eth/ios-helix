@@ -236,9 +236,13 @@ struct EditContactView: View {
                                 HStack {
                                     Text(tag.name)
                                     Spacer()
-                                    Button(action: { selectedTagIds.remove(tagId) }) {
+                                    Button(action: {
+                                        selectedTagIds.remove(tagId)
+                                    }) {
                                         Image(systemName: "xmark.circle.fill")
                                             .foregroundColor(.gray)
+                                            .frame(width: 44, height: 44)
+                                            .contentShape(Rectangle())
                                     }
                                 }
                             }
@@ -270,12 +274,20 @@ struct EditContactView: View {
                         HStack {
                             Spacer()
                             Text("Delete Contact")
+                                .padding(.vertical, 8)
                             Spacer()
                         }
+                        .contentShape(Rectangle())
                     }
                 }
             }
-            .dismissKeyboardOnTap()
+            .gesture(
+                TapGesture()
+                    .onEnded { _ in
+                        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder),
+                                                     to: nil, from: nil, for: nil)
+                    }
+            )
             .navigationTitle("Edit Contact")
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
