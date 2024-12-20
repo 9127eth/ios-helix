@@ -165,6 +165,7 @@ struct EditContactView: View {
                 // Image Upload Section
                 Section(header: Text("Image")) {
                     VStack(alignment: .center, spacing: 12) {
+                        // Image Display
                         if let imageData = selectedImageData {
                             Image(uiImage: UIImage(data: imageData)!)
                                 .resizable()
@@ -196,23 +197,30 @@ struct EditContactView: View {
                                 .cornerRadius(12)
                         }
                         
+                        // Image Actions
                         if editedContact.imageUrl != nil || selectedImageData != nil {
-                            Button(role: .destructive) {
-                                deleteImage()
-                            } label: {
-                                HStack(spacing: 8) {
-                                    Image("trashDelete")
-                                        .renderingMode(.template)
-                                    Text("Remove Image")
-                                        .font(.system(size: 14))
+                            HStack {
+                                Spacer()
+                                Button(role: .destructive) {
+                                    if let existingUrl = editedContact.imageUrl {
+                                        imageToDelete = existingUrl
+                                        editedContact.imageUrl = nil
+                                    }
+                                    pendingImageData = nil
+                                    selectedImageData = nil
+                                    selectedImage = nil
+                                } label: {
+                                    HStack(spacing: 8) {
+                                        Image("trashDelete")
+                                            .renderingMode(.template)
+                                        Text("Remove Image")
+                                            .font(.system(size: 14))
+                                    }
                                 }
-                                .foregroundColor(.red)
-                                .padding(.vertical, 6)
-                                .padding(.horizontal, 12)
-                                .background(AppColors.cardGridBackground)
-                                .cornerRadius(12)
+                                .buttonStyle(.borderless)
+                                Spacer()
                             }
-                            .frame(maxWidth: 160)
+                            .padding(.vertical, 4)
                         } else {
                             PhotosPicker(selection: $selectedImage, matching: .images) {
                                 Label("Add Image", systemImage: "doc.badge.plus")
@@ -236,25 +244,23 @@ struct EditContactView: View {
                                 HStack {
                                     Text(tag.name)
                                     Spacer()
-                                    Button(action: {
+                                    Button {
                                         selectedTagIds.remove(tagId)
-                                    }) {
+                                    } label: {
                                         Image(systemName: "xmark.circle.fill")
                                             .foregroundColor(.gray)
-                                            .frame(width: 44, height: 44)
-                                            .contentShape(Rectangle())
                                     }
+                                    .buttonStyle(.borderless)
                                 }
                             }
                         }
                     }
                     
-                    Text("Add Tags")
-                        .foregroundColor(.blue)
-                        .onTapGesture {
-                            print("Tag text tapped")
-                            showingTagSheet.toggle()
-                        }
+                    Button("Add Tags") {
+                        print("Tag text tapped")
+                        showingTagSheet.toggle()
+                    }
+                    .foregroundColor(.blue)
                 }
                 
                 // Notes Section
@@ -274,11 +280,12 @@ struct EditContactView: View {
                         HStack {
                             Spacer()
                             Text("Delete Contact")
-                                .padding(.vertical, 8)
                             Spacer()
                         }
                         .contentShape(Rectangle())
+                        .padding(.vertical, 8)
                     }
+                    .buttonStyle(.borderless)
                 }
             }
             .gesture(
