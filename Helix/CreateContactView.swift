@@ -214,23 +214,40 @@ struct CreateContactView: View {
                                 HStack {
                                     Text(tag.name)
                                     Spacer()
-                                    Button(action: { selectedTagIds.remove(tagId) }) {
+                                    Button {
+                                        selectedTagIds.remove(tagId)
+                                    } label: {
                                         Image(systemName: "xmark.circle.fill")
                                             .foregroundColor(.gray)
+                                            .frame(width: 44, height: 44)
+                                            .contentShape(Rectangle())
                                     }
+                                    .buttonStyle(.borderless)
                                 }
                             }
                         }
                     }
                     
-                    Button(action: { showingTagSheet = true }) {
-                        Label("Add Tags", systemImage: "tag")
+                    Button {
+                        focusedField = nil
+                        showingTagSheet = true
+                    } label: {
+                        HStack(spacing: 8) {
+                            Image("tag")
+                                .renderingMode(.template)
+                            Text("Add Tags")
+                                .font(.system(size: 14))
+                        }
+                        .foregroundColor(.blue)
+                        .padding(.vertical, 6)
+                        .contentShape(Rectangle())
                     }
+                    .buttonStyle(.borderless)
                 }
                 
                 // Image Upload Section
                 Section(header: Text("Business Card Image")) {
-                    VStack {
+                    VStack(alignment: .center, spacing: 12) {
                         if let imageData = selectedImageData {
                             Image(uiImage: UIImage(data: imageData)!)
                                 .resizable()
@@ -249,25 +266,33 @@ struct CreateContactView: View {
                         
                         PhotosPicker(selection: $selectedImage, matching: .images) {
                             if selectedImageData != nil || pendingImage != nil {
-                                Label("Change Image", systemImage: "photo")
-                            } else {
-                                Label("Select Image", systemImage: "photo")
-                            }
-                        }
-                        .onChange(of: selectedImage) { newValue in
-                            print("Image selected")
-                            Task {
-                                if let data = try? await newValue?.loadTransferable(type: Data.self) {
-                                    print("Image data loaded: \(data.count) bytes")
-                                    await MainActor.run {
-                                        selectedImageData = data
-                                        pendingImage = nil  // Clear scanned image when user selects new image
-                                        print("Image data set to state")
-                                    }
+                                HStack(spacing: 8) {
+                                    Image(systemName: "photo")
+                                    Text("Change Image")
+                                        .font(.system(size: 14))
                                 }
+                                .foregroundColor(.blue)
+                                .padding(.vertical, 6)
+                                .padding(.horizontal, 12)
+                                .background(AppColors.cardGridBackground)
+                                .cornerRadius(12)
+                            } else {
+                                HStack(spacing: 8) {
+                                    Image(systemName: "photo")
+                                    Text("Select Image")
+                                        .font(.system(size: 14))
+                                }
+                                .foregroundColor(.blue)
+                                .padding(.vertical, 6)
+                                .padding(.horizontal, 12)
+                                .background(AppColors.cardGridBackground)
+                                .cornerRadius(12)
                             }
                         }
+                        .buttonStyle(.borderless)
                     }
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 8)
                 }
                 
                 // Notes Section
