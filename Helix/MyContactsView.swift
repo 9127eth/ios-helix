@@ -368,7 +368,7 @@ struct MyContactsView: View {
         // Apply sorting
         switch selectedSortOption {
         case .name:
-            result.sort { $0.name < $1.name }
+            result.sort { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
         case .dateAdded:
             result.sort { $0.dateAdded > $1.dateAdded }
         }
