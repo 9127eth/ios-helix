@@ -180,7 +180,7 @@ struct ContactCreationEntryView: View {
             } catch {
                 await MainActor.run {
                     showError = true
-                    errorMessage = "Failed to process image: \(error.localizedDescription)"
+                    errorMessage = error.localizedDescription
                     isProcessing = false
                 }
             }

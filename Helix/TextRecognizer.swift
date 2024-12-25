@@ -16,6 +16,17 @@ class TextRecognizer {
         // First, use Vision framework to extract text
         let extractedText = try await recognizeText(from: image)
         
+        // Check if extracted text is empty or only whitespace
+        guard !extractedText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            throw NSError(
+                domain: "TextRecognizer",
+                code: -1,
+                userInfo: [
+                    NSLocalizedDescriptionKey: "No text was detected in the image. Please ensure the image contains clear, readable text or try taking another photo."
+                ]
+            )
+        }
+        
         // Print raw extracted text for debugging
         print("Raw OCR Text:", extractedText)
         
@@ -30,8 +41,13 @@ class TextRecognizer {
                 return convertToScannedData(processedData, image)
             } catch {
                 print("Claude processing failed: \(error.localizedDescription)")
-                throw NSError(domain: "", code: -1, 
-                            userInfo: [NSLocalizedDescriptionKey: "AI service currently unavailable."])
+                throw NSError(
+                    domain: "TextRecognizer",
+                    code: -1,
+                    userInfo: [
+                        NSLocalizedDescriptionKey: "Unable to process the text from the image. Please try taking another photo with clearer text."
+                    ]
+                )
             }
         }
     }
