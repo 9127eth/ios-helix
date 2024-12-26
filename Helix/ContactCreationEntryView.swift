@@ -55,42 +55,42 @@ struct ContactCreationEntryView: View {
                 // Bottom controls overlay
                 VStack {
                     Spacer()
-                    if UIDevice.current.orientation.isPortrait {  // Only show in portrait
-                        HStack(spacing: 20) {
-                            PhotosPicker(selection: $selectedItem, matching: .images) {
-                                VStack {
-                                    Image("addImage")
-                                    Text("Choose Photo")
-                                        .font(.caption)
-                                }
-                                .foregroundColor(.white)
+                    HStack(spacing: 20) {
+                        PhotosPicker(selection: $selectedItem, matching: .images) {
+                            VStack {
+                                Image("addImage")
+                                Text("Choose Photo")
+                                    .font(.caption)
                             }
-                            .onChange(of: selectedItem) { newValue in
-                                Task {
-                                    if let data = try? await newValue?.loadTransferable(type: Data.self),
-                                       let uiImage = UIImage(data: data) {
-                                        self.capturedImage = uiImage
-                                        processImage(uiImage)
-                                    }
+                            .foregroundColor(.white)
+                        }
+                        .onChange(of: selectedItem) { newValue in
+                            Task {
+                                if let data = try? await newValue?.loadTransferable(type: Data.self),
+                                   let uiImage = UIImage(data: data) {
+                                    self.capturedImage = uiImage
+                                    processImage(uiImage)
                                 }
-                            }
-                            
-                            Spacer()
-                            
-                            Button(action: { showManualEntry = true }) {
-                                VStack {
-                                    Image("entermanually")
-                                        .renderingMode(.template)
-                                    Text("Enter Manually")
-                                        .font(.caption)
-                                }
-                                .foregroundColor(.white)
                             }
                         }
-                        .padding()
-                        .background(Color.black.opacity(0.6))
+                        
+                        Spacer()
+                        
+                        Button(action: { showManualEntry = true }) {
+                            VStack {
+                                Image("entermanually")
+                                    .renderingMode(.template)
+                                Text("Enter Manually")
+                                    .font(.caption)
+                            }
+                            .foregroundColor(.white)
+                        }
                     }
+                    .padding()
+                    .background(Color.black.opacity(0.6))
+                    .ignoresSafeArea(.keyboard)
                 }
+                .ignoresSafeArea(.keyboard)
             }
             .navigationBarTitleDisplayMode(.inline)
             .navigationBarItems(leading: Button("Close") { dismiss() })
