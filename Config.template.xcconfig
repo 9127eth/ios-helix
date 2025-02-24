@@ -35,3 +35,7 @@ FIREBASE_PRIVATE_KEY = your-private-key
 // OpenAI Configuration
 OPENAI_API_KEY = your-openai-api-key-here
 CLAUDE_API_KEY = your-claude-api-key-here
+
+WALLET_PASS_TYPE_IDENTIFIER = your-pass-type-identifier
+WALLET_TEAM_IDENTIFIER = your-team-identifier
+WALLET_CERTIFICATE_PASSWORD = your-certificate-password 

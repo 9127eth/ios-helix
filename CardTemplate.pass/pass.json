@@ -1,0 +1,46 @@
+{
+  "formatVersion": 1,
+  "passTypeIdentifier": "pass.com.rxradio.helix",
+  "teamIdentifier": "$(WALLET_TEAM_IDENTIFIER)",
+  "serialNumber": "",
+  "organizationName": "Helix",
+  "description": "Digital Business Card",
+  "logoText": "Helix",
+  "foregroundColor": "rgb(0, 0, 0)",
+  "backgroundColor": "rgb(255, 255, 255)",
+  "labelColor": "rgb(0, 0, 0)",
+  "generic": {
+    "primaryFields": [
+      {
+        "key": "name",
+        "label": "Name",
+        "value": ""
+      }
+    ],
+    "secondaryFields": [
+      {
+        "key": "company",
+        "label": "Company",
+        "value": ""
+      },
+      {
+        "key": "title",
+        "label": "Title",
+        "value": ""
+      }
+    ]
+  },
+  "barcodes": [
+    {
+      "message": "",
+      "format": "PKBarcodeFormatQR",
+      "messageEncoding": "iso-8859-1"
+    }
+  ],
+  "icon": "icon.png",
+  "icon@2x": "icon@2x.png",
+  "logo": "logo.png",
+  "logo@2x": "logo@2x.png",
+  "strip": "strip.png",
+  "strip@2x": "strip@2x.png"
+} 

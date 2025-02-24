@@ -1,0 +1,31 @@
+Feature Requirements: Add Digital Business Card to Apple Wallet
+
+Overview
+The business card app will include a new feature allowing users to add their digital business cards to their Apple Wallet. This feature will enhance accessibility and convenience for users by enabling them to store and share their business card directly from their Apple Wallet.
+Functional Requirements
+ - Add to Apple Wallet Option
+Users must be able to add each of their digital business cards to their Apple Wallet.
+The option to add the card to Apple Wallet will be accessible from the ellipses menu button (e.g., the "..." menu) on the card dashboard screen.
+ - Apple Wallet Integration
+When the user selects the "Add to Apple Wallet" option, the app will generate a compatible pass file (e.g., .pkpass) and prompt the system to add it to the user’s Apple Wallet.
+The process should follow Apple’s Wallet API guidelines and support seamless integration with iOS devices.
+ - Displayed Information
+The business card in the Apple Wallet must display the same information as shown when the user selects the "Share" button from the card dashboard. This includes:
+Name: The user’s first and last name as entered in the business card.
+Company: The user’s company name.
+Title: The user’s job title or position.
+QR Code: A scannable QR code linking to the digital business card or a predefined URL (consistent with the existing share functionality).
+The layout should be clean, visually appealing, and optimized for Apple Wallet’s pass display format.
+
+Design Considerations
+ - The QR code should be prominently displayed and scannable from the Wallet pass.
+ - Ensure the design aligns with Apple Wallet’s branding and formatting standards (e.g., font sizes, colors, and field placement).
+ - Include the helix app logo on the right and rist and last name and company to the left of the pass thumbnail for easy identification in the Wallet.
+
+Technical Requirements
+ - Use Apple’s PassKit framework to create and manage the Wallet pass.
+ - Ensure the pass is signed with an appropriate Apple Developer certificate to meet security and compatibility requirements.
+Support dynamic updates to the pass if the user modifies their business card details in the app.
+User Experience
+Upon selecting "Add to Apple Wallet," provide a confirmation prompt or animation to indicate the card has been successfully added.
+If the user already has the card in their Wallet, either disable the option or display a message (e.g., "Already in Wallet") to avoid duplicates.

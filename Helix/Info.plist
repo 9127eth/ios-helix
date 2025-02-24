@@ -45,5 +45,15 @@
 	<string>$(CLAUDE_API_KEY)</string>
 	<key>OPENAI_API_KEY</key>
 	<string>$(OPENAI_API_KEY)</string>
+	<key>WALLET_PASS_TYPE_IDENTIFIER</key>
+	<string>$(WALLET_PASS_TYPE_IDENTIFIER)</string>
+	<key>WALLET_TEAM_IDENTIFIER</key>
+	<string>$(WALLET_TEAM_IDENTIFIER)</string>
+	<key>WALLET_CERTIFICATE_PASSWORD</key>
+	<string>$(WALLET_CERTIFICATE_PASSWORD)</string>
+	<key>com.apple.developer.pass-type-identifiers</key>
+	<array>
+		<string>$(TeamIdentifierPrefix)*</string>
+	</array>
 </dict>
 </plist>

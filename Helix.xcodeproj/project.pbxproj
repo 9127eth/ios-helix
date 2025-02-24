@@ -8,6 +8,10 @@
 
 /* Begin PBXBuildFile section */
 		0252AE802CBB58740076FAE0 /* libPhoneNumber in Frameworks */ = {isa = PBXBuildFile; productRef = 0252AE7F2CBB58740076FAE0 /* libPhoneNumber */; };
+		027F56422D6B8D00003B85C7 /* CardTemplate.pass in Resources */ = {isa = PBXBuildFile; fileRef = 027F56412D6B8D00003B85C7 /* CardTemplate.pass */; };
+		027F56452D6B9AFF003B85C7 /* ZIPFoundation in Frameworks */ = {isa = PBXBuildFile; productRef = 027F56442D6B9AFF003B85C7 /* ZIPFoundation */; };
+		027F56562D6BF711003B85C7 /* pass.com.rxradio.helix.p12 in Resources */ = {isa = PBXBuildFile; fileRef = 027F56552D6BF710003B85C7 /* pass.com.rxradio.helix.p12 */; };
+		027F56582D6C0448003B85C7 /* AppleWWDRCAG4.cer in Resources */ = {isa = PBXBuildFile; fileRef = 027F56572D6C0447003B85C7 /* AppleWWDRCAG4.cer */; };
 		02B87DA22CC06CFE00C8C644 /* FontAwesome in Frameworks */ = {isa = PBXBuildFile; productRef = 02B87DA12CC06CFE00C8C644 /* FontAwesome */; };
 		02B87DA42CC06CFE00C8C644 /* tools in Frameworks */ = {isa = PBXBuildFile; productRef = 02B87DA32CC06CFE00C8C644 /* tools */; };
 		02B87DB82CC2F37D00C8C644 /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 02B87DB72CC2F37C00C8C644 /* StoreKit.framework */; };
@@ -42,6 +46,9 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		027F56412D6B8D00003B85C7 /* CardTemplate.pass */ = {isa = PBXFileReference; lastKnownFileType = folder; path = CardTemplate.pass; sourceTree = "<group>"; };
+		027F56552D6BF710003B85C7 /* pass.com.rxradio.helix.p12 */ = {isa = PBXFileReference; lastKnownFileType = file; path = pass.com.rxradio.helix.p12; sourceTree = "<group>"; };
+		027F56572D6C0447003B85C7 /* AppleWWDRCAG4.cer */ = {isa = PBXFileReference; lastKnownFileType = file; path = AppleWWDRCAG4.cer; sourceTree = "<group>"; };
 		02B87DB72CC2F37C00C8C644 /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
 		02F4644F2CB4E6130034711F /* Helix.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Helix.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		02F464612CB4E6150034711F /* HelixTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = HelixTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -118,6 +125,7 @@
 				02F464862CB4EDA40034711F /* FirebaseFunctions in Frameworks */,
 				02B87DB82CC2F37D00C8C644 /* StoreKit.framework in Frameworks */,
 				02F464AB2CB788300034711F /* GoogleSignIn in Frameworks */,
+				027F56452D6B9AFF003B85C7 /* ZIPFoundation in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -141,6 +149,9 @@
 		02F464462CB4E6130034711F = {
 			isa = PBXGroup;
 			children = (
+				027F56572D6C0447003B85C7 /* AppleWWDRCAG4.cer */,
+				027F56552D6BF710003B85C7 /* pass.com.rxradio.helix.p12 */,
+				027F56412D6B8D00003B85C7 /* CardTemplate.pass */,
 				02F464EC2CB795A50034711F /* AppDelegate.swift */,
 				02F464E62CB78E680034711F /* Config.xcconfig */,
 				02F464512CB4E6130034711F /* Helix */,
@@ -201,6 +212,7 @@
 				0252AE7F2CBB58740076FAE0 /* libPhoneNumber */,
 				02B87DA12CC06CFE00C8C644 /* FontAwesome */,
 				02B87DA32CC06CFE00C8C644 /* tools */,
+				027F56442D6B9AFF003B85C7 /* ZIPFoundation */,
 			);
 			productName = Helix;
 			productReference = 02F4644F2CB4E6130034711F /* Helix.app */;
@@ -289,6 +301,7 @@
 				02F464A92CB788300034711F /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
 				0252AE7E2CBB58740076FAE0 /* XCRemoteSwiftPackageReference "libPhoneNumber-iOS" */,
 				02B87DA02CC06CFE00C8C644 /* XCRemoteSwiftPackageReference "FontAwesome" */,
+				027F56432D6B9AFF003B85C7 /* XCRemoteSwiftPackageReference "ZIPFoundation" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 02F464502CB4E6130034711F /* Products */;
@@ -307,6 +320,9 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				027F56582D6C0448003B85C7 /* AppleWWDRCAG4.cer in Resources */,
+				027F56562D6BF711003B85C7 /* pass.com.rxradio.helix.p12 in Resources */,
+				027F56422D6B8D00003B85C7 /* CardTemplate.pass in Resources */,
 				02F464E72CB78E720034711F /* Config.xcconfig in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -519,6 +535,7 @@
 				SUPPORTS_MACCATALYST = NO;
 				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -556,6 +573,7 @@
 				SUPPORTS_MACCATALYST = NO;
 				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -683,6 +701,14 @@
 				minimumVersion = 1.2.0;
 			};
 		};
+		027F56432D6B9AFF003B85C7 /* XCRemoteSwiftPackageReference "ZIPFoundation" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/weichsel/ZIPFoundation.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.9.19;
+			};
+		};
 		02B87DA02CC06CFE00C8C644 /* XCRemoteSwiftPackageReference "FontAwesome" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/thii/FontAwesome.swift";
@@ -714,6 +740,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 0252AE7E2CBB58740076FAE0 /* XCRemoteSwiftPackageReference "libPhoneNumber-iOS" */;
 			productName = libPhoneNumber;
+		};
+		027F56442D6B9AFF003B85C7 /* ZIPFoundation */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 027F56432D6B9AFF003B85C7 /* XCRemoteSwiftPackageReference "ZIPFoundation" */;
+			productName = ZIPFoundation;
 		};
 		02B87DA12CC06CFE00C8C644 /* FontAwesome */ = {
 			isa = XCSwiftPackageProductDependency;

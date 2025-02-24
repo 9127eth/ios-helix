@@ -24,6 +24,8 @@ struct BusinessCardItemView: View {
     @StateObject private var nfcWriter = NFCWriter()
     @State private var showColorPicker = false
     @State private var selectedColor: Color = AppColors.cardDepthDefault
+    @StateObject private var walletViewModel = AddToWalletViewModel()
+    @State private var showWalletError = false
     
     var body: some View {
         ZStack {
@@ -84,6 +86,14 @@ struct BusinessCardItemView: View {
             }
         } message: {
             Text("Are you sure you want to delete this business card? This action cannot be undone.")
+        }
+        .alert("Wallet Error", isPresented: $showWalletError) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text(walletViewModel.error?.localizedDescription ?? "Unable to add to wallet")
+        }
+        .onChange(of: walletViewModel.error) { error in
+            showWalletError = error != nil
         }
     }
     
@@ -168,6 +178,15 @@ struct BusinessCardItemView: View {
                                 Text("Add to NFC")
                             } icon: {
                                 Image("nfc")
+                            }
+                        }
+                        Button {
+                            addToWallet()
+                        } label: {
+                            Label {
+                                Text("Add to Wallet")
+                            } icon: {
+                                Image(systemName: "wallet.pass")
                             }
                         }
                         Button {
@@ -320,6 +339,12 @@ struct BusinessCardItemView: View {
         
         DispatchQueue.main.async {
             self.nfcWriter.writeToNFC(url: url)
+        }
+    }
+    
+    private func addToWallet() {
+        Task {
+            await walletViewModel.addToWallet(card: card)
         }
     }
     
