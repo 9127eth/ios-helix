@@ -68,7 +68,7 @@ class WalletManager {
                 
                 if relativePath == "pass.json" {
                     let passJsonData = try Data(contentsOf: destinationURL)
-                    var passDict = try JSONSerialization.jsonObject(with: passJsonData, options: []) as! [String: Any]
+                    var passDict = try JSONSerialization.jsonObject(with: passJsonData, options: [.mutableContainers]) as! [String: Any]
                     
                     print("Verifying pass.json contents:")
                     print("- passTypeIdentifier: \(passDict["passTypeIdentifier"] as? String ?? "missing")")
@@ -89,9 +89,13 @@ class WalletManager {
                     passDict["generic"] = generic
                     
                     let cardURL = card.getCardURL(username: "")
-                    var barcodes = passDict["barcodes"] as! [[String: Any]]
-                    barcodes[0]["message"] = cardURL
-                    passDict["barcodes"] = barcodes
+                    if var barcodes = passDict["barcodes"] as? [[String: Any]], !barcodes.isEmpty {
+                        barcodes[0]["message"] = cardURL
+                        passDict["barcodes"] = barcodes
+                    } else {
+                        print("Warning: 'barcodes' key not found or not an array in pass.json")
+                        passDict["barcodes"] = [["format": "PKBarcodeFormatQR", "message": cardURL, "messageEncoding": "iso-8859-1"]]
+                    }
                     
                     let updatedPassJsonData = try JSONSerialization.data(withJSONObject: passDict, options: [])
                     try updatedPassJsonData.write(to: destinationURL)
@@ -186,12 +190,10 @@ enum WalletError: Error, LocalizedError {
 
 private class PKCS12 {
     let secIdentity: SecIdentity
-    var certificates: [SecCertificate]  // Changed from let to var
+    var certificates: [SecCertificate]
     
     init(data: Data, password: String) throws {
         print("Initializing PKCS12")
-        print("Certificate data size: \(data.count) bytes")
-        
         var items: CFArray?
         let options = [kSecImportExportPassphrase as String: password] as CFDictionary
         let status = SecPKCS12Import(data as CFData, options, &items)
@@ -204,16 +206,13 @@ private class PKCS12 {
         self.secIdentity = dict[kSecImportItemIdentity as String] as! SecIdentity
         var certs = dict[kSecImportItemCertChain as String] as! [SecCertificate]
         
-        // Add WWDR G4 if missing
         if certs.count == 1, let wwdrURL = Bundle.main.url(forResource: "AppleWWDRCAG4", withExtension: "cer"),
            let wwdrData = try? Data(contentsOf: wwdrURL),
            let wwdrCert = SecCertificateCreateWithData(nil, wwdrData as CFData) {
             certs.append(wwdrCert)
         }
         self.certificates = certs
-        
-        print("PKCS12 initialized successfully")
-        print("Certificate chain count: \(certificates.count)")
+        print("PKCS12 initialized with \(certs.count) certificates")
     }
     
     func sign(_ data: Data) throws -> Data {
@@ -232,41 +231,21 @@ private class PKCS12 {
             throw WalletError.signatureInvalid
         }
         
+        // Sign the raw manifest data directly
         var error: Unmanaged<CFError>?
-        guard let rawSignature = SecKeyCreateSignature(key, algorithm, data as CFData, &error) as Data? else {
+        guard let signatureData = SecKeyCreateSignature(key, algorithm, data as CFData, &error) as Data? else {
             print("Signature creation failed: \(error?.takeRetainedValue().localizedDescription ?? "unknown")")
             throw WalletError.signatureInvalid
         }
         
-        // Simplified CMS wrapper (PKCS#7 SignedData)
-        var cmsData = Data()
-        // SEQUENCE
-        cmsData.append(Data([0x30, 0x82]))
-        let totalLength = rawSignature.count + certificates.reduce(0) { $0 + (SecCertificateCopyData($1) as Data).count } + 40
-        cmsData.append(Data([UInt8(totalLength >> 8), UInt8(totalLength & 0xFF)]))
-        // SignedData OID
-        cmsData.append(Data([0x06, 0x09, 0x2a, 0x86, 0x48, 0x86, 0xf7, 0x0d, 0x01, 0x07, 0x02]))
-        // Content
-        cmsData.append(Data([0xa0, 0x82]))
-        let contentLength = rawSignature.count + certificates.reduce(0) { $0 + (SecCertificateCopyData($1) as Data).count } + 10
-        cmsData.append(Data([UInt8(contentLength >> 8), UInt8(contentLength & 0xFF)]))
-        // Version
-        cmsData.append(Data([0x02, 0x01, 0x01]))
-        // Digest Algorithm (SHA-256)
-        cmsData.append(Data([0x31, 0x0d, 0x30, 0x0b, 0x06, 0x09, 0x60, 0x86, 0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x01]))
-        // Certificates
-        cmsData.append(Data([0xa0]))
-        let certsLength = certificates.reduce(0) { $0 + (SecCertificateCopyData($1) as Data).count }
-        cmsData.append(Data([UInt8(certsLength >> 8), UInt8(certsLength & 0xFF)]))
-        for cert in certificates {
-            cmsData.append(SecCertificateCopyData(cert) as Data)
-        }
-        // SignerInfo
-        cmsData.append(Data([0x31, 0x81, UInt8(rawSignature.count + 3), 0x30, 0x81, UInt8(rawSignature.count)]))
-        cmsData.append(rawSignature)
+        print("Signature size: \(signatureData.count) bytes")
+        print("Signature hex: \(signatureData.map { String(format: "%02x", $0) }.joined())")
         
-        print("CMS signature created successfully")
-        print("Signature size: \(cmsData.count) bytes")
-        return cmsData
+        // For debugging, log the manifest digest
+        let digest = SHA256.hash(data: data)
+        let digestData = Data(digest)
+        print("Manifest digest: \(digestData.map { String(format: "%02x", $0) }.joined())")
+        
+        return signatureData
     }
 }
