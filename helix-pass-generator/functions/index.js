@@ -53,19 +53,61 @@ exports.generatePassV2 = functions.https.onRequest(async (req, res) => {
     
     console.log(`Generating pass for: ${firstName} ${lastName}`);
     
-    // Create pass.json content
+    // Create pass.json content - keep the critical identifiers
     const passJson = {
       formatVersion: 1,
       passTypeIdentifier: "pass.com.rxradio.helix",
-      teamIdentifier: "7544NQ6262", // Replace with your actual team ID
+      teamIdentifier: "7544NQ6262", // Keep the team ID
       organizationName: "Helix",
       description: "Helix Business Card",
-      foregroundColor: "rgb(255, 255, 255)",
-      backgroundColor: "rgb(0, 0, 0)",
-      labelColor: "rgb(255, 255, 255)",
-      type: "generic", // This is the key field that was missing
       serialNumber: cardSlug,
-      generic: {
+      type: "generic"
+    };
+    
+    // Load design elements from template
+    try {
+      const templatePassJson = JSON.parse(fs.readFileSync(path.join(MODEL_PATH, "pass.json")));
+      
+      // Copy design elements from template
+      passJson.foregroundColor = templatePassJson.foregroundColor;
+      passJson.backgroundColor = templatePassJson.backgroundColor;
+      passJson.labelColor = templatePassJson.labelColor;
+      passJson.logoText = templatePassJson.logoText;
+      
+      // Use template structure for fields but with dynamic content
+      passJson.generic = {
+        primaryFields: [
+          { 
+            key: "name", 
+            label: templatePassJson.generic?.primaryFields?.[0]?.label || "Name",
+            value: `${firstName} ${lastName}`,
+          }
+        ],
+        secondaryFields: company ? [
+          { 
+            key: "company", 
+            label: templatePassJson.generic?.secondaryFields?.[0]?.label || "COMPANY", 
+            value: company,
+          }
+        ] : [],
+        auxiliaryFields: jobTitle ? [
+          { 
+            key: "title", 
+            label: templatePassJson.generic?.secondaryFields?.[1]?.label || "TITLE", 
+            value: jobTitle,
+          }
+        ] : []
+      };
+      
+      console.log("Successfully loaded design elements from template");
+    } catch (error) {
+      console.error("Error loading template pass.json:", error);
+      // Fallback to default design if template can't be loaded
+      passJson.foregroundColor = "rgb(255, 255, 255)";
+      passJson.backgroundColor = "rgb(0, 0, 0)";
+      passJson.labelColor = "rgb(255, 255, 255)";
+      
+      passJson.generic = {
         primaryFields: [
           { 
             key: "name", 
@@ -86,15 +128,17 @@ exports.generatePassV2 = functions.https.onRequest(async (req, res) => {
             value: jobTitle,
           }
         ] : []
-      },
-      barcodes: [
-        {
-          message: cardURL,
-          format: "PKBarcodeFormatQR",
-          messageEncoding: "iso-8859-1"
-        }
-      ]
-    };
+      };
+    }
+    
+    // Add barcode
+    passJson.barcodes = [
+      {
+        message: cardURL,
+        format: "PKBarcodeFormatQR",
+        messageEncoding: "iso-8859-1"
+      }
+    ];
     
     // Load existing images from the template directory
     const initialBuffers = {

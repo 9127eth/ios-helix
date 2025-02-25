@@ -8,10 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		0252AE802CBB58740076FAE0 /* libPhoneNumber in Frameworks */ = {isa = PBXBuildFile; productRef = 0252AE7F2CBB58740076FAE0 /* libPhoneNumber */; };
-		027F56422D6B8D00003B85C7 /* CardTemplate.pass in Resources */ = {isa = PBXBuildFile; fileRef = 027F56412D6B8D00003B85C7 /* CardTemplate.pass */; };
 		027F56452D6B9AFF003B85C7 /* ZIPFoundation in Frameworks */ = {isa = PBXBuildFile; productRef = 027F56442D6B9AFF003B85C7 /* ZIPFoundation */; };
-		027F56562D6BF711003B85C7 /* pass.com.rxradio.helix.p12 in Resources */ = {isa = PBXBuildFile; fileRef = 027F56552D6BF710003B85C7 /* pass.com.rxradio.helix.p12 */; };
-		027F56582D6C0448003B85C7 /* AppleWWDRCAG4.cer in Resources */ = {isa = PBXBuildFile; fileRef = 027F56572D6C0447003B85C7 /* AppleWWDRCAG4.cer */; };
 		027F565C2D6C3A97003B85C7 /* OpenSSL in Frameworks */ = {isa = PBXBuildFile; productRef = 027F565B2D6C3A97003B85C7 /* OpenSSL */; };
 		027F56602D6D288A003B85C7 /* ZipArchive in Frameworks */ = {isa = PBXBuildFile; productRef = 027F565F2D6D288A003B85C7 /* ZipArchive */; };
 		02B87DA22CC06CFE00C8C644 /* FontAwesome in Frameworks */ = {isa = PBXBuildFile; productRef = 02B87DA12CC06CFE00C8C644 /* FontAwesome */; };
@@ -48,9 +45,6 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		027F56412D6B8D00003B85C7 /* CardTemplate.pass */ = {isa = PBXFileReference; lastKnownFileType = folder; path = CardTemplate.pass; sourceTree = "<group>"; };
-		027F56552D6BF710003B85C7 /* pass.com.rxradio.helix.p12 */ = {isa = PBXFileReference; lastKnownFileType = file; path = pass.com.rxradio.helix.p12; sourceTree = "<group>"; };
-		027F56572D6C0447003B85C7 /* AppleWWDRCAG4.cer */ = {isa = PBXFileReference; lastKnownFileType = file; path = AppleWWDRCAG4.cer; sourceTree = "<group>"; };
 		02B87DB72CC2F37C00C8C644 /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
 		02F4644F2CB4E6130034711F /* Helix.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Helix.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		02F464612CB4E6150034711F /* HelixTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = HelixTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -153,9 +147,6 @@
 		02F464462CB4E6130034711F = {
 			isa = PBXGroup;
 			children = (
-				027F56572D6C0447003B85C7 /* AppleWWDRCAG4.cer */,
-				027F56552D6BF710003B85C7 /* pass.com.rxradio.helix.p12 */,
-				027F56412D6B8D00003B85C7 /* CardTemplate.pass */,
 				02F464EC2CB795A50034711F /* AppDelegate.swift */,
 				02F464E62CB78E680034711F /* Config.xcconfig */,
 				02F464512CB4E6130034711F /* Helix */,
@@ -329,9 +320,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				027F56582D6C0448003B85C7 /* AppleWWDRCAG4.cer in Resources */,
-				027F56562D6BF711003B85C7 /* pass.com.rxradio.helix.p12 in Resources */,
-				027F56422D6B8D00003B85C7 /* CardTemplate.pass in Resources */,
 				02F464E72CB78E720034711F /* Config.xcconfig in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
