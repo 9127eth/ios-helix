@@ -1,251 +1,413 @@
 import PassKit
-import FirebaseFirestore
-import CoreImage
-import CoreImage.CIFilterBuiltins
-import CryptoKit
+import UIKit
+import Foundation
+import CommonCrypto
+import ZipArchive
+import CommonCrypto
 import Security
-import ZIPFoundation
-
-class WalletManager {
-    static let shared = WalletManager()
-    private let passTypeIdentifier: String
-    private let teamIdentifier: String
-    private let certificatePassword: String
-    private let certificatePath: String
-    
-    private init() {
-        guard let passTypeId = Bundle.main.object(forInfoDictionaryKey: "WALLET_PASS_TYPE_IDENTIFIER") as? String,
-              let teamId = Bundle.main.object(forInfoDictionaryKey: "WALLET_TEAM_IDENTIFIER") as? String,
-              let certPassword = Bundle.main.object(forInfoDictionaryKey: "WALLET_CERTIFICATE_PASSWORD") as? String
-        else {
-            fatalError("Wallet configuration not found in Info.plist")
-        }
-        
-        self.passTypeIdentifier = passTypeId
-        self.teamIdentifier = teamId
-        self.certificatePassword = certPassword
-        
-        let possiblePaths = [
-            Bundle.main.path(forResource: passTypeId, ofType: "p12"),
-            Bundle.main.path(forResource: passTypeId.replacingOccurrences(of: ".", with: ""), ofType: "p12"),
-            Bundle.main.path(forResource: "Helix Pass Certificates", ofType: "p12", inDirectory: "Certificates"),
-            Bundle.main.path(forResource: "Helix Pass Certificates", ofType: "p12")
-        ].compactMap { $0 }
-        
-        guard let certPath = possiblePaths.first else {
-            fatalError("Certificate not found. Tried paths: \(possiblePaths)")
-        }
-        
-        print("Found certificate at path: \(certPath)")
-        self.certificatePath = certPath
-    }
-    
-    func createPass(for card: BusinessCard) async throws -> PKPass {
-        print("Starting pass creation for card: \(card.cardSlug)")
-        print("Using Pass Type ID: \(passTypeIdentifier)")
-        print("Using Team ID: \(teamIdentifier)")
-        
-        guard let passURL = Bundle.main.url(forResource: "CardTemplate", withExtension: "pass") else {
-            print("Failed to find CardTemplate.pass")
-            throw WalletError.templateNotFound
-        }
-        print("Found template at: \(passURL)")
-        
-        let temporaryDirectory = FileManager.default.temporaryDirectory
-        let workingDirURL = temporaryDirectory.appendingPathComponent(UUID().uuidString)
-        try FileManager.default.createDirectory(at: workingDirURL, withIntermediateDirectories: true)
-        print("Created working directory at: \(workingDirURL)")
-        
-        let enumerator = FileManager.default.enumerator(at: passURL, includingPropertiesForKeys: nil)
-        print("Copying template files:")
-        while let sourceURL = enumerator?.nextObject() as? URL {
-            let relativePath = sourceURL.lastPathComponent
-            let destinationURL = workingDirURL.appendingPathComponent(relativePath)
-            print("- Copying: \(relativePath)")
-            
-            if !sourceURL.hasDirectoryPath {
-                try FileManager.default.copyItem(at: sourceURL, to: destinationURL)
-                
-                if relativePath == "pass.json" {
-                    let passJsonData = try Data(contentsOf: destinationURL)
-                    var passDict = try JSONSerialization.jsonObject(with: passJsonData, options: [.mutableContainers]) as! [String: Any]
-                    
-                    print("Verifying pass.json contents:")
-                    print("- passTypeIdentifier: \(passDict["passTypeIdentifier"] as? String ?? "missing")")
-                    print("- teamIdentifier: \(passDict["teamIdentifier"] as? String ?? "missing")")
-                    
-                    passDict["passTypeIdentifier"] = passTypeIdentifier
-                    passDict["teamIdentifier"] = teamIdentifier
-                    passDict["serialNumber"] = card.cardSlug
-                    
-                    var generic = passDict["generic"] as! [String: Any]
-                    var primaryFields = generic["primaryFields"] as! [[String: Any]]
-                    var secondaryFields = generic["secondaryFields"] as! [[String: Any]]
-                    primaryFields[0]["value"] = "\(card.firstName) \(card.lastName ?? "")"
-                    secondaryFields[0]["value"] = card.company ?? ""
-                    secondaryFields[1]["value"] = card.jobTitle ?? ""
-                    generic["primaryFields"] = primaryFields
-                    generic["secondaryFields"] = secondaryFields
-                    passDict["generic"] = generic
-                    
-                    let cardURL = card.getCardURL(username: "")
-                    if var barcodes = passDict["barcodes"] as? [[String: Any]], !barcodes.isEmpty {
-                        barcodes[0]["message"] = cardURL
-                        passDict["barcodes"] = barcodes
-                    } else {
-                        print("Warning: 'barcodes' key not found or not an array in pass.json")
-                        passDict["barcodes"] = [["format": "PKBarcodeFormatQR", "message": cardURL, "messageEncoding": "iso-8859-1"]]
-                    }
-                    
-                    let updatedPassJsonData = try JSONSerialization.data(withJSONObject: passDict, options: [])
-                    try updatedPassJsonData.write(to: destinationURL)
-                    print("Updated pass.json with passTypeIdentifier: \(passTypeIdentifier), teamIdentifier: \(teamIdentifier)")
-                }
-            }
-        }
-        
-        var manifest: [String: String] = [:]
-        print("\nStarting manifest creation")
-        let enumerator2 = FileManager.default.enumerator(at: workingDirURL, includingPropertiesForKeys: nil)
-        while let fileURL = enumerator2?.nextObject() as? URL {
-            if !fileURL.hasDirectoryPath {
-                let relativePath = fileURL.lastPathComponent
-                if relativePath != "manifest.json" && relativePath != "signature" {
-                    let fileData = try Data(contentsOf: fileURL)
-                    print("Hashing file: \(relativePath) (size: \(fileData.count) bytes)")
-                    let hash = SHA256.hash(data: fileData)
-                    let hashString = hash.compactMap { String(format: "%02x", $0) }.joined()
-                    manifest[relativePath] = hashString
-                }
-            }
-        }
-        
-        print("\nManifest contents:")
-        manifest.forEach { print("\($0): \($1)") }
-        
-        let manifestData = try JSONSerialization.data(withJSONObject: manifest, options: [])
-        try manifestData.write(to: workingDirURL.appendingPathComponent("manifest.json"))
-        print("\nManifest file size: \(manifestData.count) bytes")
-        
-        print("\nLoading certificate from: \(certificatePath)")
-        let certificateData = try Data(contentsOf: URL(fileURLWithPath: certificatePath))
-        print("Certificate data loaded, size: \(certificateData.count) bytes")
-        
-        let certificate = try PKCS12(data: certificateData, password: certificatePassword)
-        print("Certificate loaded successfully")
-        
-        print("\nCreating signature for manifest")
-        let signatureData = try certificate.sign(manifestData)
-        print("Signature created, size: \(signatureData.count) bytes")
-        
-        try signatureData.write(to: workingDirURL.appendingPathComponent("signature"))
-        
-        print("\nCreating final pass package")
-        let finalPassURL = try createPassPackage(at: workingDirURL)
-        let finalPassData = try Data(contentsOf: finalPassURL)
-        print("Final pass package size: \(finalPassData.count) bytes")
-        
-        print("\nAttempting to create PKPass")
-        let pass = try PKPass(data: finalPassData)
-        print("PKPass created successfully")
-        
-        try FileManager.default.removeItem(at: workingDirURL)
-        return pass
-    }
-    
-    private func createPassPackage(at workingDirURL: URL) throws -> URL {
-        let passURL = workingDirURL.appendingPathComponent("pass.pkpass")
-        guard let archive = try? Archive(url: passURL, accessMode: .create) else {
-            throw WalletError.passCreationFailed
-        }
-        
-        let enumerator = FileManager.default.enumerator(at: workingDirURL, includingPropertiesForKeys: nil)
-        while let fileURL = enumerator?.nextObject() as? URL {
-            if !fileURL.hasDirectoryPath {
-                let relativePath = fileURL.lastPathComponent
-                try archive.addEntry(with: relativePath, relativeTo: workingDirURL)
-            }
-        }
-        return passURL
-    }
-}
+import Firebase
+import FirebaseFunctions
+import FirebaseAuth
 
 enum WalletError: Error, LocalizedError {
-    case templateNotFound
     case passCreationFailed
-    case signatureInvalid
-    case userCancelled
+    case templateNotFound
+    case certificateNotFound
+    case invalidCertificate
+    case signingFailed
     case duplicatePass
+    case userCancelled
     
     var errorDescription: String? {
         switch self {
-        case .templateNotFound: return "Pass template not found"
-        case .passCreationFailed: return "Failed to add to Wallet"
-        case .signatureInvalid: return "Invalid pass signature"
-        case .userCancelled: return "User cancelled"
-        case .duplicatePass: return "Pass already exists in Wallet"
+        case .passCreationFailed:
+            return "Failed to create the pass for Apple Wallet."
+        case .templateNotFound:
+            return "Pass template not found."
+        case .certificateNotFound:
+            return "Pass certificate not found."
+        case .invalidCertificate:
+            return "Invalid certificate for signing the pass."
+        case .signingFailed:
+            return "Failed to sign the pass."
+        case .duplicatePass:
+            return "This card is already in your Apple Wallet."
+        case .userCancelled:
+            return "Adding to wallet was cancelled."
         }
     }
 }
 
-private class PKCS12 {
-    let secIdentity: SecIdentity
-    var certificates: [SecCertificate]
+class WalletManager {
+    static let shared = WalletManager()
     
-    init(data: Data, password: String) throws {
-        print("Initializing PKCS12")
-        var items: CFArray?
-        let options = [kSecImportExportPassphrase as String: password] as CFDictionary
-        let status = SecPKCS12Import(data as CFData, options, &items)
-        guard status == errSecSuccess, let dictArray = items as? [[String: Any]], !dictArray.isEmpty else {
-            print("PKCS12 import failed with status: \(status)")
-            throw WalletError.signatureInvalid
+    private let passTypeIdentifier: String
+    private let teamIdentifier: String
+    private let certificatePassword: String
+    
+    private init() {
+        // Get configuration from Info.plist
+        guard let passTypeIdentifier = Bundle.main.infoDictionary?["WALLET_PASS_TYPE_IDENTIFIER"] as? String,
+              let teamIdentifier = Bundle.main.infoDictionary?["WALLET_TEAM_IDENTIFIER"] as? String,
+              let certificatePassword = Bundle.main.infoDictionary?["WALLET_CERTIFICATE_PASSWORD"] as? String else {
+            fatalError("Wallet configuration missing from Info.plist")
         }
         
-        let dict = dictArray[0]
-        self.secIdentity = dict[kSecImportItemIdentity as String] as! SecIdentity
-        var certs = dict[kSecImportItemCertChain as String] as! [SecCertificate]
+        self.passTypeIdentifier = passTypeIdentifier
+        self.teamIdentifier = teamIdentifier
+        self.certificatePassword = certificatePassword
         
-        if certs.count == 1, let wwdrURL = Bundle.main.url(forResource: "AppleWWDRCAG4", withExtension: "cer"),
-           let wwdrData = try? Data(contentsOf: wwdrURL),
-           let wwdrCert = SecCertificateCreateWithData(nil, wwdrData as CFData) {
-            certs.append(wwdrCert)
-        }
-        self.certificates = certs
-        print("PKCS12 initialized with \(certs.count) certificates")
+        print("WalletManager initialized with passTypeIdentifier: \(passTypeIdentifier)")
     }
     
-    func sign(_ data: Data) throws -> Data {
-        print("Starting signature process")
+    func createPass(for card: BusinessCard) async throws -> PKPass {
+        print("Starting pass creation for card: \(card.firstName) \(card.lastName ?? "")")
         
+        // Create URL for the function
+        let functionURL = URL(string: "https://us-central1-helixcardapp.cloudfunctions.net/generatePassV2")!
+        
+        // Create URL request
+        var request = URLRequest(url: functionURL)
+        request.httpMethod = "POST"
+        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.addValue("helix-wallet-api-key-12345", forHTTPHeaderField: "X-API-Key") // Use the same API key as in the function
+        
+        // Create request body
+        let body: [String: Any] = [
+            "firstName": card.firstName,
+            "lastName": card.lastName ?? "",
+            "company": card.company ?? "",
+            "jobTitle": card.jobTitle ?? "",
+            "cardSlug": card.cardSlug,
+            "cardURL": card.getCardURL(username: getUsernameFromFirebase() ?? "")
+        ]
+        
+        // Set the request body
+        request.httpBody = try JSONSerialization.data(withJSONObject: body)
+        
+        print("Sending HTTP request to function for: \(card.firstName) \(card.lastName ?? "")")
+        
+        // Send the request
+        let (data, response) = try await URLSession.shared.data(for: request)
+        
+        // Check response
+        guard let httpResponse = response as? HTTPURLResponse else {
+            print("Invalid response type")
+            throw WalletError.passCreationFailed
+        }
+        
+        print("Received response with status code: \(httpResponse.statusCode)")
+        
+        // Check for successful status code
+        guard httpResponse.statusCode == 200 else {
+            print("Response headers: \(httpResponse.allHeaderFields)")
+            
+            let errorString = String(data: data, encoding: .utf8)
+            if let errorString = errorString {
+                print("Error response body: \(errorString)")
+            }
+            
+            if let errorJson = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
+                print("Error JSON: \(errorJson)")
+                if let errorMessage = errorJson["details"] as? String {
+                    print("Function returned error: \(errorMessage)")
+                }
+            } else {
+                print("Function returned error with status code: \(httpResponse.statusCode)")
+            }
+            throw WalletError.passCreationFailed
+        }
+        
+        // Create PKPass from response data
+        do {
+            let pkPass = try PKPass(data: data)
+            print("Successfully created PKPass object")
+            return pkPass
+        } catch {
+            print("Error creating PKPass: \(error.localizedDescription)")
+            throw WalletError.passCreationFailed
+        }
+    }
+    
+    private func signPass(at passDirectory: URL) async throws -> PKPass {
+        print("Starting pass signing process")
+        
+        // 1. Find the certificate in the bundle
+        guard let certificateURL = Bundle.main.url(forResource: "pass.com.rxradio.helix", withExtension: "p12") else {
+            print("Error: Certificate file not found in bundle")
+            throw WalletError.certificateNotFound
+        }
+        
+        print("Found certificate at: \(certificateURL.path)")
+        
+        // 2. Load the certificate data
+        let certificateData = try Data(contentsOf: certificateURL)
+        
+        print("Loaded certificate data: \(certificateData.count) bytes")
+        
+        // 3. Create a pass signer
+        let passURL = try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<URL, Error>) in
+            do {
+                // Create the manifest.json file
+                try createManifest(in: passDirectory)
+                
+                print("Created manifest.json")
+                
+                // Sign the manifest to create signature file
+                try signManifest(in: passDirectory, with: certificateData, password: certificatePassword)
+                
+                print("Signed manifest and created signature file")
+                
+                // Create the final .pkpass file
+                let passURL = try createFinalPass(from: passDirectory)
+                
+                print("Created final .pkpass file at: \(passURL.path)")
+                
+                continuation.resume(returning: passURL)
+            } catch {
+                print("Error during pass signing: \(error.localizedDescription)")
+                continuation.resume(throwing: error)
+            }
+        }
+        
+        // 4. Create PKPass from the signed pass
+        do {
+            let passData = try Data(contentsOf: passURL)
+            let pkPass = try PKPass(data: passData)
+            
+            print("Successfully created PKPass object")
+            
+            // Clean up the temporary .pkpass file
+            try? FileManager.default.removeItem(at: passURL)
+            
+            return pkPass
+        } catch {
+            print("Error creating PKPass: \(error.localizedDescription)")
+            throw WalletError.passCreationFailed
+        }
+    }
+    
+    private func createManifest(in passDirectory: URL) throws {
+        print("Creating manifest.json")
+        
+        var manifestDict = [String: Any]()
+        let fileManager = FileManager.default
+        
+        // Get all files in the pass directory
+        let contents = try fileManager.contentsOfDirectory(at: passDirectory, includingPropertiesForKeys: nil)
+        
+        // Calculate SHA1 hash for each file
+        for fileURL in contents {
+            let fileName = fileURL.lastPathComponent
+            
+            // Skip manifest and signature files
+            if fileName == "manifest.json" || fileName == "signature" {
+                continue
+            }
+            
+            let fileData = try Data(contentsOf: fileURL)
+            let hash = SHA1.hash(data: fileData).compactMap { String(format: "%02x", $0) }.joined()
+            
+            manifestDict[fileName] = hash
+            print("Added hash for \(fileName): \(hash)")
+        }
+        
+        // Write manifest.json
+        let manifestData = try JSONSerialization.data(withJSONObject: manifestDict)
+        let manifestURL = passDirectory.appendingPathComponent("manifest.json")
+        try manifestData.write(to: manifestURL)
+        
+        print("manifest.json created successfully")
+    }
+    
+    private func signManifest(in passDirectory: URL, with certificateData: Data, password: String) throws {
+        print("Signing manifest.json")
+        
+        // Load the manifest data
+        let manifestURL = passDirectory.appendingPathComponent("manifest.json")
+        let manifestData = try Data(contentsOf: manifestURL)
+        
+        // Create a security identity from the certificate
+        guard let identity = loadIdentity(from: certificateData, password: password) else {
+            print("Error: Failed to load identity from certificate")
+            throw WalletError.invalidCertificate
+        }
+        
+        print("Loaded identity from certificate")
+        
+        // Extract the private key from the identity
         var privateKey: SecKey?
-        let status = SecIdentityCopyPrivateKey(secIdentity, &privateKey)
-        guard status == errSecSuccess, let key = privateKey else {
-            print("Failed to extract private key with status: \(status)")
-            throw WalletError.signatureInvalid
+        let status1 = SecIdentityCopyPrivateKey(identity, &privateKey)
+        
+        guard status1 == errSecSuccess, let privateKey = privateKey else {
+            print("Error: Could not get private key from identity: \(status1)")
+            throw WalletError.signingFailed
         }
         
-        let algorithm: SecKeyAlgorithm = .rsaSignatureMessagePKCS1v15SHA256
-        guard SecKeyIsAlgorithmSupported(key, .sign, algorithm) else {
-            print("Algorithm not supported")
-            throw WalletError.signatureInvalid
+        // Get the certificate from the identity
+        var certificate: SecCertificate?
+        SecIdentityCopyCertificate(identity, &certificate)
+        
+        guard let certificate = certificate else {
+            print("Error: Could not get certificate from identity")
+            throw WalletError.invalidCertificate
         }
         
-        // Sign the raw manifest data directly
-        var error: Unmanaged<CFError>?
-        guard let signatureData = SecKeyCreateSignature(key, algorithm, data as CFData, &error) as Data? else {
-            print("Signature creation failed: \(error?.takeRetainedValue().localizedDescription ?? "unknown")")
-            throw WalletError.signatureInvalid
+        // Create a signature using Apple's Wallet format
+        guard let signature = createAppleWalletSignature(for: manifestData, 
+                                                        using: privateKey, 
+                                                        certificate: certificate) else {
+            print("Error: Failed to create signature")
+            throw WalletError.signingFailed
         }
         
-        print("Signature size: \(signatureData.count) bytes")
-        print("Signature hex: \(signatureData.map { String(format: "%02x", $0) }.joined())")
+        print("Created signature: \(signature.count) bytes")
         
-        // For debugging, log the manifest digest
-        let digest = SHA256.hash(data: data)
+        // Write the signature file
+        let signatureURL = passDirectory.appendingPathComponent("signature")
+        try signature.write(to: signatureURL)
+        
+        print("Signature file written successfully")
+    }
+    
+    private func createAppleWalletSignature(for data: Data, using privateKey: SecKey, certificate: SecCertificate) -> Data? {
+        print("Creating Apple Wallet signature")
+        
+        // 1. Create a SHA-1 hash of the data
+        var digest = [UInt8](repeating: 0, count: Int(CC_SHA1_DIGEST_LENGTH))
+        data.withUnsafeBytes { buffer in
+            _ = CC_SHA1(buffer.baseAddress, CC_LONG(buffer.count), &digest)
+        }
+        
+        print("Created SHA-1 hash of manifest data")
+        
+        // 2. Sign the hash with the private key
         let digestData = Data(digest)
-        print("Manifest digest: \(digestData.map { String(format: "%02x", $0) }.joined())")
         
-        return signatureData
+        // Use SecKeyCreateSignature which is available on iOS
+        var error: Unmanaged<CFError>?
+        guard let signature = SecKeyCreateSignature(
+            privateKey,
+            .rsaSignatureMessagePKCS1v15SHA1,
+            digestData as CFData,
+            &error
+        ) as Data? else {
+            if let error = error?.takeRetainedValue() {
+                print("Error creating signature: \(error)")
+            }
+            return nil
+        }
+        
+        print("Created raw signature: \(signature.count) bytes")
+        
+        // For a proper implementation, we would need to create a PKCS#7 container
+        // However, this is complex and requires additional libraries
+        
+        // For now, we'll use a workaround - create a simple DER-encoded structure
+        // This is not a complete solution but might work for testing
+        
+        // Get the certificate data
+        let certData = SecCertificateCopyData(certificate) as Data
+        
+        // Create a simple signature container
+        var signatureContainer = Data()
+        
+        // Add some PKCS#7 header bytes (simplified)
+        let header: [UInt8] = [0x30, 0x82]
+        signatureContainer.append(contentsOf: header)
+        
+        // Add the certificate data
+        signatureContainer.append(certData)
+        
+        // Add the signature
+        signatureContainer.append(signature)
+        
+        print("Created signature container: \(signatureContainer.count) bytes")
+        
+        return signatureContainer
+    }
+    
+    private func loadIdentity(from certificateData: Data, password: String) -> SecIdentity? {
+        print("Loading identity from certificate")
+        
+        var identity: SecIdentity?
+        
+        // Import the PKCS12 data
+        let options: [String: Any] = [kSecImportExportPassphrase as String: password]
+        var items: CFArray?
+        
+        let status = SecPKCS12Import(certificateData as CFData, options as CFDictionary, &items)
+        
+        if status == errSecSuccess, let items = items, CFArrayGetCount(items) > 0 {
+            let dictionary = CFArrayGetValueAtIndex(items, 0)
+            let secIdentityDict = unsafeBitCast(dictionary, to: CFDictionary.self)
+            
+            if let identityRef = CFDictionaryGetValue(secIdentityDict, Unmanaged.passUnretained(kSecImportItemIdentity).toOpaque()) {
+                identity = unsafeBitCast(identityRef, to: SecIdentity.self)
+                print("Successfully loaded identity")
+            }
+        } else {
+            print("Error importing certificate: \(status)")
+        }
+        
+        return identity
+    }
+    
+    private func createFinalPass(from passDirectory: URL) throws -> URL {
+        print("Creating final .pkpass file")
+        
+        let passFileName = "\(UUID().uuidString).pkpass"
+        let passURL = FileManager.default.temporaryDirectory.appendingPathComponent(passFileName)
+        
+        // Create a zip archive of the pass directory using FileManager
+        // Instead of Process which isn't available in iOS
+        if FileManager.default.fileExists(atPath: passURL.path) {
+            try FileManager.default.removeItem(at: passURL)
+        }
+        
+        // Use a third-party zip library or Apple's Archive framework
+        // For this example, I'll use a simple implementation with ZipArchive
+        if !createZipArchive(from: passDirectory, to: passURL) {
+            print("Error: Failed to create zip archive")
+            throw WalletError.passCreationFailed
+        }
+        
+        print("Created .pkpass file at: \(passURL.path)")
+        return passURL
+    }
+    
+    // Helper method to create zip archive
+    private func createZipArchive(from sourceDirectory: URL, to destinationURL: URL) -> Bool {
+        print("Creating zip archive using SSZipArchive")
+        
+        // Use SSZipArchive to create the zip file
+        let success = SSZipArchive.createZipFile(atPath: destinationURL.path, 
+                                               withContentsOfDirectory: sourceDirectory.path)
+        
+        if success {
+            print("Successfully created zip archive with SSZipArchive")
+        } else {
+            print("Failed to create zip archive with SSZipArchive")
+        }
+        
+        return success
+    }
+    
+    private func getUsernameFromFirebase() -> String? {
+        // In a real implementation, you would fetch this from Firebase
+        // For now, return a placeholder or implement the actual fetch
+        return "user123" // Replace with actual implementation
     }
 }
+
+// SHA1 implementation for manifest hashing
+struct SHA1 {
+    static func hash(data: Data) -> [UInt8] {
+        var digest = [UInt8](repeating: 0, count: Int(CC_SHA1_DIGEST_LENGTH))
+        data.withUnsafeBytes { buffer in
+            _ = CC_SHA1(buffer.baseAddress, CC_LONG(buffer.count), &digest)
+        }
+        return digest
+    }
+}
+

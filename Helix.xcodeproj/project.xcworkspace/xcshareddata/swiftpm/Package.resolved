@@ -1,5 +1,5 @@
 {
-  "originHash" : "c00b2eb656b0267abe775d93118743627c63ea673cd8a60dd59f491d95ea1ef7",
+  "originHash" : "144dcc6d666a1caa2bd8fb35f409a59fc83331c502f6df7e05d66864caa41f5a",
   "pins" : [
     {
       "identity" : "abseil-cpp-binary",
@@ -146,6 +146,15 @@
       }
     },
     {
+      "identity" : "openssl",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/krzyzanowskim/OpenSSL.git",
+      "state" : {
+        "revision" : "8729614a93e6b20307db3c3359aed81f030facaa",
+        "version" : "3.3.2000"
+      }
+    },
+    {
       "identity" : "promises",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/google/promises.git",
@@ -161,6 +170,15 @@
       "state" : {
         "revision" : "ebc7251dd5b37f627c93698e4374084d98409633",
         "version" : "1.28.2"
+      }
+    },
+    {
+      "identity" : "ziparchive",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/ZipArchive/ZipArchive",
+      "state" : {
+        "revision" : "df35718ea19a94e015b91dc4881dee028ce4cdba",
+        "version" : "2.6.0"
       }
     },
     {

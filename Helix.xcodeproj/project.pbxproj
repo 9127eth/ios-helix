@@ -12,6 +12,8 @@
 		027F56452D6B9AFF003B85C7 /* ZIPFoundation in Frameworks */ = {isa = PBXBuildFile; productRef = 027F56442D6B9AFF003B85C7 /* ZIPFoundation */; };
 		027F56562D6BF711003B85C7 /* pass.com.rxradio.helix.p12 in Resources */ = {isa = PBXBuildFile; fileRef = 027F56552D6BF710003B85C7 /* pass.com.rxradio.helix.p12 */; };
 		027F56582D6C0448003B85C7 /* AppleWWDRCAG4.cer in Resources */ = {isa = PBXBuildFile; fileRef = 027F56572D6C0447003B85C7 /* AppleWWDRCAG4.cer */; };
+		027F565C2D6C3A97003B85C7 /* OpenSSL in Frameworks */ = {isa = PBXBuildFile; productRef = 027F565B2D6C3A97003B85C7 /* OpenSSL */; };
+		027F56602D6D288A003B85C7 /* ZipArchive in Frameworks */ = {isa = PBXBuildFile; productRef = 027F565F2D6D288A003B85C7 /* ZipArchive */; };
 		02B87DA22CC06CFE00C8C644 /* FontAwesome in Frameworks */ = {isa = PBXBuildFile; productRef = 02B87DA12CC06CFE00C8C644 /* FontAwesome */; };
 		02B87DA42CC06CFE00C8C644 /* tools in Frameworks */ = {isa = PBXBuildFile; productRef = 02B87DA32CC06CFE00C8C644 /* tools */; };
 		02B87DB82CC2F37D00C8C644 /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 02B87DB72CC2F37C00C8C644 /* StoreKit.framework */; };
@@ -112,6 +114,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				027F565C2D6C3A97003B85C7 /* OpenSSL in Frameworks */,
 				02B87DA22CC06CFE00C8C644 /* FontAwesome in Frameworks */,
 				02F464CA2CB788C00034711F /* GoogleSignInSwift in Frameworks */,
 				02F464C92CB788C00034711F /* GoogleSignIn in Frameworks */,
@@ -126,6 +129,7 @@
 				02B87DB82CC2F37D00C8C644 /* StoreKit.framework in Frameworks */,
 				02F464AB2CB788300034711F /* GoogleSignIn in Frameworks */,
 				027F56452D6B9AFF003B85C7 /* ZIPFoundation in Frameworks */,
+				027F56602D6D288A003B85C7 /* ZipArchive in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -213,6 +217,8 @@
 				02B87DA12CC06CFE00C8C644 /* FontAwesome */,
 				02B87DA32CC06CFE00C8C644 /* tools */,
 				027F56442D6B9AFF003B85C7 /* ZIPFoundation */,
+				027F565B2D6C3A97003B85C7 /* OpenSSL */,
+				027F565F2D6D288A003B85C7 /* ZipArchive */,
 			);
 			productName = Helix;
 			productReference = 02F4644F2CB4E6130034711F /* Helix.app */;
@@ -302,6 +308,9 @@
 				0252AE7E2CBB58740076FAE0 /* XCRemoteSwiftPackageReference "libPhoneNumber-iOS" */,
 				02B87DA02CC06CFE00C8C644 /* XCRemoteSwiftPackageReference "FontAwesome" */,
 				027F56432D6B9AFF003B85C7 /* XCRemoteSwiftPackageReference "ZIPFoundation" */,
+				027F565A2D6C3A97003B85C7 /* XCRemoteSwiftPackageReference "OpenSSL" */,
+				027F565E2D6D288A003B85C7 /* XCRemoteSwiftPackageReference "ZipArchive" */,
+				027F56612D6D3689003B85C7 /* XCRemoteSwiftPackageReference "passkit-generator" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 02F464502CB4E6130034711F /* Products */;
@@ -709,6 +718,30 @@
 				minimumVersion = 0.9.19;
 			};
 		};
+		027F565A2D6C3A97003B85C7 /* XCRemoteSwiftPackageReference "OpenSSL" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/krzyzanowskim/OpenSSL.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 3.3.2000;
+			};
+		};
+		027F565E2D6D288A003B85C7 /* XCRemoteSwiftPackageReference "ZipArchive" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/ZipArchive/ZipArchive";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.6.0;
+			};
+		};
+		027F56612D6D3689003B85C7 /* XCRemoteSwiftPackageReference "passkit-generator" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/alexandercerutti/passkit-generator";
+			requirement = {
+				branch = master;
+				kind = branch;
+			};
+		};
 		02B87DA02CC06CFE00C8C644 /* XCRemoteSwiftPackageReference "FontAwesome" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/thii/FontAwesome.swift";
@@ -745,6 +778,16 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 027F56432D6B9AFF003B85C7 /* XCRemoteSwiftPackageReference "ZIPFoundation" */;
 			productName = ZIPFoundation;
+		};
+		027F565B2D6C3A97003B85C7 /* OpenSSL */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 027F565A2D6C3A97003B85C7 /* XCRemoteSwiftPackageReference "OpenSSL" */;
+			productName = OpenSSL;
+		};
+		027F565F2D6D288A003B85C7 /* ZipArchive */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 027F565E2D6D288A003B85C7 /* XCRemoteSwiftPackageReference "ZipArchive" */;
+			productName = ZipArchive;
 		};
 		02B87DA12CC06CFE00C8C644 /* FontAwesome */ = {
 			isa = XCSwiftPackageProductDependency;
