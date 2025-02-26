@@ -2,6 +2,7 @@ const functions = require("firebase-functions");
 const fs = require("fs");
 const path = require("path");
 const {PKPass} = require("passkit-generator");
+const axios = require("axios"); // Add axios for HTTP requests
 
 // Load certificates
 const wwdr = fs.readFileSync(
@@ -49,7 +50,7 @@ exports.generatePassV2 = functions.https.onRequest(async (req, res) => {
   }
   
   try {
-    const {firstName, lastName, company, jobTitle, cardSlug, cardURL, description} = req.body;
+    const {firstName, lastName, company, jobTitle, cardSlug, cardURL, description, phoneNumber, email, imageUrl} = req.body;
     
     console.log(`Generating pass for: ${firstName} ${lastName}`);
     
@@ -72,31 +73,65 @@ exports.generatePassV2 = functions.https.onRequest(async (req, res) => {
       passJson.foregroundColor = templatePassJson.foregroundColor;
       passJson.backgroundColor = templatePassJson.backgroundColor;
       passJson.labelColor = templatePassJson.labelColor;
-      passJson.logoText = templatePassJson.logoText;
       
       // Use template structure for fields but with dynamic content
       passJson.generic = {
-        primaryFields: [
-          { 
-            key: "name", 
-            value: `${firstName} ${lastName}`,
-            textAlignment: "PKTextAlignmentLeft"
-          }
-        ],
-        secondaryFields: [
-          { 
-            key: "position_company", 
-            value: company && jobTitle ? `${jobTitle} | ${company}` : (company || jobTitle || ""),
-            textAlignment: "PKTextAlignmentLeft"
-          }
-        ],
-        auxiliaryFields: [
+        // Move description to header fields (top right)
+        headerFields: [
           {
             key: "card_description",
             value: description || "Helix Business Card",
             textAlignment: "PKTextAlignmentRight"
           }
-        ]
+        ],
+        // Primary field for name with line break to shift it down
+        primaryFields: [
+          { 
+            key: "name", 
+            value: `\n${firstName} ${lastName}`,
+            textAlignment: "PKTextAlignmentLeft"
+          }
+        ],
+        // Secondary fields for position and company with better spacing around the separator
+        secondaryFields: [
+          { 
+            key: "position_company", 
+            value: company && jobTitle ? `${jobTitle}  |  ${company}` : (company || jobTitle || ""),
+            textAlignment: "PKTextAlignmentLeft"
+          }
+        ],
+        // Simple auxiliary fields without labels and without line break attempts
+        auxiliaryFields: [
+          phoneNumber ? {
+            key: "phone",
+            value: phoneNumber,
+            textAlignment: "PKTextAlignmentLeft"
+          } : null,
+          email ? {
+            key: "email",
+            value: email,
+            textAlignment: "PKTextAlignmentLeft"
+          } : null
+        ].filter(field => field !== null),
+        
+        // Simple back fields
+        backFields: [
+          phoneNumber ? {
+            key: "phone_back",
+            label: "Phone",
+            value: phoneNumber
+          } : null,
+          email ? {
+            key: "email_back",
+            label: "Email",
+            value: email
+          } : null,
+          {
+            key: "about",
+            label: "About This Card",
+            value: "This digital business card was created with Helix.\n\nTap the QR code to view the full digital card online."
+          }
+        ].filter(field => field !== null)
       };
       
       console.log("Successfully loaded design elements from template");
@@ -144,6 +179,24 @@ exports.generatePassV2 = functions.https.onRequest(async (req, res) => {
     const initialBuffers = {
       "pass.json": Buffer.from(JSON.stringify(passJson))
     };
+    
+    // Download profile image if available and use as thumbnail
+    if (imageUrl && imageUrl.trim() !== "") {
+      try {
+        console.log(`Downloading profile image from: ${imageUrl}`);
+        const imageResponse = await axios.get(imageUrl, { responseType: 'arraybuffer' });
+        
+        // Add the image as thumbnail
+        initialBuffers["thumbnail.png"] = Buffer.from(imageResponse.data);
+        console.log("Added profile image as thumbnail.png");
+        
+        // Also add as thumbnail@2x for better resolution on newer devices
+        initialBuffers["thumbnail@2x.png"] = Buffer.from(imageResponse.data);
+        console.log("Added profile image as thumbnail@2x.png");
+      } catch (imageError) {
+        console.error("Error downloading profile image:", imageError);
+      }
+    }
     
     // Load icon.png if it exists
     try {

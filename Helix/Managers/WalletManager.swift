@@ -8,6 +8,7 @@ import Security
 import Firebase
 import FirebaseFunctions
 import FirebaseAuth
+import FirebaseFirestore
 
 enum WalletError: Error, LocalizedError {
     case passCreationFailed
@@ -63,6 +64,10 @@ class WalletManager {
     func createPass(for card: BusinessCard) async throws -> PKPass {
         print("Starting pass creation for card: \(card.firstName) \(card.lastName ?? "")")
         
+        // Fetch the username from Firebase
+        let username = await fetchUsernameFromFirebase()
+        print("Using username for card URL: \(username)")
+        
         // Create URL for the function
         let functionURL = URL(string: "https://us-central1-helixcardapp.cloudfunctions.net/generatePassV2")!
         
@@ -79,8 +84,11 @@ class WalletManager {
             "company": card.company ?? "",
             "jobTitle": card.jobTitle ?? "",
             "cardSlug": card.cardSlug,
-            "cardURL": card.getCardURL(username: getUsernameFromFirebase() ?? ""),
-            "description": card.description
+            "cardURL": card.getCardURL(username: username),
+            "description": card.description,
+            "phoneNumber": card.phoneNumber ?? "",
+            "email": card.email ?? "",
+            "imageUrl": card.imageUrl ?? ""
         ]
         
         // Set the request body
@@ -394,10 +402,38 @@ class WalletManager {
         return success
     }
     
+    // Add a new method to fetch the username asynchronously
+    private func fetchUsernameFromFirebase() async -> String {
+        // Get the current user
+        guard let currentUser = Auth.auth().currentUser else {
+            print("Error: No authenticated user found")
+            return "guest" // Fallback value
+        }
+        
+        let uid = currentUser.uid
+        
+        do {
+            let db = Firestore.firestore()
+            let userDoc = try await db.collection("users").document(uid).getDocument()
+            
+            if let userData = userDoc.data(),
+               let username = userData["username"] as? String {
+                print("Retrieved username from Firebase: \(username)")
+                return username
+            } else {
+                print("No username found in user document, using UID instead")
+                return uid
+            }
+        } catch {
+            print("Error fetching username from Firebase: \(error.localizedDescription)")
+            return uid
+        }
+    }
+    
     private func getUsernameFromFirebase() -> String? {
-        // In a real implementation, you would fetch this from Firebase
-        // For now, return a placeholder or implement the actual fetch
-        return "user123" // Replace with actual implementation
+        // This method is kept for backward compatibility
+        // But we should use fetchUsernameFromFirebase() for new code
+        return Auth.auth().currentUser?.uid
     }
 }
 
