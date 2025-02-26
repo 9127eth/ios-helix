@@ -3,6 +3,7 @@ const fs = require("fs");
 const path = require("path");
 const {PKPass} = require("passkit-generator");
 const axios = require("axios"); // Add axios for HTTP requests
+const sharp = require("sharp"); // Add sharp for image processing
 
 // Load certificates
 const wwdr = fs.readFileSync(
@@ -53,6 +54,8 @@ exports.generatePassV2 = functions.https.onRequest(async (req, res) => {
     const {firstName, lastName, company, jobTitle, cardSlug, cardURL, description, phoneNumber, email, imageUrl} = req.body;
     
     console.log(`Generating pass for: ${firstName} ${lastName}`);
+    
+    console.log("Received request with imageUrl:", imageUrl);
     
     // Create pass.json content - keep the critical identifiers
     const passJson = {
@@ -185,14 +188,54 @@ exports.generatePassV2 = functions.https.onRequest(async (req, res) => {
       try {
         console.log(`Downloading profile image from: ${imageUrl}`);
         const imageResponse = await axios.get(imageUrl, { responseType: 'arraybuffer' });
+        console.log(`Downloaded image: ${imageResponse.data.length} bytes`);
         
-        // Add the image as thumbnail
-        initialBuffers["thumbnail.png"] = Buffer.from(imageResponse.data);
-        console.log("Added profile image as thumbnail.png");
-        
-        // Also add as thumbnail@2x for better resolution on newer devices
-        initialBuffers["thumbnail@2x.png"] = Buffer.from(imageResponse.data);
-        console.log("Added profile image as thumbnail@2x.png");
+        try {
+          // Create a circular version of the image using SVG mask
+          // This approach should work with any version of Sharp
+          const svgCircle = Buffer.from(`
+            <svg width="90" height="90">
+              <circle cx="45" cy="45" r="45" fill="white"/>
+            </svg>`);
+            
+          const svgCircle2x = Buffer.from(`
+            <svg width="180" height="180">
+              <circle cx="90" cy="90" r="90" fill="white"/>
+            </svg>`);
+          
+          // Process standard resolution image
+          const thumbnailBuffer = await sharp(Buffer.from(imageResponse.data))
+            .resize(90, 90, { fit: 'cover' }) // Resize to square
+            .composite([{
+              input: svgCircle,
+              blend: 'dest-in'
+            }])
+            .png()
+            .toBuffer();
+          
+          // Process 2x resolution image
+          const thumbnail2xBuffer = await sharp(Buffer.from(imageResponse.data))
+            .resize(180, 180, { fit: 'cover' }) // Resize to square
+            .composite([{
+              input: svgCircle2x,
+              blend: 'dest-in'
+            }])
+            .png()
+            .toBuffer();
+          
+          // Add the processed images to the pass
+          initialBuffers["thumbnail.png"] = thumbnailBuffer;
+          initialBuffers["thumbnail@2x.png"] = thumbnail2xBuffer;
+          
+          console.log("Successfully created circular thumbnails");
+        } catch (sharpError) {
+          console.error("Error processing image with Sharp:", sharpError);
+          
+          // Fallback to using the original image
+          initialBuffers["thumbnail.png"] = Buffer.from(imageResponse.data);
+          initialBuffers["thumbnail@2x.png"] = Buffer.from(imageResponse.data);
+          console.log("Using raw image as thumbnail (fallback after Sharp error)");
+        }
       } catch (imageError) {
         console.error("Error downloading profile image:", imageError);
       }
@@ -214,7 +257,7 @@ exports.generatePassV2 = functions.https.onRequest(async (req, res) => {
       console.error("Error loading icon@2x.png:", error);
     }
     
-    // Create icon@3x.png from icon@2x.png if it doesn't exist
+    // Load icon@3x.png if it doesn't exist
     try {
       if (fs.existsSync(path.join(MODEL_PATH, "icon@3x.png"))) {
         initialBuffers["icon@3x.png"] = fs.readFileSync(path.join(MODEL_PATH, "icon@3x.png"));

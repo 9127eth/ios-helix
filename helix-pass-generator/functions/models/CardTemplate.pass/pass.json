@@ -43,5 +43,6 @@
   "logo": "logo.png",
   "logo@2x": "logo@2x.png",
   "strip": "strip.png",
-  "strip@2x": "strip@2x.png"
+  "strip@2x": "strip@2x.png",
+  "thumbnails": ["thumbnail.png", "thumbnail@2x.png"]
 } 
