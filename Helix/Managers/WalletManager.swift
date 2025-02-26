@@ -435,6 +435,32 @@ class WalletManager {
         // But we should use fetchUsernameFromFirebase() for new code
         return Auth.auth().currentUser?.uid
     }
+    
+    // Simplify the passExists method - keep this to determine button text
+    func passExists(for card: BusinessCard) -> Bool {
+        let passLibrary = PKPassLibrary()
+        
+        // Get all passes
+        let allPasses = passLibrary.passes()
+        
+        // Check if any pass has the same serial number as our card's slug
+        // and matches our pass type identifier
+        return allPasses.contains { pass in
+            return pass.serialNumber == card.cardSlug && 
+                   pass.passTypeIdentifier == passTypeIdentifier
+        }
+    }
+    
+    // Keep the updatePass method - it's still needed for updating passes
+    func updatePass(for card: BusinessCard) async throws -> PKPass {
+        print("Updating pass for card: \(card.firstName) \(card.lastName ?? "")")
+        
+        // Create a new pass - the same process as creating a pass
+        let newPass = try await createPass(for: card)
+        
+        // The PKPassLibrary will handle replacing the existing pass
+        return newPass
+    }
 }
 
 // SHA1 implementation for manifest hashing

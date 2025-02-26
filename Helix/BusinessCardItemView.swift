@@ -92,8 +92,15 @@ struct BusinessCardItemView: View {
         } message: {
             Text(walletViewModel.error?.localizedDescription ?? "Unable to add to wallet")
         }
-        .onChange(of: walletViewModel.error) { error in
-            showWalletError = error != nil
+        .onReceive(walletViewModel.$error) { error in
+            if let error = error {
+                print("Showing wallet error: \(error.localizedDescription)")
+                showWalletError = true
+            }
+        }
+        .onAppear {
+            // Check if a pass exists for this card when the view appears
+            walletViewModel.checkPassStatus(for: card)
         }
     }
     
@@ -102,6 +109,18 @@ struct BusinessCardItemView: View {
             actionButton(title: "Edit", action: { showingEditView = true })
             actionButton(title: "Preview", action: { showPreview = true })
             actionButton(title: "Share", action: { showShare = true })
+            
+            // Use a custom wallet button with consistent styling
+            Button(action: { addToWallet() }) {
+                Text(walletViewModel.passExists ? "Update Your Wallet" : "Add to Wallet")
+                    .font(.system(size: 15, weight: .medium))
+                    .foregroundColor(AppColors.buttonText)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 40)
+                    .background(AppColors.secondary)
+                    .cornerRadius(12)
+            }
+            .frame(width: 160)
         }
         .padding(.vertical, 20)
     }
@@ -183,11 +202,7 @@ struct BusinessCardItemView: View {
                         Button {
                             addToWallet()
                         } label: {
-                            Label {
-                                Text("Add to Wallet")
-                            } icon: {
-                                Image(systemName: "wallet.pass")
-                            }
+                            walletButtonLabel
                         }
                         Button {
                             showColorPicker = true
@@ -368,6 +383,18 @@ struct BusinessCardItemView: View {
         }
 
         return result
+    }
+    
+    private var walletButtonLabel: some View {
+        Label {
+            if walletViewModel.passExists {
+                Text("Update in Apple Wallet")
+            } else {
+                Text("Add to Wallet")
+            }
+        } icon: {
+            Image(systemName: "wallet.pass")
+        }
     }
 }
 
