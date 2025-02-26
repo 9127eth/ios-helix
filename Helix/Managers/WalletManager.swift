@@ -79,7 +79,8 @@ class WalletManager {
             "company": card.company ?? "",
             "jobTitle": card.jobTitle ?? "",
             "cardSlug": card.cardSlug,
-            "cardURL": card.getCardURL(username: getUsernameFromFirebase() ?? "")
+            "cardURL": card.getCardURL(username: getUsernameFromFirebase() ?? ""),
+            "description": card.description
         ]
         
         // Set the request body

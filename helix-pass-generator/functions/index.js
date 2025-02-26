@@ -49,7 +49,7 @@ exports.generatePassV2 = functions.https.onRequest(async (req, res) => {
   }
   
   try {
-    const {firstName, lastName, company, jobTitle, cardSlug, cardURL} = req.body;
+    const {firstName, lastName, company, jobTitle, cardSlug, cardURL, description} = req.body;
     
     console.log(`Generating pass for: ${firstName} ${lastName}`);
     
@@ -79,24 +79,24 @@ exports.generatePassV2 = functions.https.onRequest(async (req, res) => {
         primaryFields: [
           { 
             key: "name", 
-            label: templatePassJson.generic?.primaryFields?.[0]?.label || "Name",
             value: `${firstName} ${lastName}`,
+            textAlignment: "PKTextAlignmentLeft"
           }
         ],
-        secondaryFields: company ? [
+        secondaryFields: [
           { 
-            key: "company", 
-            label: templatePassJson.generic?.secondaryFields?.[0]?.label || "COMPANY", 
-            value: company,
+            key: "position_company", 
+            value: company && jobTitle ? `${jobTitle} | ${company}` : (company || jobTitle || ""),
+            textAlignment: "PKTextAlignmentLeft"
           }
-        ] : [],
-        auxiliaryFields: jobTitle ? [
-          { 
-            key: "title", 
-            label: templatePassJson.generic?.secondaryFields?.[1]?.label || "TITLE", 
-            value: jobTitle,
+        ],
+        auxiliaryFields: [
+          {
+            key: "card_description",
+            value: description || "Helix Business Card",
+            textAlignment: "PKTextAlignmentRight"
           }
-        ] : []
+        ]
       };
       
       console.log("Successfully loaded design elements from template");

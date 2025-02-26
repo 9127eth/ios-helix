@@ -5,28 +5,29 @@
   "serialNumber": "",
   "organizationName": "Helix",
   "description": "Digital Business Card",
-  "logoText": "Helix",
   "foregroundColor": "rgb(0, 0, 0)",
-  "backgroundColor": "rgb(255, 255, 255)",
+  "backgroundColor": "rgb(217, 217, 217)",
   "labelColor": "rgb(0, 0, 0)",
   "generic": {
     "primaryFields": [
       {
         "key": "name",
-        "label": "Name",
-        "value": ""
+        "value": "",
+        "textAlignment": "PKTextAlignmentLeft"
       }
     ],
     "secondaryFields": [
       {
-        "key": "company",
-        "label": "Company",
-        "value": ""
-      },
+        "key": "position_company",
+        "value": "",
+        "textAlignment": "PKTextAlignmentLeft"
+      }
+    ],
+    "auxiliaryFields": [
       {
-        "key": "title",
-        "label": "Title",
-        "value": ""
+        "key": "card_description",
+        "value": "Helix Business Card",
+        "textAlignment": "PKTextAlignmentRight"
       }
     ]
   },
