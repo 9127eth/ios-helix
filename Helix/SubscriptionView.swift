@@ -81,7 +81,7 @@ struct SubscriptionView: View {
                                 "AI powered business card scanning",
                                 "CV/Resume Upload",
                                 "Link to physical card via NFC",
-                                "Image Upload"
+                                "Add to Apple Wallet"
                             ],
                             isCurrentPlan: isPro,
                             action: {
@@ -98,7 +98,7 @@ struct SubscriptionView: View {
                             features: [
                                 "1 free business card",
                                 "Link to physical card via NFC",
-                                "Image Upload"
+                                "Add to Apple Wallet"
                             ],
                             disabledFeatures: [
                                 "Up to 10 business cards",

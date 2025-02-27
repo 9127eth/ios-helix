@@ -88,7 +88,8 @@ class WalletManager {
             "description": card.description,
             "phoneNumber": card.phoneNumber ?? "",
             "email": card.email ?? "",
-            "imageUrl": card.imageUrl ?? ""
+            "imageUrl": card.imageUrl ?? "",
+            "username": username  // Add the username to the request
         ]
         
         // Set the request body

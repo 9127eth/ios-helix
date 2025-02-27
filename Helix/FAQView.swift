@@ -36,6 +36,22 @@ struct FAQView: View {
             answer: "You can include your name, title, company, contact information (phone, email), social media links, profile photo, about me section, pronouns, custom message, and even upload documents like your CV (available in Pro version)."
         ),
         FAQItem(
+            question: "Can I add my digital business card to Apple Wallet?",
+            answer: "Yes! You can add your digital business card to Apple Wallet for quick and easy access. This feature allows you to share your contact information even without an internet connection."
+        ),
+        FAQItem(
+            question: "How do I add my card to Apple Wallet?",
+            answer: "To add your card to Apple Wallet, open your digital business card in the Helix app, tap on the 3 dots menu button, and select 'Add to Apple Wallet'. Follow the on-screen instructions to complete the process. Your card will then be available in your Apple Wallet for quick access."
+        ),
+        FAQItem(
+            question: "What are the benefits of adding my card to Apple Wallet?",
+            answer: "Adding your digital business card to Apple Wallet provides several benefits: offline access to share your card without internet, quick access with just a few taps, and the ability to share your contact information even when your phone is in low battery mode."
+        ),
+        FAQItem(
+            question: "Will my Apple Wallet card update automatically?",
+            answer: "When you make changes to your digital business card, you'll need to update your Apple Wallet card. Simply follow the same process to add it to Apple Wallet again, and the new version will replace the old one."
+        ),
+        FAQItem(
             question: "Do you have a mobile app?",
             answer: "Yes! We have an iOS app available on the App Store. Our Android app is currently in development and coming soon. In the meantime, Android users can access all features through our mobile-responsive website."
         ),
@@ -54,6 +70,10 @@ struct FAQView: View {
         FAQItem(
             question: "What is an NFC card and how does it work?",
             answer: "An NFC (Near Field Communication) card contains a small chip that wirelessly shares your digital business card when tapped with a smartphone. For iPhone users, simply hold the card near the top of your phone. For Android users, ensure NFC is enabled in settings and tap the card against the back of your phone. When tapped, your phone will instantly receive a notification to view the digital business card - no app download required."
+        ),
+        FAQItem(
+            question: "How does the AI-powered business card scanning feature work?",
+            answer: "Our Pro subscription includes an AI-powered business card scanning tool that allows you to quickly capture and save contacts from physical business cards. Simply open the Helix app, navigate to contacts, hit create new, and our AI will automatically extract the contact information. You can review and edit the extracted information before saving it to your contacts. This feature saves you time and eliminates manual data entry."
         ),
         FAQItem(
             question: "Will my digital business card automatically update if I make changes?",

@@ -23,6 +23,36 @@ const MODEL_PATH = path.join(__dirname, "models", "CardTemplate.pass");
 // Simple API key for basic security
 const API_KEY = "helix-wallet-api-key-12345"; // Change this to something secure
 
+// Add rate limiting with a simple in-memory store based on usernames
+// Note: This is reset when the function instance is recycled
+const rateLimits = {
+  userRequests: {},
+  lastResetTime: Date.now()
+};
+
+// Rate limit configuration
+const RATE_LIMIT = {
+  requestsPerUser: 30,    // Maximum requests per username per day
+  resetIntervalMs: 86400000, // Reset counter every day (86400000 ms)
+};
+
+// Function to check and update rate limits
+function checkRateLimit(username) {
+  const now = Date.now();
+  
+  // Reset counters if the interval has passed
+  if (now - rateLimits.lastResetTime > RATE_LIMIT.resetIntervalMs) {
+    rateLimits.userRequests = {};
+    rateLimits.lastResetTime = now;
+  }
+  
+  // Initialize or increment the counter for this user
+  rateLimits.userRequests[username] = (rateLimits.userRequests[username] || 0) + 1;
+  
+  // Check if the user has exceeded the limit
+  return rateLimits.userRequests[username] <= RATE_LIMIT.requestsPerUser;
+}
+
 exports.generatePassV2 = functions.https.onRequest(async (req, res) => {
   // Enable CORS
   res.set("Access-Control-Allow-Origin", "*");
@@ -51,9 +81,26 @@ exports.generatePassV2 = functions.https.onRequest(async (req, res) => {
   }
   
   try {
-    const {firstName, lastName, company, jobTitle, cardSlug, cardURL, description, phoneNumber, email, imageUrl} = req.body;
+    const {firstName, lastName, company, jobTitle, cardSlug, cardURL, description, phoneNumber, email, imageUrl, username} = req.body;
     
-    console.log(`Generating pass for: ${firstName} ${lastName}`);
+    // Ensure username is provided
+    if (!username) {
+      return res.status(400).json({
+        error: "Bad Request",
+        details: "Username is required for rate limiting"
+      });
+    }
+    
+    console.log(`Generating pass for: ${firstName} ${lastName} (username: ${username})`);
+    
+    // Apply rate limiting based on username
+    if (!checkRateLimit(username)) {
+      console.log(`Rate limit exceeded for user: ${username}`);
+      return res.status(429).json({
+        error: "Too Many Requests",
+        details: "You've reached the daily limit for generating wallet passes. Please try again tomorrow."
+      });
+    }
     
     console.log("Received request with imageUrl:", imageUrl);
     
