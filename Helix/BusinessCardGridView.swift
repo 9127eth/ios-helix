@@ -18,8 +18,8 @@ struct BusinessCardGridView: View {
     @State private var showSubscriptionView = false
     @State private var showUpgradeModal = false
     @State private var showMaxCardsAlert = false
-    @State private var showWalletProTip = true
-    @State private var showSwipeProTip = true
+    @State private var showWalletProTip = !UserDefaults.standard.bool(forKey: "walletProTipDismissed")
+    @State private var showSwipeProTip = !UserDefaults.standard.bool(forKey: "swipeProTipDismissed")
 
     
     @Environment(\.horizontalSizeClass) var sizeClass
@@ -73,7 +73,12 @@ struct BusinessCardGridView: View {
                                 icon: "wallet.pass.fill",
                                 title: "Add to Apple Wallet",
                                 message: "Add your business card to Apple Wallet for quick access and easy sharing with anyone.",
-                                onDismiss: { withAnimation(.easeInOut) { showWalletProTip = false } }
+                                onDismiss: { 
+                                    withAnimation(.easeInOut) { 
+                                        showWalletProTip = false 
+                                        UserDefaults.standard.set(true, forKey: "walletProTipDismissed")
+                                    } 
+                                }
                             )
                             .padding(.horizontal)
                             .padding(.bottom, 8)
@@ -85,7 +90,12 @@ struct BusinessCardGridView: View {
                                 icon: "hand.draw.fill",
                                 title: "Quick Actions",
                                 message: "Swipe right on any card to access quick actions like share, edit, or delete.",
-                                onDismiss: { withAnimation(.easeInOut) { showSwipeProTip = false } }
+                                onDismiss: { 
+                                    withAnimation(.easeInOut) { 
+                                        showSwipeProTip = false 
+                                        UserDefaults.standard.set(true, forKey: "swipeProTipDismissed")
+                                    } 
+                                }
                             )
                             .padding(.horizontal)
                             .padding(.bottom, 8)
@@ -126,7 +136,7 @@ struct BusinessCardGridView: View {
                                     VStack(alignment: .leading, spacing: 16) {
                                         proFeatureRow(icon: "infinity", title: "More Business Cards", description: "Create different cards for different roles, businesses, or networking contexts")
                                         
-                                        proFeatureRow(icon: "qrcode.viewfinder", title: "Business Card Scanner", description: "Use our AI to instantly scan and save physical business cards to your contacts")
+                                        proFeatureRow(icon: "qrcode.viewfinder", title: "Business Card Scanner", description: "Use our AI to instantly scan and save physical business cards to your contacts using your phone's camera")
                                         
                                         proFeatureRow(icon: "doc.text.fill", title: "Add Your CV/Resume", description: "Attach your professional resume to your business card for a complete professional profile")
                                         
