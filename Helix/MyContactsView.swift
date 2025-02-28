@@ -38,7 +38,6 @@ struct MyContactsView: View {
     @FocusState private var isSearchFocused: Bool
     @State private var isShowingContactCreationEntry = false
     @State private var showUpgradeModal = false
-    @State private var showProTip = true
     
     enum SortOption {
         case name, dateAdded
@@ -104,67 +103,26 @@ struct MyContactsView: View {
                         }
                         .padding(.trailing, 8)
                         
-                        // Only show the Create New button if there's at least one contact
-                        if !contacts.isEmpty {
-                            Button(action: {
+                        Button(action: {
+                            if !isPro && contacts.count >= 2 {
+                                showUpgradeModal = true
+                            } else {
+                                isShowingContactCreationEntry = true
+                            }
+                        }) {
+                            AddContactButton(action: {
                                 if !isPro && contacts.count >= 2 {
                                     showUpgradeModal = true
                                 } else {
                                     isShowingContactCreationEntry = true
                                 }
-                            }) {
-                                AddContactButton(action: {
-                                    if !isPro && contacts.count >= 2 {
-                                        showUpgradeModal = true
-                                    } else {
-                                        isShowingContactCreationEntry = true
-                                    }
-                                })
-                            }
+                            })
                         }
                         
                         Spacer()
                     }
                     .padding(.horizontal)
                     .padding(.vertical, 16)
-                    
-                    // Pro Tip banner (visible when there's at least one contact and showProTip is true)
-                    if !contacts.isEmpty && showProTip {
-                        HStack(alignment: .top, spacing: 12) {
-                            Image(systemName: "lightbulb.fill")
-                                .foregroundColor(AppColors.helixPro)
-                            
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text("Pro Tip")
-                                    .font(.headline)
-                                    .foregroundColor(AppColors.bodyPrimaryText)
-                                
-                                Text("Use tags to organize your contacts and optimize bulk exports to your CRM system.")
-                                    .font(.subheadline)
-                                    .foregroundColor(AppColors.bodyPrimaryText.opacity(0.8))
-                                    .fixedSize(horizontal: false, vertical: true)
-                            }
-                            
-                            Spacer()
-                            
-                            Button(action: {
-                                withAnimation(.easeInOut) {
-                                    showProTip = false
-                                }
-                            }) {
-                                Image(systemName: "xmark")
-                                    .foregroundColor(AppColors.bodyPrimaryText.opacity(0.6))
-                                    .padding(8)
-                            }
-                        }
-                        .padding()
-                        .background(Color.gray.opacity(0.10))
-                        .cornerRadius(16)
-                        .padding(.horizontal)
-                        .padding(.bottom, 12)
-                        .transition(.move(edge: .top).combined(with: .opacity))
-                        .animation(.easeInOut, value: !contacts.isEmpty)
-                    }
                     
                     // Search and filters with Select button
                     VStack(spacing: 12) {
@@ -280,12 +238,11 @@ struct MyContactsView: View {
                                         Text("Add Your First Contact")
                                     }
                                     .font(.headline)
-                                    .foregroundColor(.black)
+                                    .foregroundColor(AppColors.buttonText)
                                     .frame(maxWidth: .infinity)
                                     .padding()
-                                    .background(AppColors.cardDepthDefault)
+                                    .background(AppColors.buttonBackground)
                                     .cornerRadius(16)
-                                    .shadow(color: Color.black.opacity(0.1), radius: 2, x: 0, y: 1)
                                 }
                                 .padding(.horizontal, 40)
                                 .padding(.top, 8)
@@ -374,69 +331,6 @@ struct MyContactsView: View {
                             }
                         }
                         .padding(.horizontal)
-                        
-                        // Add the new promotional content
-                        if !isPro && !contacts.isEmpty {
-                            VStack(spacing: 24) {
-                                // Add this new title section
-                                Text("Unlock AI-Powered Networking")
-                                    .font(.title2)
-                                    .fontWeight(.bold)
-                                    .foregroundColor(AppColors.bodyPrimaryText)
-                                    .frame(maxWidth: .infinity, alignment: .center)
-                                    .padding(.bottom, 8)
-                                
-                                // Existing feature cards
-                                ForEach(proFeatures) { feature in
-                                    HStack(spacing: 16) {
-                                        Image(feature.icon)
-                                            .renderingMode(.template)
-                                            .foregroundColor(AppColors.helixPro)
-                                            .frame(width: 24, height: 24)
-                                        
-                                        VStack(alignment: .leading, spacing: 4) {
-                                            Text(feature.title)
-                                                .font(.headline)
-                                                .foregroundColor(AppColors.bodyPrimaryText)
-                                            
-                                            Text(feature.description)
-                                                .font(.subheadline)
-                                                .foregroundColor(AppColors.bodyPrimaryText.opacity(0.8))
-                                                .fixedSize(horizontal: false, vertical: true)
-                                        }
-                                    }
-                                    .padding()
-                                    .frame(maxWidth: .infinity, alignment: .leading)
-                                    .background(Color.gray.opacity(0.10))
-                                    .cornerRadius(16)
-                                }
-                                
-                                // Add this new text
-                                Text("Try it now by hitting the Create New button at the top of this page. You can create 2 contacts to see how it works before upgrading.")
-                                    .font(.subheadline)
-                                    .foregroundColor(AppColors.bodyPrimaryText.opacity(0.8))
-                                    .multilineTextAlignment(.center)
-                                    .padding(.horizontal)
-                                    .padding(.vertical, 8)
-                                
-                                // Existing upgrade button
-                                Button(action: {
-                                    showSubscriptionView = true
-                                }) {
-                                    HStack {
-                                        Image(systemName: "bolt.fill")
-                                        Text("Upgrade to Helix Pro")
-                                    }
-                                    .font(.headline)
-                                    .foregroundColor(AppColors.buttonText)
-                                    .frame(maxWidth: .infinity)
-                                    .padding()
-                                    .background(AppColors.buttonBackground)
-                                    .cornerRadius(16)
-                                }
-                            }
-                            .padding()
-                        }
                     }
                 }
             }
@@ -484,10 +378,6 @@ struct MyContactsView: View {
         }
         .onAppear {
             fetchContacts()
-            // Reset Pro Tip visibility when the view appears
-            if !contacts.isEmpty {
-                showProTip = true
-            }
         }
     }
     

@@ -18,6 +18,8 @@ struct BusinessCardGridView: View {
     @State private var showSubscriptionView = false
     @State private var showUpgradeModal = false
     @State private var showMaxCardsAlert = false
+    @State private var showWalletProTip = true
+    @State private var showSwipeProTip = true
 
     
     @Environment(\.horizontalSizeClass) var sizeClass
@@ -64,6 +66,31 @@ struct BusinessCardGridView: View {
                         }
                         .padding(.horizontal)
                         .padding(.bottom, 4)
+                        
+                        // Pro Tips - only show when there's at least one card and they haven't been dismissed
+                        if showWalletProTip {
+                            ProTipView(
+                                icon: "wallet.pass.fill",
+                                title: "Add to Apple Wallet",
+                                message: "Add your business card to Apple Wallet for quick access and easy sharing with anyone.",
+                                onDismiss: { withAnimation(.easeInOut) { showWalletProTip = false } }
+                            )
+                            .padding(.horizontal)
+                            .padding(.bottom, 8)
+                            .transition(.move(edge: .top).combined(with: .opacity))
+                        }
+                        
+                        if showSwipeProTip {
+                            ProTipView(
+                                icon: "hand.draw.fill",
+                                title: "Quick Actions",
+                                message: "Swipe right on any card to access quick actions like share, edit, or delete.",
+                                onDismiss: { withAnimation(.easeInOut) { showSwipeProTip = false } }
+                            )
+                            .padding(.horizontal)
+                            .padding(.bottom, 8)
+                            .transition(.move(edge: .top).combined(with: .opacity))
+                        }
                     }
                     
                     LazyVStack(spacing: 16) {
@@ -86,6 +113,56 @@ struct BusinessCardGridView: View {
                                     showCreateCard = true
                                 }
                             })
+                            
+                            // Conversion card - only show for non-Pro users with at least one card
+                            if !isPro {
+                                VStack(spacing: 20) {
+                                    Text("Get More with Helix Pro")
+                                        .font(.title2)
+                                        .fontWeight(.bold)
+                                        .foregroundColor(AppColors.bodyPrimaryText)
+                                        .frame(maxWidth: .infinity, alignment: .center)
+                                    
+                                    VStack(alignment: .leading, spacing: 16) {
+                                        proFeatureRow(icon: "infinity", title: "More Business Cards", description: "Create different cards for different roles, businesses, or networking contexts")
+                                        
+                                        proFeatureRow(icon: "qrcode.viewfinder", title: "Business Card Scanner", description: "Use our AI to instantly scan and save physical business cards to your contacts")
+                                        
+                                        proFeatureRow(icon: "doc.text.fill", title: "Add Your CV/Resume", description: "Attach your professional resume to your business card for a complete professional profile")
+                                        
+                                        proFeatureRow(icon: "person.crop.circle.badge.plus", title: "Advanced Contact Management", description: "Organize your network with tags and notes for better relationship management")
+                                    }
+                                    .padding(.vertical, 10)
+                                    
+                                    Button(action: {
+                                        showSubscriptionView = true
+                                    }) {
+                                        HStack {
+                                            Image(systemName: "bolt.fill")
+                                            Text("Upgrade to Helix Pro")
+                                        }
+                                        .font(.headline)
+                                        .foregroundColor(.white)
+                                        .frame(maxWidth: .infinity)
+                                        .padding()
+                                        .background(
+                                            LinearGradient(
+                                                gradient: Gradient(colors: [AppColors.helixPro, AppColors.helixPro.opacity(0.8)]),
+                                                startPoint: .leading,
+                                                endPoint: .trailing
+                                            )
+                                        )
+                                        .cornerRadius(16)
+                                        .shadow(color: AppColors.helixPro.opacity(0.3), radius: 5, x: 0, y: 2)
+                                    }
+                                    .padding(.top, 10)
+                                }
+                                .padding(24)
+                                .background(Color.white)
+                                .cornerRadius(20)
+                                .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5)
+                                .padding(.top, 30)
+                            }
                         }
                     }
                 }
@@ -269,5 +346,69 @@ struct BusinessCardGridView: View {
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "EEEE, MMMM d"
         return dateFormatter.string(from: Date())
+    }
+    
+    private func proFeatureRow(icon: String, title: String, description: String) -> some View {
+        HStack(spacing: 16) {
+            Image(systemName: icon)
+                .font(.system(size: 22))
+                .foregroundColor(AppColors.helixPro)
+                .frame(width: 30, height: 30)
+            
+            VStack(alignment: .leading, spacing: 4) {
+                Text(title)
+                    .font(.headline)
+                    .foregroundColor(AppColors.bodyPrimaryText)
+                
+                Text(description)
+                    .font(.subheadline)
+                    .foregroundColor(AppColors.bodyPrimaryText.opacity(0.7))
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+    }
+}
+
+// Pro Tip View Component
+struct ProTipView: View {
+    let icon: String
+    let title: String
+    let message: String
+    let onDismiss: () -> Void
+    
+    var body: some View {
+        HStack(alignment: .top, spacing: 12) {
+            Image(systemName: icon)
+                .font(.system(size: 22))
+                .foregroundColor(AppColors.helixPro)
+            
+            VStack(alignment: .leading, spacing: 4) {
+                Text("Pro Tip")
+                    .font(.headline)
+                    .foregroundColor(AppColors.bodyPrimaryText)
+                
+                Text(title)
+                    .font(.subheadline)
+                    .fontWeight(.semibold)
+                    .foregroundColor(AppColors.bodyPrimaryText)
+                
+                Text(message)
+                    .font(.subheadline)
+                    .foregroundColor(AppColors.bodyPrimaryText.opacity(0.8))
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            
+            Spacer()
+            
+            Button(action: onDismiss) {
+                Image(systemName: "xmark")
+                    .foregroundColor(AppColors.bodyPrimaryText.opacity(0.6))
+                    .padding(8)
+            }
+        }
+        .padding()
+        .background(Color.gray.opacity(0.10))
+        .cornerRadius(16)
+        .animation(.easeInOut, value: true)
     }
 }
