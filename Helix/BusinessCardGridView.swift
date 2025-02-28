@@ -67,18 +67,26 @@ struct BusinessCardGridView: View {
                     }
                     
                     LazyVStack(spacing: 16) {
+                        if businessCards.isEmpty {
+                            welcomeView
+                        }
+                        
                         ForEach(Array($businessCards.enumerated()), id: \.element.id) { index, $card in
                             BusinessCardItemView(card: $card, username: username)
                         }
-                        AddCardButton(action: {
-                            if businessCards.count >= 10 {
-                                showMaxCardsAlert = true
-                            } else if businessCards.count >= 1 && !isPro {
-                                showUpgradeModal = true
-                            } else {
-                                showCreateCard = true
-                            }
-                        })
+                        
+                        // Only show the AddCardButton when there are already cards
+                        if !businessCards.isEmpty {
+                            AddCardButton(action: {
+                                if businessCards.count >= 10 {
+                                    showMaxCardsAlert = true
+                                } else if businessCards.count >= 1 && !isPro {
+                                    showUpgradeModal = true
+                                } else {
+                                    showCreateCard = true
+                                }
+                            })
+                        }
                     }
                 }
                 .padding()
@@ -149,6 +157,86 @@ struct BusinessCardGridView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.top, 40)
         .padding(.bottom, 10)
+    }
+    
+    private var welcomeView: some View {
+        VStack(alignment: .leading, spacing: 20) {
+            Text("Welcome to Helix! 🎉")
+                .font(.system(size: 28, weight: .bold))
+                .foregroundColor(AppColors.bodyPrimaryText)
+            
+            Text("We're excited to have you join us on this journey!")
+                .font(.headline)
+                .foregroundColor(AppColors.bodyPrimaryText)
+            
+            VStack(alignment: .leading, spacing: 16) {
+                featureItem(
+                    icon: "wand.and.stars",
+                    title: "Create Your Digital Business Card",
+                    description: "Start by creating your first digital business card. Customize it with your information, social links, and profile image."
+                )
+                
+                featureItem(
+                    icon: "wallet.pass",
+                    title: "Add to Your Digital Wallet",
+                    description: "Once created, you can add your card to Apple Wallet for easy access, or link it to an NFC device."
+                )
+                
+                featureItem(
+                    icon: "qrcode",
+                    title: "Share Instantly",
+                    description: "Share your digital card via QR code, link, or tap with compatible NFC devices."
+                )
+                
+                featureItem(
+                    icon: "brain",
+                    title: "AI Scanning Tool",
+                    description: "Use our AI scanning technology to quickly capture and save business cards as digital contacts in your network."
+                )
+            }
+            .padding(.vertical, 10)
+            
+            Button(action: {
+                showCreateCard = true
+            }) {
+                Text("Create Your First Card")
+                    .font(.headline)
+                    .foregroundColor(.black)
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(AppColors.buttonBackground)
+                    .cornerRadius(12)
+            }
+            .padding(.top, 10)
+        }
+        .padding(24)
+        .background(
+            RoundedRectangle(cornerRadius: 16)
+                .fill(AppColors.cardGridBackground)
+                .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
+        )
+        .padding(.horizontal, 8)
+        .padding(.bottom, 24)
+    }
+    
+    private func featureItem(icon: String, title: String, description: String) -> some View {
+        HStack(alignment: .top, spacing: 16) {
+            Image(systemName: icon)
+                .font(.system(size: 24))
+                .foregroundColor(AppColors.buttonBackground)
+                .frame(width: 32, height: 32)
+            
+            VStack(alignment: .leading, spacing: 4) {
+                Text(title)
+                    .font(.headline)
+                    .foregroundColor(AppColors.bodyPrimaryText)
+                
+                Text(description)
+                    .font(.subheadline)
+                    .foregroundColor(AppColors.bodySecondaryText)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
     }
     
     private func opacityForOffset(_ offset: CGFloat) -> Double {
