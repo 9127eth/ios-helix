@@ -23,7 +23,6 @@
 		02F464AD2CB788300034711F /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 02F464AC2CB788300034711F /* GoogleSignInSwift */; };
 		02F464C92CB788C00034711F /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = 02F464892CB4EDA40034711F /* GoogleSignIn */; };
 		02F464CA2CB788C00034711F /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 02F4648A2CB4EDA40034711F /* GoogleSignInSwift */; };
-		02F464E72CB78E720034711F /* Config.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 02F464E62CB78E680034711F /* Config.xcconfig */; };
 		02F464ED2CB795B80034711F /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02F464EC2CB795A50034711F /* AppDelegate.swift */; };
 /* End PBXBuildFile section */
 
@@ -269,7 +268,7 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 1600;
-				LastUpgradeCheck = 1600;
+				LastUpgradeCheck = 1620;
 				TargetAttributes = {
 					02F4644E2CB4E6130034711F = {
 						CreatedOnToolsVersion = 16.0;
@@ -301,7 +300,7 @@
 				027F56432D6B9AFF003B85C7 /* XCRemoteSwiftPackageReference "ZIPFoundation" */,
 				027F565A2D6C3A97003B85C7 /* XCRemoteSwiftPackageReference "OpenSSL" */,
 				027F565E2D6D288A003B85C7 /* XCRemoteSwiftPackageReference "ZipArchive" */,
-				027F56612D6D3689003B85C7 /* XCRemoteSwiftPackageReference "passkit-generator" */,
+				024987142D9F27550048F5CB /* XCRemoteSwiftPackageReference "passkit-generator" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 02F464502CB4E6130034711F /* Products */;
@@ -320,7 +319,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				02F464E72CB78E720034711F /* Config.xcconfig in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -690,6 +688,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		024987142D9F27550048F5CB /* XCRemoteSwiftPackageReference "passkit-generator" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/alexandercerutti/passkit-generator";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.0.0;
+			};
+		};
 		0252AE7E2CBB58740076FAE0 /* XCRemoteSwiftPackageReference "libPhoneNumber-iOS" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/iziz/libPhoneNumber-iOS";
@@ -720,14 +726,6 @@
 			requirement = {
 				kind = upToNextMajorVersion;
 				minimumVersion = 2.6.0;
-			};
-		};
-		027F56612D6D3689003B85C7 /* XCRemoteSwiftPackageReference "passkit-generator" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/alexandercerutti/passkit-generator";
-			requirement = {
-				branch = master;
-				kind = branch;
 			};
 		};
 		02B87DA02CC06CFE00C8C644 /* XCRemoteSwiftPackageReference "FontAwesome" */ = {

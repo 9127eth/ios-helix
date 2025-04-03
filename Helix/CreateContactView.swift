@@ -37,6 +37,7 @@ struct CreateContactView: View {
     // Add these state variables at the top with other @State properties
     @State private var showDuplicateAlert = false
     @State private var duplicateContact: Contact? = nil
+    @State private var isSaving = false
     
     init(prefilledData: ScannedContactData? = nil, onSave: (() -> Void)? = nil) {
         self.prefilledData = prefilledData
@@ -314,10 +315,19 @@ struct CreateContactView: View {
                     }
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Save") {
+                    Button {
                         saveContact()
+                    } label: {
+                        HStack {
+                            if isSaving {
+                                ProgressView()
+                                    .scaleEffect(0.8)
+                                    .foregroundColor(.blue)
+                            }
+                            Text("Save")
+                        }
                     }
-                    .disabled(contact.name.isEmpty || !isPhoneNumberValid || !isEmailValid)
+                    .disabled(contact.name.isEmpty || !isPhoneNumberValid || !isEmailValid || isSaving)
                 }
             }
         }
@@ -344,7 +354,9 @@ struct CreateContactView: View {
                     await saveContactToFirestore(db: Firestore.firestore(), userId: userId)
                 }
             }
-            Button("Go Back", role: .cancel) { }
+            Button("Go Back", role: .cancel) {
+                isSaving = false
+            }
         } message: {
             Text("A contact with this email already exists: \(duplicateContact?.name ?? "")")
         }
@@ -381,6 +393,9 @@ struct CreateContactView: View {
         
         guard let userId = Auth.auth().currentUser?.uid else { return }
         
+        // Set loading state
+        isSaving = true
+        
         // Parse the full name into first and last name
         let nameComponents = contact.name.trimmingCharacters(in: .whitespacesAndNewlines)
                                       .components(separatedBy: " ")
@@ -411,6 +426,7 @@ struct CreateContactView: View {
                         await MainActor.run {
                             duplicateContact = existingContact
                             showDuplicateAlert = true
+                            isSaving = false
                         }
                         return
                     }
@@ -423,6 +439,7 @@ struct CreateContactView: View {
                 await MainActor.run {
                     showAlert = true
                     alertMessage = "Error saving contact: \(error.localizedDescription)"
+                    isSaving = false
                 }
             }
         }
@@ -450,6 +467,7 @@ struct CreateContactView: View {
             await MainActor.run {
                 showAlert = true
                 alertMessage = "Error saving contact: \(error.localizedDescription)"
+                isSaving = false
             }
         }
     }
