@@ -73,7 +73,7 @@ struct BusinessCardGridView: View {
                             ProTipView(
                                 icon: "wave.3.right",
                                 title: "Add to NFC device",
-                                message: "To add your Helix card to an NFC device, tap the 3-dot menu on your card in the app, select \"Add to NFC\" and then tap your physical NFC device when prompted.",
+                                message: "To add your Helix card to an NFC device, tap the 3-dot menu on your card in the app, select \"Add to NFC\" and then tap your physical NFC device when prompted. This allows anyone to simply tap their mobile device against your NFC tag to instantly access your digital card.",
                                 onDismiss: { 
                                     withAnimation(.easeInOut) { 
                                         showNfcProTip = false 
