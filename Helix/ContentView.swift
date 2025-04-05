@@ -179,9 +179,6 @@ struct ContentView: View {
         
         Task {
             do {
-                // Add a small delay to allow server timestamps to resolve
-                try await Task.sleep(nanoseconds: 500_000_000) // 0.5 seconds
-                
                 let db = Firestore.firestore()
                 let userRef = db.collection("users").document(userId)
                 
