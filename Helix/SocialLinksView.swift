@@ -139,6 +139,7 @@ struct SocialLinksView: View {
         case .telegram: return businessCard.telegramUrl
         case .whatsapp: return businessCard.whatsappUrl
         case .threads: return businessCard.threadsUrl
+        case .bluesky: return businessCard.blueskyUrl
         }
     }
 
@@ -156,6 +157,7 @@ struct SocialLinksView: View {
         case .telegram: businessCard.telegramUrl = value
         case .whatsapp: businessCard.whatsappUrl = value
         case .threads: businessCard.threadsUrl = value
+        case .bluesky: businessCard.blueskyUrl = value
         }
         
         // After updating the businessCard, we need to save the changes to Firebase
@@ -184,7 +186,8 @@ struct SocialLinksView: View {
             "snapchatUrl": businessCard.snapchatUrl as Any,
             "telegramUrl": businessCard.telegramUrl as Any,
             "whatsappUrl": businessCard.whatsappUrl as Any,
-            "threadsUrl": businessCard.threadsUrl as Any
+            "threadsUrl": businessCard.threadsUrl as Any,
+            "blueskyUrl": businessCard.blueskyUrl as Any
         ]) { error in
             if let error = error {
                 print("Error updating document: \(error)")

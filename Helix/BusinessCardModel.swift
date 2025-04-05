@@ -51,6 +51,7 @@ struct BusinessCard: Identifiable, Codable {
     var telegramUrl: String?
     var whatsappUrl: String?
     var threadsUrl: String?
+    var blueskyUrl: String?
     
     var webLinks: [WebLink]?
     var cardDepthColor: String?  // Store hex color string
@@ -72,7 +73,7 @@ struct BusinessCard: Identifiable, Codable {
     }
 
     enum CodingKeys: String, CodingKey {
-        case id, cardSlug, isPrimary, firstName, middleName, lastName, prefix, credentials, pronouns, description, jobTitle, company, phoneNumber, email, aboutMe, customMessage, customMessageHeader, cvUrl, cvHeader, cvDescription, cvDisplayText, imageUrl, isActive, createdAt, updatedAt, customSlug, isPro, linkedIn, twitter, facebookUrl, instagramUrl, tiktokUrl, youtubeUrl, discordUrl, twitchUrl, snapchatUrl, telegramUrl, whatsappUrl, threadsUrl, webLinks, cardDepthColor, theme, enableTextMessage
+        case id, cardSlug, isPrimary, firstName, middleName, lastName, prefix, credentials, pronouns, description, jobTitle, company, phoneNumber, email, aboutMe, customMessage, customMessageHeader, cvUrl, cvHeader, cvDescription, cvDisplayText, imageUrl, isActive, createdAt, updatedAt, customSlug, isPro, linkedIn, twitter, facebookUrl, instagramUrl, tiktokUrl, youtubeUrl, discordUrl, twitchUrl, snapchatUrl, telegramUrl, whatsappUrl, threadsUrl, blueskyUrl, webLinks, cardDepthColor, theme, enableTextMessage
     }
 
     var name: String {
@@ -128,6 +129,7 @@ struct BusinessCard: Identifiable, Codable {
         telegramUrl = try container.decodeIfPresent(String.self, forKey: .telegramUrl)
         whatsappUrl = try container.decodeIfPresent(String.self, forKey: .whatsappUrl)
         threadsUrl = try container.decodeIfPresent(String.self, forKey: .threadsUrl)
+        blueskyUrl = try container.decodeIfPresent(String.self, forKey: .blueskyUrl)
         webLinks = try container.decodeIfPresent([WebLink].self, forKey: .webLinks)
         cardDepthColor = try container.decodeIfPresent(String.self, forKey: .cardDepthColor)
         theme = try container.decodeIfPresent(String.self, forKey: .theme) ?? "classic"
@@ -211,6 +213,7 @@ struct BusinessCard: Identifiable, Codable {
         try container.encodeIfPresent(telegramUrl, forKey: .telegramUrl)
         try container.encodeIfPresent(whatsappUrl, forKey: .whatsappUrl)
         try container.encodeIfPresent(threadsUrl, forKey: .threadsUrl)
+        try container.encodeIfPresent(blueskyUrl, forKey: .blueskyUrl)
         try container.encodeIfPresent(webLinks, forKey: .webLinks)
         try container.encodeIfPresent(cardDepthColor, forKey: .cardDepthColor)
         try container.encode(theme, forKey: .theme)
@@ -238,6 +241,7 @@ struct BusinessCard: Identifiable, Codable {
         case .telegram: telegramUrl = value
         case .whatsapp: whatsappUrl = value
         case .threads: threadsUrl = value
+        case .bluesky: blueskyUrl = value
         }
     }
 
@@ -255,6 +259,7 @@ struct BusinessCard: Identifiable, Codable {
         case .telegram: telegramUrl = nil
         case .whatsapp: whatsappUrl = nil
         case .threads: threadsUrl = nil
+        case .bluesky: blueskyUrl = nil
         }
     }
 
@@ -272,6 +277,7 @@ struct BusinessCard: Identifiable, Codable {
         case .telegram: return telegramUrl
         case .whatsapp: return whatsappUrl
         case .threads: return threadsUrl
+        case .bluesky: return blueskyUrl
         }
     }
 

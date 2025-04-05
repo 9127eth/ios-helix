@@ -6,7 +6,7 @@
 //
 
 enum SocialLinkType: String, CaseIterable {
-    case linkedIn, twitter, facebook, instagram, tiktok, youtube, discord, twitch, snapchat, telegram, whatsapp, threads
+    case linkedIn, twitter, facebook, instagram, tiktok, youtube, discord, twitch, snapchat, telegram, whatsapp, threads, bluesky
     
     var allowsFullURL: Bool {
         switch self {
@@ -29,6 +29,7 @@ enum SocialLinkType: String, CaseIterable {
         case .telegram: return "Telegram"
         case .whatsapp: return "WhatsApp"
         case .threads: return "Threads"
+        case .bluesky: return "Bluesky"
         }
     }
     
@@ -46,6 +47,7 @@ enum SocialLinkType: String, CaseIterable {
         case .telegram: return "username/handle"
         case .whatsapp: return "+1234567890"
         case .threads: return "username/handle"
+        case .bluesky: return "username/handle"
         }
     }
     
@@ -203,6 +205,7 @@ enum SocialLinkType: String, CaseIterable {
         case .telegram: return "https://t.me/"
         case .whatsapp: return "https://wa.me/"
         case .threads: return "https://www.threads.net/@"
+        case .bluesky: return "https://bsky.app/profile/"
         }
     }
     
