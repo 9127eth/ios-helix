@@ -18,6 +18,7 @@ struct BusinessCardGridView: View {
     @State private var showSubscriptionView = false
     @State private var showUpgradeModal = false
     @State private var showMaxCardsAlert = false
+    @State private var showNfcProTip = !UserDefaults.standard.bool(forKey: "nfcProTipDismissed")
     @State private var showWalletProTip = !UserDefaults.standard.bool(forKey: "walletProTipDismissed")
     @State private var showSwipeProTip = !UserDefaults.standard.bool(forKey: "swipeProTipDismissed")
 
@@ -68,6 +69,23 @@ struct BusinessCardGridView: View {
                         .padding(.bottom, 4)
                         
                         // Pro Tips - only show when there's at least one card and they haven't been dismissed
+                        if showNfcProTip {
+                            ProTipView(
+                                icon: "wave.3.right",
+                                title: "Add to NFC device",
+                                message: "To add your Helix card to an NFC device, tap the 3-dot menu on your card in the app, select \"Add to NFC\" and then tap your physical NFC device when prompted.",
+                                onDismiss: { 
+                                    withAnimation(.easeInOut) { 
+                                        showNfcProTip = false 
+                                        UserDefaults.standard.set(true, forKey: "nfcProTipDismissed")
+                                    } 
+                                }
+                            )
+                            .padding(.horizontal)
+                            .padding(.bottom, 8)
+                            .transition(.move(edge: .top).combined(with: .opacity))
+                        }
+                        
                         if showWalletProTip {
                             ProTipView(
                                 icon: "wallet.pass.fill",
