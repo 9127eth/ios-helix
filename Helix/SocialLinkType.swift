@@ -10,7 +10,7 @@ enum SocialLinkType: String, CaseIterable {
     
     var allowsFullURL: Bool {
         switch self {
-        case .youtube, .discord, .facebook: return true
+        case .youtube, .discord, .facebook, .bluesky: return true
         default: return false
         }
     }
@@ -47,7 +47,7 @@ enum SocialLinkType: String, CaseIterable {
         case .telegram: return "username/handle"
         case .whatsapp: return "+1234567890"
         case .threads: return "username/handle"
-        case .bluesky: return "username/handle"
+        case .bluesky: return "Bluesky Link"
         }
     }
     
@@ -86,6 +86,18 @@ enum SocialLinkType: String, CaseIterable {
             for pattern in patterns {
                 cleanInput = cleanInput.replacingOccurrences(of: pattern, with: "", options: .caseInsensitive)
             }
+        case .bluesky:
+            // For bluesky, ensure the URL is properly formatted
+            if !cleanInput.lowercased().contains("https://") && !cleanInput.lowercased().contains("http://") {
+                // Add https:// if missing
+                if cleanInput.lowercased().contains("bsky.app") {
+                    cleanInput = "https://" + cleanInput
+                } else {
+                    // Assume it's a direct profile link if no domain is specified
+                    cleanInput = "https://bsky.app/profile/" + cleanInput
+                }
+            }
+            return cleanInput
         default:
             break
         }
@@ -113,7 +125,7 @@ enum SocialLinkType: String, CaseIterable {
             "facebook.com", "instagram.com", "tiktok.com",
             "youtube.com", "discord.com", "twitch.tv",
             "snapchat.com", "t.me", "wa.me",
-            "threads.net",
+            "threads.net", "bsky.app",
             "linkedin.cn", "x.jp", "facebook.de",
             "eu.linkedin.com", "uk.linkedin.com"
         ]
@@ -194,7 +206,7 @@ enum SocialLinkType: String, CaseIterable {
     
     var baseURL: String {
         switch self {
-        case .youtube, .discord, .facebook:
+        case .youtube, .discord, .facebook, .bluesky:
             return ""  // No base URL needed for full URL platforms
         case .linkedIn: return "https://www.linkedin.com/in/"
         case .twitter: return "https://x.com/"
@@ -205,7 +217,6 @@ enum SocialLinkType: String, CaseIterable {
         case .telegram: return "https://t.me/"
         case .whatsapp: return "https://wa.me/"
         case .threads: return "https://www.threads.net/@"
-        case .bluesky: return "https://bsky.app/profile/"
         }
     }
     
