@@ -204,7 +204,7 @@ struct PhoneNumberTextField: View {
     }
     
     private func validatePhoneNumber() {
-        // If phone number is empty, consider it valid and reset the binding
+        // If phone number is empty, consider it valid and reset binding
         if localPhoneNumber.isEmpty {
             isValid = true
             phoneNumber = ""
