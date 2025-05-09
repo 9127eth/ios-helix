@@ -31,23 +31,19 @@ struct ShareView: View {
                         .font(.system(size: 40, weight: .bold))
                         .fontWeight(.bold)
                     
-                    HStack(spacing: 5) {
+                    VStack(alignment: .leading, spacing: 5) {
                         if let jobTitle = card.jobTitle {
                             Text(jobTitle)
                                 .font(.system(size: 20))
                                 .foregroundColor(.bodyPrimaryText)
-                        }
-                        
-                        if card.jobTitle != nil && card.company != nil {
-                            Text("|")
-                                .font(.system(size: 20))
-                                .foregroundColor(.gray.opacity(0.8))
+                                .lineLimit(1)
                         }
                         
                         if let company = card.company {
                             Text(company)
                                 .font(.system(size: 20))
                                 .foregroundColor(.gray.opacity(0.8))
+                                .lineLimit(2)
                         }
                     }
                     .padding(.bottom, 20)
