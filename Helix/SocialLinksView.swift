@@ -16,6 +16,11 @@ struct SocialLinksView: View {
     var showHeader: Bool
     @State private var offsets: [CGFloat] = []
 
+    init(businessCard: Binding<BusinessCard>, showHeader: Bool) {
+        self._businessCard = businessCard
+        self.showHeader = showHeader
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
             if showHeader {
@@ -94,7 +99,7 @@ struct SocialLinksView: View {
                     set: { newLinks in
                         self.visibleLinkTypes = Array(newLinks)
                         updateVisibleLinkTypes()
-                        updateOffsets() // Add this line
+                        updateOffsets()
                     }
                 ),
                 isPresented: $showingAddLinkPopup,
@@ -159,42 +164,6 @@ struct SocialLinksView: View {
         case .threads: businessCard.threadsUrl = value
         case .bluesky: businessCard.blueskyUrl = value
         }
-        
-        // After updating the businessCard, we need to save the changes to Firebase
-        saveChangesToFirebase()
-    }
-
-    private func saveChangesToFirebase() {
-        guard let userId = Auth.auth().currentUser?.uid,
-              let cardId = businessCard.id else {
-            print("Error: Unable to save changes. User ID or Card ID is missing.")
-            return
-        }
-
-        let db = Firestore.firestore()
-        let cardRef = db.collection("users").document(userId).collection("businessCards").document(cardId)
-
-        cardRef.updateData([
-            "linkedIn": businessCard.linkedIn as Any,
-            "twitter": businessCard.twitter as Any,
-            "facebookUrl": businessCard.facebookUrl as Any,
-            "instagramUrl": businessCard.instagramUrl as Any,
-            "tiktokUrl": businessCard.tiktokUrl as Any,
-            "youtubeUrl": businessCard.youtubeUrl as Any,
-            "discordUrl": businessCard.discordUrl as Any,
-            "twitchUrl": businessCard.twitchUrl as Any,
-            "snapchatUrl": businessCard.snapchatUrl as Any,
-            "telegramUrl": businessCard.telegramUrl as Any,
-            "whatsappUrl": businessCard.whatsappUrl as Any,
-            "threadsUrl": businessCard.threadsUrl as Any,
-            "blueskyUrl": businessCard.blueskyUrl as Any
-        ]) { error in
-            if let error = error {
-                print("Error updating document: \(error)")
-            } else {
-                print("Document successfully updated")
-            }
-        }
     }
 
     private func updateVisibleLinkTypes() {
@@ -233,6 +202,42 @@ struct SocialLinksView: View {
         // Update the businessCard by removing the corresponding social link
         businessCard.removeSocialLink(linkType)
         updateVisibleLinkTypes()
+    }
+
+    // This method is kept for API compatibility but is no longer called
+    // automatically when values change. The parent EditBusinessCardView is responsible
+    // for saving all changes at once.
+    func saveChangesToFirebase() {
+        guard let userId = Auth.auth().currentUser?.uid,
+              let cardId = businessCard.id else {
+            print("Error: Unable to save changes. User ID or Card ID is missing.")
+            return
+        }
+
+        let db = Firestore.firestore()
+        let cardRef = db.collection("users").document(userId).collection("businessCards").document(cardId)
+
+        cardRef.updateData([
+            "linkedIn": businessCard.linkedIn as Any,
+            "twitter": businessCard.twitter as Any,
+            "facebookUrl": businessCard.facebookUrl as Any,
+            "instagramUrl": businessCard.instagramUrl as Any,
+            "tiktokUrl": businessCard.tiktokUrl as Any,
+            "youtubeUrl": businessCard.youtubeUrl as Any,
+            "discordUrl": businessCard.discordUrl as Any,
+            "twitchUrl": businessCard.twitchUrl as Any,
+            "snapchatUrl": businessCard.snapchatUrl as Any,
+            "telegramUrl": businessCard.telegramUrl as Any,
+            "whatsappUrl": businessCard.whatsappUrl as Any,
+            "threadsUrl": businessCard.threadsUrl as Any,
+            "blueskyUrl": businessCard.blueskyUrl as Any
+        ]) { error in
+            if let error = error {
+                print("Error updating document: \(error)")
+            } else {
+                print("Document successfully updated")
+            }
+        }
     }
 }
 
