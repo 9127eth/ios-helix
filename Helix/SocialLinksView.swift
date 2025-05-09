@@ -259,7 +259,13 @@ struct SocialLinkRow: View {
                     .textInputAutocapitalization(.never)
                     .autocorrectionDisabled()
                     .onChange(of: handle) { oldValue, newValue in
-                        value = linkType.getFullURL(newValue)
+                        // If the handle is empty, set the value to an empty string
+                        // which will be treated as nil when saving to Firebase
+                        if newValue.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                            value = ""
+                        } else {
+                            value = linkType.getFullURL(newValue)
+                        }
                     }
                 
                 if !handle.isEmpty {

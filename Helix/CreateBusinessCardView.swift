@@ -342,6 +342,14 @@ struct CreateBusinessCardView: View {
                     cardDict["createdAt"] = FieldValue.serverTimestamp()
                     cardDict["updatedAt"] = FieldValue.serverTimestamp()
                     
+                    // Remove empty social links from the dictionary before saving
+                    for linkType in SocialLinkType.allCases {
+                        let key = linkType == .linkedIn ? "linkedIn" : "\(linkType.rawValue)Url"
+                        if cardData.socialLinkValue(for: linkType) == nil || cardData.socialLinkValue(for: linkType)?.isEmpty ?? true {
+                            cardDict.removeValue(forKey: key)
+                        }
+                    }
+                    
                     await MainActor.run {
                         businessCardsRef.document(cardData.cardSlug).setData(cardDict)
                     }
