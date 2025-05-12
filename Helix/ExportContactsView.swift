@@ -113,7 +113,7 @@ struct ExportContactsView: View {
     
     private func generateCSV(from contacts: [Contact]) -> String {
         // CSV header
-        var csv = "Full Name,First Name,Last Name,Company,Position,Phone,Email,Tags,Date Added\n"
+        var csv = "Full Name,First Name,Last Name,Company,Position,Phone,Email,Address,Notes,Tags,Date Added\n"
         
         // Sort contacts alphabetically by name
         let sortedContacts = contacts.sorted { $0.name.trimmingCharacters(in: .whitespaces).lowercased() < $1.name.trimmingCharacters(in: .whitespaces).lowercased() }
@@ -133,6 +133,8 @@ struct ExportContactsView: View {
                 contact.position ?? "",
                 contact.phone ?? "",
                 contact.email ?? "",
+                contact.address ?? "",
+                contact.note ?? "",
                 tagNames,
                 formatDate(contact.dateAdded)
             ].map { escapeCSVField($0) }.joined(separator: ",")
