@@ -724,6 +724,11 @@ struct SettingsView: View {
     }
 
     private func fetchUserProStatus() {
+        // Refresh current user to get latest email verification status
+        Auth.auth().currentUser?.reload { _ in
+            // This will trigger a view update since we're checking isEmailVerified in the view
+        }
+        
         guard let userId = Auth.auth().currentUser?.uid else { return }
         let db = Firestore.firestore()
         db.collection("users").document(userId).getDocument { (document, error) in

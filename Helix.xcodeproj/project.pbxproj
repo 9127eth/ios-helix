@@ -3,19 +3,17 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 77;
+	objectVersion = 90;
 	objects = {
 
 /* Begin PBXBuildFile section */
 		0252AE802CBB58740076FAE0 /* libPhoneNumber in Frameworks */ = {isa = PBXBuildFile; productRef = 0252AE7F2CBB58740076FAE0 /* libPhoneNumber */; };
+		0261A6FF2DE948ED003ACB70 /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 02B87DB72CC2F37C00C8C644 /* StoreKit.framework */; };
 		027F56452D6B9AFF003B85C7 /* ZIPFoundation in Frameworks */ = {isa = PBXBuildFile; productRef = 027F56442D6B9AFF003B85C7 /* ZIPFoundation */; };
 		027F565C2D6C3A97003B85C7 /* OpenSSL in Frameworks */ = {isa = PBXBuildFile; productRef = 027F565B2D6C3A97003B85C7 /* OpenSSL */; };
 		027F56602D6D288A003B85C7 /* ZipArchive in Frameworks */ = {isa = PBXBuildFile; productRef = 027F565F2D6D288A003B85C7 /* ZipArchive */; };
-		02B87DA22CC06CFE00C8C644 /* FontAwesome in Frameworks */ = {isa = PBXBuildFile; productRef = 02B87DA12CC06CFE00C8C644 /* FontAwesome */; };
-		02B87DA42CC06CFE00C8C644 /* tools in Frameworks */ = {isa = PBXBuildFile; productRef = 02B87DA32CC06CFE00C8C644 /* tools */; };
-		02B87DB82CC2F37D00C8C644 /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 02B87DB72CC2F37C00C8C644 /* StoreKit.framework */; };
 		02F464802CB4EDA40034711F /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = 02F4647F2CB4EDA40034711F /* FirebaseAnalytics */; };
-		02F464822CB4EDA40034711F /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 02F464812CB4EDA40034711F /* FirebaseAuth */; };
+		02F464822CB4EDA40034711F /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 02F464812CB4EDA40034711F /* FirebaseAuth */; settings = {ATTRIBUTES = (Required, ); }; };
 		02F464842CB4EDA40034711F /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 02F464832CB4EDA40034711F /* FirebaseFirestore */; };
 		02F464862CB4EDA40034711F /* FirebaseFunctions in Frameworks */ = {isa = PBXBuildFile; productRef = 02F464852CB4EDA40034711F /* FirebaseFunctions */; };
 		02F464882CB4EDA40034711F /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = 02F464872CB4EDA40034711F /* FirebaseStorage */; };
@@ -105,40 +103,32 @@
 /* Begin PBXFrameworksBuildPhase section */
 		02F4644C2CB4E6130034711F /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
 			files = (
 				027F565C2D6C3A97003B85C7 /* OpenSSL in Frameworks */,
-				02B87DA22CC06CFE00C8C644 /* FontAwesome in Frameworks */,
 				02F464CA2CB788C00034711F /* GoogleSignInSwift in Frameworks */,
+				0261A6FF2DE948ED003ACB70 /* StoreKit.framework in Frameworks */,
 				02F464C92CB788C00034711F /* GoogleSignIn in Frameworks */,
 				02F464802CB4EDA40034711F /* FirebaseAnalytics in Frameworks */,
 				02F464822CB4EDA40034711F /* FirebaseAuth in Frameworks */,
 				0252AE802CBB58740076FAE0 /* libPhoneNumber in Frameworks */,
-				02B87DA42CC06CFE00C8C644 /* tools in Frameworks */,
 				02F464AD2CB788300034711F /* GoogleSignInSwift in Frameworks */,
 				02F464842CB4EDA40034711F /* FirebaseFirestore in Frameworks */,
 				02F464882CB4EDA40034711F /* FirebaseStorage in Frameworks */,
 				02F464862CB4EDA40034711F /* FirebaseFunctions in Frameworks */,
-				02B87DB82CC2F37D00C8C644 /* StoreKit.framework in Frameworks */,
 				02F464AB2CB788300034711F /* GoogleSignIn in Frameworks */,
 				027F56452D6B9AFF003B85C7 /* ZIPFoundation in Frameworks */,
 				027F56602D6D288A003B85C7 /* ZipArchive in Frameworks */,
 			);
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 		02F4645E2CB4E6150034711F /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
 			files = (
 			);
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 		02F464682CB4E6150034711F /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
 			files = (
 			);
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
@@ -187,8 +177,6 @@
 			);
 			buildRules = (
 			);
-			dependencies = (
-			);
 			fileSystemSynchronizedGroups = (
 				02F464512CB4E6130034711F /* Helix */,
 			);
@@ -204,8 +192,6 @@
 				02F464892CB4EDA40034711F /* GoogleSignIn */,
 				02F4648A2CB4EDA40034711F /* GoogleSignInSwift */,
 				0252AE7F2CBB58740076FAE0 /* libPhoneNumber */,
-				02B87DA12CC06CFE00C8C644 /* FontAwesome */,
-				02B87DA32CC06CFE00C8C644 /* tools */,
 				027F56442D6B9AFF003B85C7 /* ZIPFoundation */,
 				027F565B2D6C3A97003B85C7 /* OpenSSL */,
 				027F565F2D6D288A003B85C7 /* ZipArchive */,
@@ -231,8 +217,6 @@
 				02F464642CB4E6150034711F /* HelixTests */,
 			);
 			name = HelixTests;
-			packageProductDependencies = (
-			);
 			productName = HelixTests;
 			productReference = 02F464612CB4E6150034711F /* HelixTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
@@ -254,8 +238,6 @@
 				02F4646E2CB4E6150034711F /* HelixUITests */,
 			);
 			name = HelixUITests;
-			packageProductDependencies = (
-			);
 			productName = HelixUITests;
 			productReference = 02F4646B2CB4E6150034711F /* HelixUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
@@ -296,13 +278,12 @@
 				02F4647E2CB4EDA40034711F /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 				02F464A92CB788300034711F /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
 				0252AE7E2CBB58740076FAE0 /* XCRemoteSwiftPackageReference "libPhoneNumber-iOS" */,
-				02B87DA02CC06CFE00C8C644 /* XCRemoteSwiftPackageReference "FontAwesome" */,
 				027F56432D6B9AFF003B85C7 /* XCRemoteSwiftPackageReference "ZIPFoundation" */,
 				027F565A2D6C3A97003B85C7 /* XCRemoteSwiftPackageReference "OpenSSL" */,
 				027F565E2D6D288A003B85C7 /* XCRemoteSwiftPackageReference "ZipArchive" */,
-				027DFBE22DCDBBE300CE3D9C /* XCRemoteSwiftPackageReference "passkit-generator" */,
+				02F2FAEB2DE9580C001022C6 /* XCRemoteSwiftPackageReference "FontAwesome" */,
 			);
-			preferredProjectObjectVersion = 77;
+			preferredProjectObjectVersion = 90;
 			productRefGroup = 02F464502CB4E6130034711F /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -317,49 +298,37 @@
 /* Begin PBXResourcesBuildPhase section */
 		02F4644D2CB4E6130034711F /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
 			files = (
 			);
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 		02F4645F2CB4E6150034711F /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
 			files = (
 			);
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 		02F464692CB4E6150034711F /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
 			files = (
 			);
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		02F4644B2CB4E6130034711F /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
 			files = (
 				02F464ED2CB795B80034711F /* AppDelegate.swift in Sources */,
 			);
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 		02F4645D2CB4E6150034711F /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
 			files = (
 			);
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 		02F464672CB4E6150034711F /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
 			files = (
 			);
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
@@ -377,7 +346,7 @@
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
-		02F464732CB4E6150034711F /* Debug */ = {
+		02F464732CB4E6150034711F /* Debug configuration for PBXProject "Helix" */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 02F464E62CB78E680034711F /* Config.xcconfig */;
 			buildSettings = {
@@ -442,7 +411,7 @@
 			};
 			name = Debug;
 		};
-		02F464742CB4E6150034711F /* Release */ = {
+		02F464742CB4E6150034711F /* Release configuration for PBXProject "Helix" */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 02F464E62CB78E680034711F /* Config.xcconfig */;
 			buildSettings = {
@@ -500,7 +469,7 @@
 			};
 			name = Release;
 		};
-		02F464762CB4E6150034711F /* Debug */ = {
+		02F464762CB4E6150034711F /* Debug configuration for PBXNativeTarget "Helix" */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 02F464E62CB78E680034711F /* Config.xcconfig */;
 			buildSettings = {
@@ -519,7 +488,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 17;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -537,7 +506,7 @@
 			};
 			name = Debug;
 		};
-		02F464772CB4E6150034711F /* Release */ = {
+		02F464772CB4E6150034711F /* Release configuration for PBXNativeTarget "Helix" */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 02F464E62CB78E680034711F /* Config.xcconfig */;
 			buildSettings = {
@@ -556,7 +525,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 17;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -574,7 +543,7 @@
 			};
 			name = Release;
 		};
-		02F464792CB4E6150034711F /* Debug */ = {
+		02F464792CB4E6150034711F /* Debug configuration for PBXNativeTarget "HelixTests" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
@@ -592,7 +561,7 @@
 			};
 			name = Debug;
 		};
-		02F4647A2CB4E6150034711F /* Release */ = {
+		02F4647A2CB4E6150034711F /* Release configuration for PBXNativeTarget "HelixTests" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
@@ -610,7 +579,7 @@
 			};
 			name = Release;
 		};
-		02F4647C2CB4E6150034711F /* Debug */ = {
+		02F4647C2CB4E6150034711F /* Debug configuration for PBXNativeTarget "HelixUITests" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
@@ -626,7 +595,7 @@
 			};
 			name = Debug;
 		};
-		02F4647D2CB4E6150034711F /* Release */ = {
+		02F4647D2CB4E6150034711F /* Release configuration for PBXNativeTarget "HelixUITests" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
@@ -648,37 +617,33 @@
 		02F4644A2CB4E6130034711F /* Build configuration list for PBXProject "Helix" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				02F464732CB4E6150034711F /* Debug */,
-				02F464742CB4E6150034711F /* Release */,
+				02F464732CB4E6150034711F /* Debug configuration for PBXProject "Helix" */,
+				02F464742CB4E6150034711F /* Release configuration for PBXProject "Helix" */,
 			);
-			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 		02F464752CB4E6150034711F /* Build configuration list for PBXNativeTarget "Helix" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				02F464762CB4E6150034711F /* Debug */,
-				02F464772CB4E6150034711F /* Release */,
+				02F464762CB4E6150034711F /* Debug configuration for PBXNativeTarget "Helix" */,
+				02F464772CB4E6150034711F /* Release configuration for PBXNativeTarget "Helix" */,
 			);
-			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 		02F464782CB4E6150034711F /* Build configuration list for PBXNativeTarget "HelixTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				02F464792CB4E6150034711F /* Debug */,
-				02F4647A2CB4E6150034711F /* Release */,
+				02F464792CB4E6150034711F /* Debug configuration for PBXNativeTarget "HelixTests" */,
+				02F4647A2CB4E6150034711F /* Release configuration for PBXNativeTarget "HelixTests" */,
 			);
-			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 		02F4647B2CB4E6150034711F /* Build configuration list for PBXNativeTarget "HelixUITests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				02F4647C2CB4E6150034711F /* Debug */,
-				02F4647D2CB4E6150034711F /* Release */,
+				02F4647C2CB4E6150034711F /* Debug configuration for PBXNativeTarget "HelixUITests" */,
+				02F4647D2CB4E6150034711F /* Release configuration for PBXNativeTarget "HelixUITests" */,
 			);
-			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
@@ -690,14 +655,6 @@
 			requirement = {
 				kind = upToNextMajorVersion;
 				minimumVersion = 1.2.0;
-			};
-		};
-		027DFBE22DCDBBE300CE3D9C /* XCRemoteSwiftPackageReference "passkit-generator" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/alexandercerutti/passkit-generator";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 1.0.0;
 			};
 		};
 		027F56432D6B9AFF003B85C7 /* XCRemoteSwiftPackageReference "ZIPFoundation" */ = {
@@ -724,7 +681,7 @@
 				minimumVersion = 2.6.0;
 			};
 		};
-		02B87DA02CC06CFE00C8C644 /* XCRemoteSwiftPackageReference "FontAwesome" */ = {
+		02F2FAEB2DE9580C001022C6 /* XCRemoteSwiftPackageReference "FontAwesome" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/thii/FontAwesome.swift";
 			requirement = {
@@ -770,16 +727,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 027F565E2D6D288A003B85C7 /* XCRemoteSwiftPackageReference "ZipArchive" */;
 			productName = ZipArchive;
-		};
-		02B87DA12CC06CFE00C8C644 /* FontAwesome */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 02B87DA02CC06CFE00C8C644 /* XCRemoteSwiftPackageReference "FontAwesome" */;
-			productName = FontAwesome;
-		};
-		02B87DA32CC06CFE00C8C644 /* tools */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 02B87DA02CC06CFE00C8C644 /* XCRemoteSwiftPackageReference "FontAwesome" */;
-			productName = tools;
 		};
 		02F4647F2CB4EDA40034711F /* FirebaseAnalytics */ = {
 			isa = XCSwiftPackageProductDependency;
