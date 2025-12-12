@@ -20,7 +20,13 @@ struct ContactCreationEntryView: View {
     var body: some View {
         NavigationView {
             ZStack {
-                if cameraPermissionGranted {
+                if isProcessing, let capturedImage = capturedImage {
+                    // Show captured image as frozen frame while processing
+                    Image(uiImage: capturedImage)
+                        .resizable()
+                        .scaledToFill()
+                        .ignoresSafeArea()
+                } else if cameraPermissionGranted {
                     // Camera preview takes up full screen
                     CameraPreview { result in
                         switch result {
