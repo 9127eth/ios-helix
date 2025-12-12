@@ -7,6 +7,7 @@
 
 import Vision
 import UIKit
+import Network
 
 class TextRecognizer {
     private let openAIService = OpenAIService()
@@ -30,16 +31,50 @@ class TextRecognizer {
         // Print raw extracted text for debugging
         print("Raw OCR Text:", extractedText)
         
+        // Check for internet connectivity before making API calls
+        let isConnected = await checkNetworkConnectivity()
+        guard isConnected else {
+            throw NSError(
+                domain: "TextRecognizer",
+                code: -2,
+                userInfo: [
+                    NSLocalizedDescriptionKey: "No internet connection. Please connect to the internet to use the AI scanning tool."
+                ]
+            )
+        }
+        
         // Try OpenAI first, then Claude as fallback
         do {
             let processedData = try await openAIService.processBusinessCard(text: extractedText)
             return convertToScannedData(processedData, image)
         } catch {
+            // Check if it's a network error
+            if isNetworkError(error) {
+                throw NSError(
+                    domain: "TextRecognizer",
+                    code: -2,
+                    userInfo: [
+                        NSLocalizedDescriptionKey: "No internet connection. Please connect to the internet to use the AI scanning tool."
+                    ]
+                )
+            }
+            
             print("OpenAI processing failed, trying Claude: \(error.localizedDescription)")
             do {
                 let processedData = try await claudeAIService.processBusinessCard(text: extractedText)
                 return convertToScannedData(processedData, image)
             } catch {
+                // Check if it's a network error
+                if isNetworkError(error) {
+                    throw NSError(
+                        domain: "TextRecognizer",
+                        code: -2,
+                        userInfo: [
+                            NSLocalizedDescriptionKey: "No internet connection. Please connect to the internet to use the AI scanning tool."
+                        ]
+                    )
+                }
+                
                 print("Claude processing failed: \(error.localizedDescription)")
                 throw NSError(
                     domain: "TextRecognizer",
@@ -50,6 +85,55 @@ class TextRecognizer {
                 )
             }
         }
+    }
+    
+    private func checkNetworkConnectivity() async -> Bool {
+        await withCheckedContinuation { continuation in
+            let monitor = NWPathMonitor()
+            let queue = DispatchQueue(label: "NetworkMonitor")
+            var hasResumed = false
+            let lock = NSLock()
+            
+            monitor.pathUpdateHandler = { path in
+                lock.lock()
+                defer { lock.unlock() }
+                
+                guard !hasResumed else { return }
+                hasResumed = true
+                monitor.cancel()
+                continuation.resume(returning: path.status == .satisfied)
+            }
+            
+            monitor.start(queue: queue)
+            
+            // Timeout after 2 seconds if no response
+            DispatchQueue.global().asyncAfter(deadline: .now() + 2) {
+                lock.lock()
+                defer { lock.unlock() }
+                
+                guard !hasResumed else { return }
+                hasResumed = true
+                monitor.cancel()
+                continuation.resume(returning: false)
+            }
+        }
+    }
+    
+    private func isNetworkError(_ error: Error) -> Bool {
+        let nsError = error as NSError
+        
+        // Check for common network error codes
+        let networkErrorCodes = [
+            NSURLErrorNotConnectedToInternet,
+            NSURLErrorNetworkConnectionLost,
+            NSURLErrorCannotFindHost,
+            NSURLErrorCannotConnectToHost,
+            NSURLErrorTimedOut,
+            NSURLErrorDNSLookupFailed,
+            NSURLErrorDataNotAllowed
+        ]
+        
+        return nsError.domain == NSURLErrorDomain && networkErrorCodes.contains(nsError.code)
     }
     
     private func convertToScannedData(_ processedData: OpenAIResponse, _ image: UIImage) -> ScannedContactData {
