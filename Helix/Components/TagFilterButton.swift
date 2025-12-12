@@ -14,13 +14,13 @@ struct TagFilterButton: View {
                     .renderingMode(.template)
                     .resizable()
                     .frame(width: 14, height: 14)
-                Text(selectedTags.isEmpty ? "Filter" : "\(selectedTags.count)")
+                Text(selectedTags.isEmpty ? "Filter" : "\(selectedTags.count) applied")
                     .font(.footnote)
             }
             .foregroundColor(AppColors.bodyPrimaryText)
             .padding(.vertical, 8)
             .padding(.horizontal, 12)
-            .background(AppColors.cardGridBackground)
+            .background(selectedTags.isEmpty ? AppColors.cardGridBackground : Color.gray.opacity(0.3))
             .cornerRadius(16)
         }
         .sheet(isPresented: $showingTagPicker) {

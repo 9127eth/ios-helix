@@ -183,4 +183,3 @@ class TextRecognizer {
         return recognizedText
     }
 }
-
