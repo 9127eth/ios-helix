@@ -382,7 +382,7 @@ struct SettingsView: View {
                     .padding(.bottom, 20)
 
                     VStack(spacing: 8) {
-                        Text("Version 1.4.5")
+                        Text("Version 1.4.6")
                             .font(.footnote)
                             .foregroundColor(.gray)
                         
